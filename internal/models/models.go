@@ -56,6 +56,7 @@ type Reception struct {
 	Recommendations string          `json:"recommendations"` // Рекомендации
 	IsSMP           bool            `json:"is_smp"`          // Работает в СМП (скорая медицинская помощь): true - да, false - нет
 	Status          ReceptionStatus `json:"status"`
+	Address         string          `json:"address"`
 	CreatedAt       time.Time       `json:"created_at"`
 	UpdatedAt       time.Time       `json:"updated_at"`
 }
