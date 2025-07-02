@@ -8,7 +8,7 @@ type Doctor struct {
 	MiddleName     string    `json:"middle_name"`
 	Surname        string    `json:"surname"`
 	Login          string    `json:"login"`
-	Password       string    `json:"-"` // Исключаем из JSON для безопасности
+	PasswordHash   string    `json:"password_hash"`
 	Specialization string    `json:"specialization"`
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
