@@ -5,14 +5,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type AllergyRepository interface {
-	Create(allergy *models.Allergy) error
-	GetByPatientID(patientID uint) ([]models.Allergy, error)
-	Update(allergy *models.Allergy) error
-	Delete(patientID uint) error
-	DeleteByPatientID(patientID uint) error
-}
-
 type allergyRepository struct {
 	db *gorm.DB
 }

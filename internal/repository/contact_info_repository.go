@@ -6,13 +6,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type ContactInfoRepository interface {
-	Create(contact *models.ContactInfo) error
-	GetByPatientID(patientID uint) (*models.ContactInfo, error)
-	Update(contact *models.ContactInfo) error
-	Delete(patientID uint) error
-}
-
 type contactInfoRepository struct {
 	db *gorm.DB
 }
