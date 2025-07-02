@@ -10,6 +10,7 @@ type ContactInfoRepository interface {
 	Create(contact *models.ContactInfo) error
 	GetByPatientID(patientID uint) (*models.ContactInfo, error)
 	Update(contact *models.ContactInfo) error
+	Delete(patientID uint) error
 }
 
 type contactInfoRepository struct {
@@ -50,4 +51,8 @@ func (r *contactInfoRepository) GetByPatientID(patientID uint) (*models.ContactI
 
 func (r *contactInfoRepository) Update(contact *models.ContactInfo) error {
 	return r.db.Save(contact).Error
+}
+
+func (r *contactInfoRepository) Delete(id uint) error {
+	return r.db.Delete(&models.ContactInfo{}, id).Error
 }
