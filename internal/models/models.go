@@ -1,76 +1,71 @@
-package main
+package models
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Doctor struct {
-	ID             uint      `json:"id"`
-	FirstName      string    `json:"first_name"`
-	MiddleName     string    `json:"middle_name"`
-	Surname        string    `json:"surname"`
-	Login          string    `json:"login"`
-	PasswordHash   string    `json:"password_hash"`
-	Specialization string    `json:"specialization"`
-	CreatedAt      time.Time `json:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at"`
+	gorm.Model
+	FirstName      string `gorm:"size:100;not null" json:"first_name"`
+	MiddleName     string `gorm:"size:100" json:"middle_name"`
+	Surname        string `gorm:"size:100;not null" json:"surname"`
+	Login          string `gorm:"size:50;unique;not null" json:"login"`
+	PasswordHash   string `gorm:"size:255;not null" json:"-"`
+	Specialization string `gorm:"size:100;not null" json:"specialization"`
 }
 
 type Patient struct {
-	ID         uint      `json:"id"`
-	FirstName  string    `json:"first_name"`
-	Surname    string    `json:"surname"`
-	MiddleName string    `json:"middle_name"`
-	FullName   string    `json:"full_name"`
-	BirthDate  time.Time `json:"birth_date"` // Лучше использовать time.Time вместо int
-	IsMale     bool      `json:"is_male"`    // true - мужской, false - женский
-	SNILS      string    `json:"snils"`      // СНИЛС
-	OMS        string    `json:"oms"`        // Полис ОМС
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	gorm.Model
+	FirstName  string    `gorm:"size:100;not null" json:"first_name"`
+	Surname    string    `gorm:"size:100;not null" json:"surname"`
+	MiddleName string    `gorm:"size:100" json:"middle_name"`
+	FullName   string    `gorm:"size:300" json:"full_name"`
+	BirthDate  time.Time `gorm:"not null" json:"birth_date"`
+	IsMale     bool      `gorm:"not null" json:"is_male"`
+	SNILS      string    `gorm:"size:14;unique" json:"snils"`
+	OMS        string    `gorm:"size:16;unique" json:"oms"`
 }
 
 type ContactInfo struct {
-	ID        uint      `json:"id"`
-	PatientID uint      `json:"patient_id"`
-	Phone     string    `json:"phone"` // Строка лучше для телефонных номеров
-	Email     string    `json:"email"`
-	Address   string    `json:"address"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	gorm.Model
+	PatientID uint   `gorm:"not null" json:"patient_id"`
+	Phone     string `gorm:"size:20;not null" json:"phone"`
+	Email     string `gorm:"size:100" json:"email"`
+	Address   string `gorm:"size:200" json:"address"`
 }
 
 type ReceptionStatus string
 
 const (
-	StatusScheduled ReceptionStatus = "scheduled" // Запланирован
-	StatusCompleted ReceptionStatus = "completed" // Завершен
-	StatusCancelled ReceptionStatus = "cancelled" // Отменен
-	StatusNoShow    ReceptionStatus = "no_show"   // Не явился
+	StatusScheduled ReceptionStatus = "scheduled"
+	StatusCompleted ReceptionStatus = "completed"
+	StatusCancelled ReceptionStatus = "cancelled"
+	StatusNoShow    ReceptionStatus = "no_show"
 )
 
 type Reception struct {
-	ID              uint            `json:"id"`
-	DoctorID        uint            `json:"doctor_id"`
-	PatientID       uint            `json:"patient_id"`
-	Date            time.Time       `json:"date"`
-	Diagnosis       string          `json:"diagnosis"`       // Диагноз
-	Recommendations string          `json:"recommendations"` // Рекомендации
-	IsSMP           bool            `json:"is_smp"`          // Работает в СМП (скорая медицинская помощь): true - да, false - нет
-	Status          ReceptionStatus `json:"status"`
-	CreatedAt       time.Time       `json:"created_at"`
-	UpdatedAt       time.Time       `json:"updated_at"`
+	gorm.Model
+	DoctorID        uint            `gorm:"not null" json:"doctor_id"`
+	PatientID       uint            `gorm:"not null" json:"patient_id"`
+	Date            time.Time       `gorm:"not null" json:"date"`
+	Diagnosis       string          `gorm:"type:text" json:"diagnosis"`
+	Recommendations string          `gorm:"type:text" json:"recommendations"`
+	IsSMP           bool            `gorm:"default:false" json:"is_smp"`
+	Status          ReceptionStatus `gorm:"type:varchar(20);default:'scheduled'" json:"status"`
 }
 
 type Allergy struct {
-	ID          uint      `json:"id"`
-	PatientID   uint      `json:"patient_id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	RecordedAt  time.Time `json:"recorded_at"`
+	gorm.Model
+	PatientID   uint   `gorm:"not null" json:"patient_id"`
+	Name        string `gorm:"size:100;not null" json:"name"`
+	Description string `gorm:"type:text" json:"description"`
 }
 
 type PatientCard struct {
 	Patient     Patient     `json:"patient"`
 	ContactInfo ContactInfo `json:"contact_info"`
-	Receptions  []Reception `json:"receptions"` // Массив (слайс) структур Receptions
-	Allergies   []Allergy   `json:"allergies"`  // Массив структур аллергий
+	Receptions  []Reception `json:"receptions"`
+	Allergies   []Allergy   `json:"allergies"`
 }
