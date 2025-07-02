@@ -1,0 +1,7 @@
+# Sensitive data
+.env
+.env.local
+
+# Cache files
+__debug_bin
+.vscode/
