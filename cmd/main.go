@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/AlexanderMorozov1919/mobileapp/database"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/models"
 	"log"
-	"mobileapp/database"
-	"mobileapp/internal/models"
 	"os"
 	"os/signal"
 	"syscall"
