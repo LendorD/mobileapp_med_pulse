@@ -14,7 +14,7 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 
-	log.Println("✅ Database initialized and migrated successfully")
+	log.Println(":) Database initialized and migrated successfully")
 
 	// Простое тестовое использование
 	// testDBOperations()
