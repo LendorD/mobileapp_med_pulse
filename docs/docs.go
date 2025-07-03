@@ -25,7 +25,7 @@ const docTemplate = `{
     "paths": {
         "/login": {
             "post": {
-                "description": "Login with login and password",
+                "description": "Аутентификация доктора",
                 "consumes": [
                     "application/json"
                 ],
@@ -35,15 +35,15 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Login a doctor",
+                "summary": "Вход в систему",
                 "parameters": [
                     {
-                        "description": "Credentials",
-                        "name": "credentials",
+                        "description": "Данные для входа",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.LoginRequest"
+                            "$ref": "#/definitions/models.LoginRequest"
                         }
                     }
                 ],
@@ -51,10 +51,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.TokenPair"
                         }
                     },
                     "400": {
@@ -80,7 +77,7 @@ const docTemplate = `{
         },
         "/register": {
             "post": {
-                "description": "Register a new doctor with the input payload",
+                "description": "Регистрация нового доктора в системе",
                 "consumes": [
                     "application/json"
                 ],
@@ -90,15 +87,15 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Register a new doctor",
+                "summary": "Регистрация доктора",
                 "parameters": [
                     {
-                        "description": "Doctor information",
-                        "name": "doctor",
+                        "description": "Данные для регистрации",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Doctor"
+                            "$ref": "#/definitions/models.DoctorRegisterRequest"
                         }
                     }
                 ],
@@ -141,24 +138,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handlers.LoginRequest": {
-            "description": "Login credentials structure",
-            "type": "object",
-            "required": [
-                "login",
-                "password"
-            ],
-            "properties": {
-                "login": {
-                    "type": "string",
-                    "example": "doctor_ivanov"
-                },
-                "password": {
-                    "type": "string",
-                    "example": "securepassword123"
-                }
-            }
-        },
         "models.Doctor": {
             "description": "Medical professional information",
             "type": "object",
@@ -188,6 +167,60 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.DoctorRegisterRequest": {
+            "description": "Doctor registration structure",
+            "type": "object",
+            "required": [
+                "first_name",
+                "last_name",
+                "login",
+                "password",
+                "specialization"
+            ],
+            "properties": {
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "middle_name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "specialization": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.LoginRequest": {
+            "type": "object",
+            "required": [
+                "login",
+                "password"
+            ],
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.TokenPair": {
+            "type": "object",
+            "properties": {
+                "access_token": {
                     "type": "string"
                 }
             }

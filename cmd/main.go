@@ -42,9 +42,9 @@ func main() {
 	// Инициализация зависимостей авторизации
 	authRepo := repository.NewAuthRepository(database.GetDB())
 	authService := services.NewAuthService(
-		authRepo,
-		"your_jwt_secret_key", // Замените на реальный секретный ключ
-		24*time.Hour,          // Время жизни токена
+		authRepo, // Теперь передаётся указатель
+		"your_jwt_secret_key",
+		24*time.Hour,
 	)
 	authHandler := handlers.NewAuthHandler(authService)
 

@@ -1,18 +1,5 @@
 basePath: /
 definitions:
-  handlers.LoginRequest:
-    description: Login credentials structure
-    properties:
-      login:
-        example: doctor_ivanov
-        type: string
-      password:
-        example: securepassword123
-        type: string
-    required:
-    - login
-    - password
-    type: object
   models.Doctor:
     description: Medical professional information
     properties:
@@ -35,6 +22,43 @@ definitions:
       updated_at:
         type: string
     type: object
+  models.DoctorRegisterRequest:
+    description: Doctor registration structure
+    properties:
+      first_name:
+        type: string
+      last_name:
+        type: string
+      login:
+        type: string
+      middle_name:
+        type: string
+      password:
+        type: string
+      specialization:
+        type: string
+    required:
+    - first_name
+    - last_name
+    - login
+    - password
+    - specialization
+    type: object
+  models.LoginRequest:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  models.TokenPair:
+    properties:
+      access_token:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -52,23 +76,21 @@ paths:
     post:
       consumes:
       - application/json
-      description: Login with login and password
+      description: Аутентификация доктора
       parameters:
-      - description: Credentials
+      - description: Данные для входа
         in: body
-        name: credentials
+        name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.LoginRequest'
+          $ref: '#/definitions/models.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.TokenPair'
         "400":
           description: Bad Request
           schema:
@@ -81,21 +103,21 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Login a doctor
+      summary: Вход в систему
       tags:
       - auth
   /register:
     post:
       consumes:
       - application/json
-      description: Register a new doctor with the input payload
+      description: Регистрация нового доктора в системе
       parameters:
-      - description: Doctor information
+      - description: Данные для регистрации
         in: body
-        name: doctor
+        name: request
         required: true
         schema:
-          $ref: '#/definitions/models.Doctor'
+          $ref: '#/definitions/models.DoctorRegisterRequest'
       produces:
       - application/json
       responses:
@@ -121,7 +143,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Register a new doctor
+      summary: Регистрация доктора
       tags:
       - auth
 securityDefinitions:

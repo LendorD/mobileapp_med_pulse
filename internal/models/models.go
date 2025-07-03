@@ -82,7 +82,28 @@ type PatientCard struct {
 	Allergies   []Allergy   `json:"allergies"`  // Массив структур аллергий
 }
 
-// Для JWT-авторизации
+//// AUTHORIZATION MODELS
+
+// DoctorRegisterRequest represents registration data
+// @Description Doctor registration structure
+type DoctorRegisterRequest struct {
+	FirstName      string `json:"first_name" binding:"required"`
+	MiddleName     string `json:"middle_name"`
+	LastName       string `json:"last_name" binding:"required"`
+	Login          string `json:"login" binding:"required"`
+	Password       string `json:"password" binding:"required"`
+	Specialization string `json:"specialization" binding:"required"`
+}
+
+type LoginRequest struct {
+	Login    string `json:"login" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type TokenPair struct {
+	AccessToken string `json:"access_token"`
+}
+
 type User struct {
 	gorm.Model
 	Login        string `gorm:"unique;not null"`
