@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/AlexanderMorozov1919/mobileapp/database"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/AlexanderMorozov1919/mobileapp/database"
 )
 
 func main() {
@@ -18,9 +19,6 @@ func main() {
 
 	// Простое тестовое использование
 	// testDBOperations()
-
-	// router = gin.Default()
-	// router.GET("/smp/:doc_id", handlers.)
 
 	// Ожидание сигнала завершения
 	quit := make(chan os.Signal, 1)
