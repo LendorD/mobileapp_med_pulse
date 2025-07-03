@@ -2,7 +2,9 @@ package services
 
 import "github.com/AlexanderMorozov1919/mobileapp/internal/models"
 
-type SmpService interface{}
+type SmpService interface {
+	GetCallings(doctorID uint) ([]ReceptionResponce, error)
+}
 
 type ReceptionService interface {
 }

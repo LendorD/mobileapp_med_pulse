@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"fmt"
+
 	"github.com/AlexanderMorozov1919/mobileapp/internal/models"
 	"gorm.io/gorm"
 )
@@ -31,10 +32,10 @@ func (r *patientRepository) GetByID(id uint) (*models.Patient, error) {
 	return &patient, nil
 }
 
-func (r *patientRepository) SearchByName(name string) ([]models.Patient, error) {
+func (r *patientRepository) SearchByFullName(name string) ([]models.Patient, error) {
 	var patients []models.Patient
-	err := r.db.Where("full_name LIKE ? OR first_name LIKE ? OR surname LIKE ?",
-		"%"+name+"%", "%"+name+"%", "%"+name+"%").
+	err := r.db.Where("full_name LIKE",
+		"%"+name+"%").
 		Limit(50).
 		Find(&patients).Error
 	if err != nil {
