@@ -2,11 +2,12 @@ package main
 
 import (
 	"log"
-	"mobileapp/database"
-	"mobileapp/internal/models"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/AlexanderMorozov1919/mobileapp/database"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/models"
 )
 
 func main() {
@@ -18,13 +19,17 @@ func main() {
 	log.Println("✅ Database initialized and migrated successfully")
 
 	// Простое тестовое использование
-	testDBOperations()
+	// testDBOperations()
+
+	// router = gin.Default()
+	// router.GET("/smp/:doc_id", handlers.)
 
 	// Ожидание сигнала завершения
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	log.Println("Shutting down...")
+
 }
 
 func testDBOperations() {
