@@ -28,8 +28,7 @@ type ReceptionRepository interface {
 type PatientRepository interface {
 	Create(patient *models.Patient) error
 	GetByID(id uint) (*models.Patient, error)
-	GetAllPatientsByDoctorID(doctorID uint) ([]models.Patient, error)
-	SearchByName(name string) ([]models.Patient, error)
+	SearchByFullName(name string) ([]models.Patient, error)
 	Update(patient *models.Patient) error
 	Delete(id uint) error
 }
