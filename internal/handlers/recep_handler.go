@@ -247,3 +247,46 @@ func (h *ReceptionHandler) CompleteReception(c *gin.Context) {
 
 	c.JSON(http.StatusOK, reception)
 }
+
+// GetDoctorReceptionsByDate godoc
+// @Summary Получить записи врача на дату
+// @Description Возвращает список записей для указанного врача на конкретную дату
+// @Tags receptions
+// @Produce json
+// @Param doctor_id path int true "ID врача"
+// @Param date query string true "Дата в формате YYYY-MM-DD"
+// @Success 200 {array} models.Reception
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /doctors/{doctor_id}/receptions/date [get]
+func (h *ReceptionHandler) GetDoctorReceptionsByDate(c *gin.Context) {
+	// Получаем ID врача из URL
+	doctorID, err := strconv.Atoi(c.Param("doctor_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid doctor ID"})
+		return
+	}
+
+	// Получаем дату из query-параметров
+	dateStr := c.Query("date")
+	if dateStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Date parameter is required"})
+		return
+	}
+
+	// Парсим дату
+	date, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format, use YYYY-MM-DD"})
+		return
+	}
+
+	// Вызываем сервис
+	receptions, err := h.service.GetReceptionsByDoctorAndDate(uint(doctorID), date)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, receptions)
+}

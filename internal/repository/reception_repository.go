@@ -52,7 +52,7 @@ func (r *receptionRepository) GetAllByDoctorAndDate(doctorID *uint, date *time.T
 
 	startOfDay := time.Date(filterDate.Year(), filterDate.Month(), filterDate.Day(), 0, 0, 0, 0, filterDate.Location())
 	endOfDay := startOfDay.Add(24 * time.Hour)
-	query = query.Where("date_time >= ? AND date_time < ?", startOfDay, endOfDay)
+	query = query.Where("date >= ? AND date < ?", startOfDay, endOfDay)
 
 	// Выполнение запроса
 	if err := query.Find(&receptions).Error; err != nil {
@@ -76,7 +76,7 @@ func (r *receptionRepository) GetAllByDate(date time.Time) ([]models.Reception, 
 	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
 	endOfDay := startOfDay.Add(24 * time.Hour)
 
-	if err := r.db.Where("date_time >= ? AND date_time < ?", startOfDay, endOfDay).Find(&receptions).Error; err != nil {
+	if err := r.db.Where("date >= ? AND date < ?", startOfDay, endOfDay).Find(&receptions).Error; err != nil {
 		return nil, err
 	}
 	return receptions, nil

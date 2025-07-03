@@ -22,12 +22,16 @@ func main() {
 
 	// Инициализация зависимостей авторизации
 	authRepo := repository.NewAuthRepository(database.GetDB())
+	recepRepo := repository.NewReceptionRepository(database.GetDB())
 	authService := services.NewAuthService(
 		authRepo,
 		"your_jwt_secret_key", // Замените на реальный секретный ключ
 		24*time.Hour,          // Время жизни токена
 	)
+	recepService := services.NewReceptionService(recepRepo)
+
 	authHandler := handlers.NewAuthHandler(authService)
+	recepHandler := handlers.NewReceptionHandler(recepService)
 
 	// Настройка роутера
 	router := gin.Default()
@@ -35,6 +39,8 @@ func main() {
 	// Роуты авторизации
 	router.POST("/register", authHandler.Register)
 	router.POST("/login", authHandler.Login)
+	router.POST("/newRecep", recepHandler.CreateReception)
+	router.GET("/main/:doctor_id/receps", recepHandler.GetDoctorReceptions)
 
 	// Защищенные роуты (пример)
 	// authorized := router.Group("/")
