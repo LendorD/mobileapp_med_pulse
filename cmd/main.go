@@ -18,7 +18,7 @@ func main() {
 	log.Println("✅ Database initialized and migrated successfully")
 
 	// Простое тестовое использование
-	testDBOperations()
+	//testDBOperations()
 
 	// Ожидание сигнала завершения
 	quit := make(chan os.Signal, 1)

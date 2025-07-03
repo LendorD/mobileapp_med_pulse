@@ -1,9 +1,9 @@
 package database
 
 import (
+	"github.com/AlexanderMorozov1919/mobileapp/config"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/models"
 	"log"
-	"mobileapp/config"
-	"mobileapp/internal/models"
 
 	"gorm.io/gorm"
 )
