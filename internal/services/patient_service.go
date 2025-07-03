@@ -4,6 +4,7 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/models"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/repository"
 	"log"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/repository"
 )
 
 type patientService struct {
@@ -37,3 +38,4 @@ func (s *patientService) GetAllPatientsByDoctorID(doctorID uint) ([]models.Short
 	}
 	return response, nil
 }
+
