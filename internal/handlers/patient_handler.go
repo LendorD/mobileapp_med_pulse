@@ -17,16 +17,15 @@ func NewPatientHandler(patientService services.PatientService) *PatientHandler {
 	return &PatientHandler{patientService: patientService}
 }
 
-func (h *PatientHandler) GetAllPatients(c *gin.Context) error {
+func (h *PatientHandler) GetAllPatients(c *gin.Context) {
 	doctorId, err := strconv.Atoi(c.Param("id"))
 	patients, err := h.patientService.GetAllPatientsByDoctorID(uint(doctorId))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "service error"})
-		return nil
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"patients": patients,
 	})
-	return nil
 }

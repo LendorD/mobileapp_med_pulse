@@ -12,7 +12,7 @@ type SmpHandlers struct {
 	smpService services.SmpService
 }
 
-func NewOrderHandler(smpService services.SmpService) *SmpHandlers {
+func NewSmpHandler(smpService services.SmpService) *SmpHandlers {
 	return &SmpHandlers{
 		smpService: smpService,
 	}
