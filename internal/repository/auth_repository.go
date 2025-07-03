@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+
 	"github.com/AlexanderMorozov1919/mobileapp/internal/models"
 	"gorm.io/gorm"
 )
@@ -21,7 +23,7 @@ func (r *AuthRepository) FindDoctorByLogin(login string) (*models.Doctor, error)
 	var doctor models.Doctor
 	err := r.db.Where("login = ?", login).First(&doctor).Error
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, err

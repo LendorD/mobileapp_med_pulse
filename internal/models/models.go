@@ -6,6 +6,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// Doctor represents a medical professional
+// @Description Medical professional information
 type Doctor struct {
 	ID             uint      `json:"id"`
 	FirstName      string    `json:"first_name"`

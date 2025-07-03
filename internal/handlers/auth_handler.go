@@ -12,10 +12,29 @@ type AuthHandler struct {
 	authService *services.AuthService
 }
 
+// LoginRequest represents login credentials
+// @Description Login credentials structure
+type LoginRequest struct {
+	Login    string `json:"login" binding:"required" example:"doctor_ivanov"`
+	Password string `json:"password" binding:"required" example:"securepassword123"`
+}
+
 func NewAuthHandler(authService *services.AuthService) *AuthHandler {
 	return &AuthHandler{authService: authService}
 }
 
+// Register godoc
+// @Summary Register a new doctor
+// @Description Register a new doctor with the input payload
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param doctor body models.Doctor true "Doctor information"
+// @Success 201 {object} models.Doctor
+// @Failure 400 {object} map[string]string
+// @Failure 409 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	var doctor models.Doctor
 	if err := c.ShouldBindJSON(&doctor); err != nil {
@@ -23,7 +42,6 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	// Обрабатываем ошибку и выводим статус запроса
 	if err := h.authService.Register(&doctor); err != nil {
 		status := http.StatusInternalServerError
 		if err.Error() == "doctor with this login already exists" {
@@ -33,16 +51,23 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	// Не возвращаем хеш пароля
 	doctor.PasswordHash = ""
 	c.JSON(http.StatusCreated, doctor)
 }
 
+// Login godoc
+// @Summary Login a doctor
+// @Description Login with login and password
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param credentials body LoginRequest true "Credentials"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
-	var credentials struct {
-		Login    string `json:"login" binding:"required"`
-		Password string `json:"password" binding:"required"`
-	}
+	var credentials LoginRequest
 
 	if err := c.ShouldBindJSON(&credentials); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

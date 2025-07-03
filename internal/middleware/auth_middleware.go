@@ -8,6 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// AuthMiddleware godoc
+// @Security BearerAuth
+// @Description JWT authentication middleware
+// @Param Authorization header string true "Bearer {token}"
 func AuthMiddleware(authService *services.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
