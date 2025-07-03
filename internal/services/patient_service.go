@@ -19,3 +19,4 @@ func NewPatientService(patientRepository repository.PatientRepository, logger *l
 		logger:            logger,
 	}
 }
+
