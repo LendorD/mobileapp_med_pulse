@@ -1,9 +1,10 @@
 package database
 
 import (
+	"log"
+
 	"github.com/AlexanderMorozov1919/mobileapp/config"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/models"
-	"log"
 
 	"gorm.io/gorm"
 )
@@ -11,9 +12,8 @@ import (
 var DB *gorm.DB
 
 func Init() error {
-	cfg := config.LoadDBConfig()
 
-	db, err := config.InitDB(cfg)
+	db, err := config.InitDB()
 	if err != nil {
 		return err
 	}
