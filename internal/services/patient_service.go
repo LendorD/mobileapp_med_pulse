@@ -1,12 +1,10 @@
 package services
 
 import (
-	"github.com/AlexanderMorozov1919/mobileapp/internal/repository"
 	"log"
-)
 
-type PatientService interface {
-}
+	"github.com/AlexanderMorozov1919/mobileapp/internal/repository"
+)
 
 type patientService struct {
 	patientRepository repository.PatientRepository
