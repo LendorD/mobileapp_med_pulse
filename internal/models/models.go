@@ -6,7 +6,7 @@ type Doctor struct {
 	ID             uint      `gorm:"primaryKey;autoIncrement" json:"id"`
 	FirstName      string    `gorm:"size:100;not null" json:"first_name"`
 	MiddleName     string    `gorm:"size:100" json:"middle_name"`
-	Surname        string    `gorm:"size:100;not null" json:"surname"`
+	LastName       string    `gorm:"size:100;not null" json:"last_name"`
 	Login          string    `gorm:"size:50;unique;not null" json:"login"`
 	PasswordHash   string    `gorm:"size:255;not null" json:"password_hash"`
 	Specialization string    `gorm:"size:150;not null" json:"specialization"`
@@ -17,8 +17,8 @@ type Doctor struct {
 type Patient struct {
 	ID         uint      `gorm:"primaryKey;autoIncrement" json:"id"`
 	FirstName  string    `gorm:"size:100;not null" json:"first_name"`
-	Surname    string    `gorm:"size:100;not null" json:"surname"`
 	MiddleName string    `gorm:"size:100;not null" json:"middle_name"`
+	LastName   string    `gorm:"size:100;not null" json:"last_name"`
 	FullName   string    `gorm:"size:300;not null" json:"full_name"`
 	BirthDate  time.Time `gorm:"not null" json:"birth_date"`  // Лучше использовать time.Time вместо int
 	IsMale     bool      `gorm:"not null" json:"is_male"`     // true - мужской, false - женский
