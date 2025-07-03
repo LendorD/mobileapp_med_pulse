@@ -1,9 +1,8 @@
 package repository
 
 import (
-	"gorm.io/gorm"
-
 	"github.com/AlexanderMorozov1919/mobileapp/internal/models"
+	"gorm.io/gorm"
 )
 
 type AuthRepository struct {
@@ -21,5 +20,11 @@ func (r *AuthRepository) CreateDoctor(doctor *models.Doctor) error {
 func (r *AuthRepository) FindDoctorByLogin(login string) (*models.Doctor, error) {
 	var doctor models.Doctor
 	err := r.db.Where("login = ?", login).First(&doctor).Error
-	return &doctor, err
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &doctor, nil
 }

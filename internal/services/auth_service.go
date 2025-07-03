@@ -11,18 +11,27 @@ import (
 )
 
 type AuthService struct {
-	repo      *repository.AuthRepository
-	jwtSecret string
+	repo         *repository.AuthRepository
+	jwtSecret    string
+	accessExpiry time.Duration
 }
 
-func NewAuthService(repo *repository.AuthRepository, secret string) *AuthService {
-	return &AuthService{repo: repo, jwtSecret: secret}
+type TokenPair struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token,omitempty"`
+}
+
+func NewAuthService(repo *repository.AuthRepository, secret string, accessExpiry time.Duration) *AuthService {
+	return &AuthService{
+		repo:         repo,
+		jwtSecret:    secret,
+		accessExpiry: accessExpiry,
+	}
 }
 
 func (s *AuthService) Register(doctor *models.Doctor) error {
 	// Проверка уникальности логина
-	existing, _ := s.repo.FindDoctorByLogin(doctor.Login)
-	if existing != nil {
+	if existing, _ := s.repo.FindDoctorByLogin(doctor.Login); existing != nil {
 		return errors.New("doctor with this login already exists")
 	}
 
@@ -36,23 +45,35 @@ func (s *AuthService) Register(doctor *models.Doctor) error {
 	return s.repo.CreateDoctor(doctor)
 }
 
-func (s *AuthService) Login(login, password string) (string, error) {
+func (s *AuthService) Login(login, password string) (*TokenPair, error) {
 	doctor, err := s.repo.FindDoctorByLogin(login)
 	if err != nil {
-		return "", errors.New("invalid credentials")
+		return nil, errors.New("invalid credentials")
 	}
 
 	// Проверка пароля
 	if err := bcrypt.CompareHashAndPassword([]byte(doctor.PasswordHash), []byte(password)); err != nil {
-		return "", errors.New("invalid credentials")
+		return nil, errors.New("invalid credentials")
 	}
 
-	// Генерация JWT
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"doctor_id": doctor.ID,
-		"exp":       time.Now().Add(time.Hour * 72).Unix(),
-	})
+	// Генерация токенов
+	accessToken, err := s.generateAccessToken(doctor.ID)
+	if err != nil {
+		return nil, err
+	}
 
+	return &TokenPair{
+		AccessToken: accessToken,
+	}, nil
+}
+
+func (s *AuthService) generateAccessToken(doctorID uint) (string, error) {
+	claims := jwt.MapClaims{
+		"doctor_id": doctorID,
+		"exp":       time.Now().Add(s.accessExpiry).Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(s.jwtSecret))
 }
 
@@ -64,7 +85,11 @@ func (s *AuthService) ValidateToken(tokenString string) (uint, error) {
 		return []byte(s.jwtSecret), nil
 	})
 
-	if err != nil || !token.Valid {
+	if err != nil {
+		return 0, err
+	}
+
+	if !token.Valid {
 		return 0, errors.New("invalid token")
 	}
 
@@ -73,5 +98,6 @@ func (s *AuthService) ValidateToken(tokenString string) (uint, error) {
 		return 0, errors.New("invalid token claims")
 	}
 
-	return uint(claims["doctor_id"].(float64)), nil
+	doctorID := uint(claims["doctor_id"].(float64))
+	return doctorID, nil
 }

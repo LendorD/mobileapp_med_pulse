@@ -1,12 +1,16 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Doctor struct {
 	ID             uint      `json:"id"`
 	FirstName      string    `json:"first_name"`
 	MiddleName     string    `json:"middle_name"`
-	Surname        string    `json:"surname"`
+	LastName       string    `json:"last_name"`
 	Login          string    `json:"login"`
 	PasswordHash   string    `json:"password_hash"`
 	Specialization string    `json:"specialization"`
@@ -17,8 +21,8 @@ type Doctor struct {
 type Patient struct {
 	ID         uint      `json:"id"`
 	FirstName  string    `json:"first_name"`
-	Surname    string    `json:"surname"`
 	MiddleName string    `json:"middle_name"`
+	LastName   string    `json:"last_name"`
 	FullName   string    `json:"full_name"`
 	BirthDate  time.Time `json:"birth_date"` // Лучше использовать time.Time вместо int
 	IsMale     bool      `json:"is_male"`    // true - мужской, false - женский
@@ -56,6 +60,7 @@ type Reception struct {
 	Recommendations string          `json:"recommendations"` // Рекомендации
 	IsSMP           bool            `json:"is_smp"`          // Работает в СМП (скорая медицинская помощь): true - да, false - нет
 	Status          ReceptionStatus `json:"status"`
+	Address         string          `json:"address"`
 	CreatedAt       time.Time       `json:"created_at"`
 	UpdatedAt       time.Time       `json:"updated_at"`
 }
@@ -73,4 +78,20 @@ type PatientCard struct {
 	ContactInfo ContactInfo `json:"contact_info"`
 	Receptions  []Reception `json:"receptions"` // Массив (слайс) структур Receptions
 	Allergies   []Allergy   `json:"allergies"`  // Массив структур аллергий
+}
+
+// Для JWT-авторизации
+type User struct {
+	gorm.Model
+	Login        string `gorm:"unique;not null"`
+	PasswordHash string `gorm:"not null"`
+	Email        string `gorm:"unique"`
+	Role         string `gorm:"default:'user'"`
+}
+
+type Session struct {
+	gorm.Model
+	UserID       uint   `gorm:"not null"`
+	RefreshToken string `gorm:"not null"`
+	ExpiresAt    int64  `gorm:"not null"`
 }
