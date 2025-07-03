@@ -3,6 +3,7 @@ module github.com/AlexanderMorozov1919/mobileapp
 go 1.24.4
 
 require (
+	github.com/caarlos0/env/v8 v8.0.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.30.0
 )

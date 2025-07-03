@@ -1,13 +1,11 @@
 package main
 
 import (
+	"github.com/AlexanderMorozov1919/mobileapp/database"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
-
-	"github.com/AlexanderMorozov1919/mobileapp/database"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/models"
 )
 
 func main() {
@@ -30,23 +28,4 @@ func main() {
 	<-quit
 	log.Println("Shutting down...")
 
-}
-
-func testDBOperations() {
-	db := database.GetDB()
-
-	// Пример создания доктора
-	doctor := models.Doctor{
-		FirstName:      "Иван",
-		Surname:        "Петров",
-		Login:          "ivan.petrov",
-		PasswordHash:   "securehash",
-		Specialization: "Кардиолог",
-	}
-
-	if err := db.Create(&doctor).Error; err != nil {
-		log.Printf("Error creating doctor: %v", err)
-	} else {
-		log.Printf("Created doctor with ID: %d", doctor.ID)
-	}
 }
