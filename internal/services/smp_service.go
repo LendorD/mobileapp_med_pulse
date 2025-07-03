@@ -17,18 +17,19 @@ type ReceptionResponce struct {
 }
 
 type smpService struct {
-	smpRepo     repository.ReceptionRepository
+	recepRepo   repository.ReceptionRepository
 	patientRepo repository.PatientRepository
 }
 
-func NewSmpService(smpRepo repository.ReceptionRepository) SmpService {
-	return &smpService{smpRepo: smpRepo}
+func NewSmpService(recepRepo repository.ReceptionRepository) SmpService {
+	return &smpService{recepRepo: recepRepo}
 }
 
 func (s *smpService) GetCallings(doctorID uint) ([]ReceptionResponce, error) {
-	receptions, err := s.smpRepo.GetAllByDoctorID(doctorID)
+	// Получаем только SMP приемы для указанного доктора
+	receptions, err := s.recepRepo.GetSMPReceptionsByDoctorID(doctorID, true)
 	if err != nil {
-		return nil, errors.New("failed to get receptions")
+		return nil, errors.New("failed to get SMP receptions:")
 	}
 
 	var response []ReceptionResponce
@@ -36,19 +37,17 @@ func (s *smpService) GetCallings(doctorID uint) ([]ReceptionResponce, error) {
 	for _, reception := range receptions {
 		patient, err := s.patientRepo.GetByID(reception.PatientID)
 		if err != nil {
-			return nil, errors.New("failed to get patient data")
+			return nil, errors.New("failed to get patient data for reception")
 		}
 
-		respItem := ReceptionResponce{
+		response = append(response, ReceptionResponce{
 			ID:        reception.ID,
 			FullName:  patient.FullName,
 			BirthDate: patient.BirthDate,
 			IsMale:    patient.IsMale,
 			Address:   reception.Address,
 			Date:      reception.Date,
-		}
-
-		response = append(response, respItem)
+		})
 	}
 
 	return response, nil

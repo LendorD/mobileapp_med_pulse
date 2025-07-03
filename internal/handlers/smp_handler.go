@@ -10,7 +10,6 @@ import (
 
 type SmpHandlers struct {
 	smpService services.SmpService
-
 }
 
 func NewOrderHandler(smpService services.SmpService) *SmpHandlers {
@@ -20,17 +19,13 @@ func NewOrderHandler(smpService services.SmpService) *SmpHandlers {
 }
 
 func (h *SmpHandlers) GetAllAmbulanceCallings(c *gin.Context) {
-	doctorIDStr := c.Param("id")
-	doctorID, err := strconv.ParseUint(doctorIDStr, 10, 32)
+	doctorID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		// Обработка ошибки (например, возврат статуса 400 Bad Request)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid doctor ID format"})
 		return
 	}
 
-	// Преобразуем uint64 в uint (32-битное)
-	doctorIDUint := uint(doctorID)
-	callings, err := h.smpService.GetCallings(doctorIDUint)
+	callings, err := h.smpService.GetCallings(uint(doctorID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid order request"})
 		return

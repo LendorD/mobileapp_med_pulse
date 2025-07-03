@@ -1,11 +1,12 @@
 package handlers
 
 import (
+	"net/http"
+	"strconv"
+
 	_ "github.com/AlexanderMorozov1919/mobileapp/internal/models"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"strconv"
 )
 
 type PatientHandler struct {
@@ -17,15 +18,15 @@ func NewPatientHandler(patientService services.PatientService) *PatientHandler {
 }
 
 func (h *PatientHandler) GetAllPatients(c *gin.Context) error {
-	doc_id, err := strconv.Atoi(c.Param("id"))
-	patients, total, err := h.patientService.GetAllPatientsByDoctor(doc_id)
+	doctorId, err := strconv.Atoi(c.Param("id"))
+	patients, err := h.patientService.GetAllPatientsByDoctorID(uint(doctorId))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "service error"})
-		return
+		return nil
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"patients": patients,
-		"total":    total,
 	})
+	return nil
 }
