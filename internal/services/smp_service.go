@@ -21,8 +21,11 @@ type smpService struct {
 	patientRepo repository.PatientRepository
 }
 
-func NewSmpService(recepRepo repository.ReceptionRepository) SmpService {
-	return &smpService{recepRepo: recepRepo}
+func NewSmpService(recepRepo repository.ReceptionRepository, patientRepo repository.PatientRepository) SmpService {
+	return &smpService{
+		recepRepo:   recepRepo,
+		patientRepo: patientRepo,
+	}
 }
 
 func (s *smpService) GetCallings(doctorID uint) ([]ReceptionResponce, error) {
