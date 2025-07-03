@@ -10,6 +10,7 @@ import (
 
 type SmpHandlers struct {
 	smpService services.SmpService
+
 }
 
 func NewOrderHandler(smpService services.SmpService) *SmpHandlers {
