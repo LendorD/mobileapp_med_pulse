@@ -56,7 +56,7 @@ func main() {
 		"your_jwt_secret_key",
 		24*time.Hour,
 	)
-	recepService := services.NewReceptionService(recepRepo)
+	// recepService := services.NewReceptionService(recepRepo)
 
 	authHandler := handlers.NewAuthHandler(authService)
 	recepHandler := handlers.NewReceptionHandler(recepService)
