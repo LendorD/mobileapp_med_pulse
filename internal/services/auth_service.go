@@ -11,66 +11,59 @@ import (
 )
 
 type AuthService struct {
-	repo         *repository.AuthRepository
+	repo         *repository.AuthRepository // Изменено на указатель
 	jwtSecret    string
-	accessExpiry time.Duration
+	tokenExpires time.Duration
 }
 
-type TokenPair struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token,omitempty"`
-}
-
-func NewAuthService(repo *repository.AuthRepository, secret string, accessExpiry time.Duration) *AuthService {
+func NewAuthService(repo *repository.AuthRepository, jwtSecret string, tokenExpires time.Duration) *AuthService {
 	return &AuthService{
 		repo:         repo,
-		jwtSecret:    secret,
-		accessExpiry: accessExpiry,
+		jwtSecret:    jwtSecret,
+		tokenExpires: tokenExpires,
 	}
 }
 
-func (s *AuthService) Register(doctor *models.Doctor) error {
-	// Проверка уникальности логина
-	if existing, _ := s.repo.FindDoctorByLogin(doctor.Login); existing != nil {
-		return errors.New("doctor with this login already exists")
-	}
-
-	// Хеширование пароля
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(doctor.PasswordHash), bcrypt.DefaultCost)
+func (s *AuthService) Register(doctor *models.Doctor, password string) error {
+	existing, err := s.repo.FindDoctorByLogin(doctor.Login)
 	if err != nil {
 		return err
 	}
-	doctor.PasswordHash = string(hashedPassword)
+	if existing != nil {
+		return errors.New("doctor with this login already exists")
+	}
 
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	doctor.PasswordHash = string(hashedPassword)
 	return s.repo.CreateDoctor(doctor)
 }
 
-func (s *AuthService) Login(login, password string) (*TokenPair, error) {
+func (s *AuthService) Login(login, password string) (*models.TokenPair, error) {
 	doctor, err := s.repo.FindDoctorByLogin(login)
 	if err != nil {
 		return nil, errors.New("invalid credentials")
 	}
 
-	// Проверка пароля
 	if err := bcrypt.CompareHashAndPassword([]byte(doctor.PasswordHash), []byte(password)); err != nil {
 		return nil, errors.New("invalid credentials")
 	}
 
-	// Генерация токенов
-	accessToken, err := s.generateAccessToken(doctor.ID)
+	token, err := s.generateToken(doctor.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	return &TokenPair{
-		AccessToken: accessToken,
-	}, nil
+	return &models.TokenPair{AccessToken: token}, nil
 }
 
-func (s *AuthService) generateAccessToken(doctorID uint) (string, error) {
+func (s *AuthService) generateToken(doctorID uint) (string, error) {
 	claims := jwt.MapClaims{
 		"doctor_id": doctorID,
-		"exp":       time.Now().Add(s.accessExpiry).Unix(),
+		"exp":       time.Now().Add(s.tokenExpires).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
