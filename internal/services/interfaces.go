@@ -18,10 +18,8 @@ type ReceptionService interface {
 	CompleteReception(id uint, diagnosis string, recommendations string) error
 	MarkAsNoShow(id uint) error
 	GetReceptionByID(id uint) (*models.Reception, error)
-	GetDoctorReceptions(doctorID uint, date *time.Time) ([]models.Reception, error)
-	GetPatientReceptions(patientID uint) ([]models.Reception, error)
 	GetReceptionsByStatus(status models.ReceptionStatus) ([]models.Reception, error)
-	GetReceptionsByDoctorAndDate(doctorID uint, date time.Time) ([]models.Reception, error)
+	GetReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.Reception, error)
 }
 
 type PatientService interface {

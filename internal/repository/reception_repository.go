@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"sort"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/models"
@@ -33,33 +34,6 @@ func (r receptionRepository) GetByID(id uint) (*models.Reception, error) {
 		return nil, err
 	}
 	return &reception, nil
-}
-
-func (r *receptionRepository) GetAllByDoctorAndDate(doctorID *uint, date *time.Time) ([]models.Reception, error) {
-	var receptions []models.Reception
-	query := r.db
-
-	// Фильтр по ID врача, если указан
-	if doctorID != nil {
-		query = query.Where("doctor_id = ?", *doctorID)
-	}
-
-	// Фильтр по дате (используем текущую дату по умолчанию)
-	filterDate := time.Now()
-	if date != nil {
-		filterDate = *date
-	}
-
-	startOfDay := time.Date(filterDate.Year(), filterDate.Month(), filterDate.Day(), 0, 0, 0, 0, filterDate.Location())
-	endOfDay := startOfDay.Add(24 * time.Hour)
-	query = query.Where("date >= ? AND date < ?", startOfDay, endOfDay)
-
-	// Выполнение запроса
-	if err := query.Find(&receptions).Error; err != nil {
-		return nil, err
-	}
-
-	return receptions, nil
 }
 
 func (r *receptionRepository) GetAllByDoctorID(doctorID uint) ([]models.Reception, error) {
@@ -95,5 +69,57 @@ func (r *receptionRepository) GetSMPReceptionsByDoctorID(doctorID uint, isSMP bo
 	if err := r.db.Where("doctor_id = ? AND is_smp = ?", doctorID, isSMP).Find(&receptions).Error; err != nil {
 		return nil, err
 	}
+	return receptions, nil
+}
+
+func getReceptionPriority(status models.ReceptionStatus) int {
+	switch status {
+	case models.StatusScheduled:
+		return 1
+	case models.StatusCompleted:
+		return 2
+	case models.StatusCancelled, models.StatusNoShow:
+		return 3
+	default:
+		return 4
+	}
+}
+
+// GetReceptionsByDoctorAndDate возвращает список записей с пагинацией и сортировкой
+// @param page - номер страницы (начиная с 1)
+// @param perPage - количество записей на странице
+func (r *receptionRepository) GetReceptionsByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.Reception, error) {
+	var receptions []models.Reception
+
+	// Рассчитываем offset для пагинации
+	offset := (page - 1) * perPage
+
+	// Определяем начало и конец дня для фильтрации
+	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+	endOfDay := startOfDay.Add(24 * time.Hour)
+
+	// Выполняем запрос с фильтрацией и пагинацией
+	err := r.db.
+		Where("doctor_id = ? AND date >= ? AND date < ?", doctorID, startOfDay, endOfDay).
+		Offset(offset).
+		Limit(perPage).
+		Find(&receptions).
+		Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Сортируем результаты по приоритету статуса и времени
+	sort.Slice(receptions, func(i, j int) bool {
+		prioI := getReceptionPriority(receptions[i].Status)
+		prioJ := getReceptionPriority(receptions[j].Status)
+
+		if prioI == prioJ {
+			return receptions[i].Date.Before(receptions[j].Date)
+		}
+		return prioI < prioJ
+	})
+
 	return receptions, nil
 }
