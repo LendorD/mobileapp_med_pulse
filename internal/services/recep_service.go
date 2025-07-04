@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/models"
@@ -28,16 +29,16 @@ func (s *receptionService) CreateReception(reception *models.Reception) error {
 	}
 
 	// Проверка на пересечение с другими записями врача
-	existing, err := s.repo.GetAllByDoctorAndDate(&reception.DoctorID, &reception.Date)
-	if err != nil {
-		return err
-	}
+	// 	existing, err := s.repo.GetAllByDoctorAndDate(&reception.DoctorID, &reception.Date)
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-	for _, e := range existing {
-		if isTimeOverlap(e.Date, reception.Date, 30*time.Minute) {
-			return errors.New("doctor already has an appointment at this time")
-		}
-	}
+	// 	for _, e := range existing {
+	// 		if isTimeOverlap(e.Date, reception.Date, 30*time.Minute) {
+	// 			return errors.New("doctor already has an appointment at this time")
+	// 		}
+	// 	}
 
 	return s.repo.Create(reception)
 }
@@ -113,19 +114,6 @@ func (s *receptionService) GetReceptionByID(id uint) (*models.Reception, error) 
 	return s.repo.GetByID(id)
 }
 
-// GetDoctorReceptions возвращает записи врача с фильтрацией по дате
-func (s *receptionService) GetDoctorReceptions(doctorID uint, date *time.Time) ([]models.Reception, error) {
-	return s.repo.GetAllByDoctorAndDate(&doctorID, date)
-}
-
-// GetPatientReceptions возвращает все записи пациента
-func (s *receptionService) GetPatientReceptions(patientID uint) ([]models.Reception, error) {
-	// В реальной реализации нужно добавить метод в репозиторий
-	// Здесь используем GetAllByDoctorAndDate с nil doctorID
-	// Это временное решение, пока в репозитории нет специального метода
-	return s.repo.GetAllByDoctorAndDate(nil, nil)
-}
-
 // GetReceptionsByStatus возвращает записи по статусу
 func (s *receptionService) GetReceptionsByStatus(status models.ReceptionStatus) ([]models.Reception, error) {
 	// В реальной реализации нужно добавить метод в репозиторий
@@ -138,4 +126,28 @@ func isTimeOverlap(t1, t2 time.Time, duration time.Duration) bool {
 	end1 := t1.Add(duration)
 	end2 := t2.Add(duration)
 	return t1.Before(end2) && end1.After(t2)
+}
+
+// Обновленный метод сервиса
+func (s *receptionService) GetReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.Reception, error) {
+	// Валидация даты
+	if date.Before(time.Now().Truncate(24 * time.Hour)) {
+		return nil, errors.New("date cannot be in the past")
+	}
+
+	// Валидация номера страницы
+	if page < 1 {
+		return nil, errors.New("page must be greater than 0")
+	}
+
+	// Количество записей на странице
+	const perPage = 10
+
+	// Получаем данные из репозитория
+	receptions, err := s.repo.GetReceptionsByDoctorAndDate(doctorID, date, page, perPage)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get receptions: %w", err)
+	}
+
+	return receptions, nil
 }

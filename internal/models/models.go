@@ -19,17 +19,12 @@ type Doctor struct {
 }
 
 type Patient struct {
-	ID         uint      `json:"id"`
-	FirstName  string    `json:"first_name"`
-	MiddleName string    `json:"middle_name"`
-	LastName   string    `json:"last_name"`
-	FullName   string    `json:"full_name"`
-	BirthDate  time.Time `json:"birth_date"` // Лучше использовать time.Time вместо int
-	IsMale     bool      `json:"is_male"`    // true - мужской, false - женский
-	SNILS      string    `json:"snils"`      // СНИЛС
-	OMS        string    `json:"oms"`        // Полис ОМС
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	ID        uint      `json:"id"`
+	FirstName string    `json:"first_name"`
+	BirthDate time.Time `json:"birth_date"` // Лучше использовать time.Time вместо int
+	IsMale    bool      `json:"is_male"`    // true - мужской, false - женский
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type ContactInfo struct {
@@ -58,11 +53,26 @@ type Reception struct {
 	Date            time.Time       `json:"date"`
 	Diagnosis       string          `json:"diagnosis"`       // Диагноз
 	Recommendations string          `json:"recommendations"` // Рекомендации
-	IsSMP           bool            `json:"is_smp"`          // Работает в СМП (скорая медицинская помощь): true - да, false - нет
 	Status          ReceptionStatus `json:"status"`
 	Address         string          `json:"address"`
 	CreatedAt       time.Time       `json:"created_at"`
 	UpdatedAt       time.Time       `json:"updated_at"`
+}
+
+type ReceptionSmpStatus string
+
+const (
+	StatusEmergency ReceptionSmpStatus = "emergency" // 1 Приоритеты
+	StatusPriority  ReceptionSmpStatus = "priority"  // 2
+	StatusUrgent    ReceptionSmpStatus = "urgent"    // 3
+)
+
+type ReceptionSMP struct {
+	ID          uint               `json:"id"`
+	ReceptionID uint               `json:"doctor_id"`
+	Status      ReceptionSmpStatus `json:"status"`
+	CreatedAt   time.Time          `json:"created_at"`
+	UpdatedAt   time.Time          `json:"updated_at"`
 }
 
 type Allergy struct {
