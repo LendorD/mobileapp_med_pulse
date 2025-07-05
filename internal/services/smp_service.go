@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"github.com/AlexanderMorozov1919/mobileapp/internal_v2/domain/entities"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/repository"
@@ -44,8 +45,8 @@ func (s *smpService) GetCallings(doctorID uint) ([]ReceptionResponce, error) {
 		}
 
 		response = append(response, ReceptionResponce{
-			ID:        reception.ID,
-			FullName:  patient.FullName,
+			ID: reception.ID,
+			//FullName:  patient.FullName,
 			BirthDate: patient.BirthDate,
 			IsMale:    patient.IsMale,
 			Address:   reception.Address,
@@ -54,4 +55,14 @@ func (s *smpService) GetCallings(doctorID uint) ([]ReceptionResponce, error) {
 	}
 
 	return response, nil
+}
+
+func (s *smpService) GetEmergencyReception(doctorID uint) (ReceptionResponce, error) {
+	// Получаем детали приёма
+	receptions, err := s.recepRepo.GetEmergencyReceptionByID(doctorID)
+	if err != nil {
+		return nil, errors.New("failed to get SMP receptions:")
+	}
+
+	return receptions, nil
 }
