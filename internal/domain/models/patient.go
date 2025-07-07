@@ -5,8 +5,18 @@ import (
 	"time"
 )
 
-type CreatePatientRequest struct {
+type UpdatePatientRequest struct {
+	ID        uint
+	FullName  string
+	BirthDate time.Time
 }
+
+type CreatePatientRequest struct {
+	FullName  string
+	BirthDate time.Time
+	IsMale    bool
+}
+
 type ShortPatientResponse struct {
 	gorm.Model
 	FullName  string    `json:"-" example:"Смирнов Алексей Петрович" rus:"ФИО"`

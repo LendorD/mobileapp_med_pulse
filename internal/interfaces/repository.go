@@ -80,10 +80,10 @@ type ReceptionRepository interface {
 }
 
 type PatientRepository interface {
-	CreatePatient(patient *entities.Patient) error
-	UpdatePatient(patient *entities.Patient) error
+	CreatePatient(*entities.Patient) (*entities.Patient, error)
+	UpdatePatient(patient *entities.Patient) (*entities.Patient, error)
 	DeletePatient(id uint) error
-
+	//GetPatientsAllergyByID(id uint) error
 	GetPatientByID(id uint) (*entities.Patient, error)
 	GetAllPatient() ([]entities.Patient, error)
 	GetPatientByFullName(name string) ([]entities.Patient, error)
@@ -104,9 +104,10 @@ type AllergyRepository interface {
 	DeleteAllergy(id uint) error
 
 	GetPatientAllergiesByID(id uint) ([]entities.Allergy, error)
-	GetAllergyByID(id uint) (*entities.Allergy, error)
+	//GetPatientAllergyByID(id uint) (*entities.Allergy, error)
 	GetAllergyByName(name string) (*entities.Allergy, error)
 	GetAllAllergy() ([]entities.Allergy, error)
+	//GetPatientAllergyByID(id uint) (*entities.PatientsAllergy, error)
 }
 
 type PatientsAllergyRepository interface {
@@ -114,7 +115,7 @@ type PatientsAllergyRepository interface {
 	UpdatePatientsAllergy(pa *entities.PatientsAllergy) error
 	DeletePatientsAllergy(id uint) error
 	ExistsAllergy(patientID, allergyID uint) (bool, error)
-	GetPatientsAllergyByID(id uint) (*entities.PatientsAllergy, error)
-	GetPatientsAllergiesByPatientID(patientID uint) ([]entities.PatientsAllergy, error)
-	GetAllergyByPatientID(patientID uint) ([]entities.Allergy, error)
+	//GetPatientsAllergyByAllergyID(id uint) (*entities.PatientsAllergy, error)
+	//GetPatientsAllergiesByPatientID(patientID uint) ([]entities.PatientsAllergy, error)
+	//GetAllergyByPatientID(patientID uint) ([]entities.Allergy, error)
 }

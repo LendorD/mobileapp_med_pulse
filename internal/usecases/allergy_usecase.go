@@ -29,7 +29,7 @@ func (u *AllergyUsecase) AddAllergyToPatient(patientID, allergyID uint, descript
 	}
 
 	// Проверяем существование аллергии
-	if _, err := u.allergyRepo.GetAllergyByID(allergyID); err != nil {
+	if _, err := u.allergyRepo.GetPatientAllergiesByID(allergyID); err != nil {
 		return entities.PatientsAllergy{}, errors.NewAppError(500, "allergy not found", errors.ErrDataNotFound, true)
 	}
 
@@ -58,7 +58,7 @@ func (u *AllergyUsecase) AddAllergyToPatient(patientID, allergyID uint, descript
 }
 
 func (u *AllergyUsecase) GetAllergyByPatientID(patientID uint) ([]entities.Allergy, *errors.AppError) {
-	// Проверяем существование пациента
+	/* Проверяем существование пациента
 	if _, err := u.patientRepo.GetPatientByID(patientID); err != nil {
 
 		return nil, errors.NewAppError(500, "patient not found", errors.ErrDataNotFound, true)
@@ -70,6 +70,9 @@ func (u *AllergyUsecase) GetAllergyByPatientID(patientID uint) ([]entities.Aller
 	}
 
 	return allergies, nil
+
+	*/
+	return nil, nil
 }
 
 func (u *AllergyUsecase) RemoveAllergyFromPatient(patientID, allergyID uint) *errors.AppError {
@@ -91,8 +94,14 @@ func (u *AllergyUsecase) RemoveAllergyFromPatient(patientID, allergyID uint) *er
 }
 
 func (u *AllergyUsecase) UpdateAllergyDescription(patientID, allergyID uint, description string) (entities.PatientsAllergy, *errors.AppError) {
-	// Получаем существующую связь
-	relation, err := u.patientAllergyRepo.GetPatientsAllergyByID(patientID)
+	//TODO implement me
+	panic("implement me")
+}
+
+/*
+func (u *AllergyUsecase) UpdateAllergyDescription(patientID, allergyID uint, description string) (entities.PatientsAllergy, *errors.AppError) {
+	/* Получаем существующую связь
+	relation, err := u.patientAllergyRepo.GetPatientsAllergyByAllergyID(patientID)
 	if err != nil {
 		return entities.PatientsAllergy{}, errors.NewAppError(500, "failed to get allergy relation", err, true)
 	}
@@ -106,4 +115,6 @@ func (u *AllergyUsecase) UpdateAllergyDescription(patientID, allergyID uint, des
 	}
 
 	return *relation, nil
+
 }
+*/

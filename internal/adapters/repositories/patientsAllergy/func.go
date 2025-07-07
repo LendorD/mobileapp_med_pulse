@@ -33,11 +33,10 @@ func (r *PatientsAllergyRepositoryImpl) GetPatientAllergyByPatientID(patientID u
 	return patient, nil
 }
 
-func (r *PatientsAllergyRepositoryImpl) GetPatientsAllergiesByPatientID(patientID uint) ([]entities.PatientsAllergy, error) {
-	//TODO implement me
-	panic("implement me")
+func (r *PatientsAllergyRepositoryImpl) GetPatientsAllergyByID(id uint) (*entities.PatientsAllergy, error) {
+	panic("")
 }
-func (r *PatientsAllergyRepositoryImpl) GetAllergyByPatientID(patientID uint) ([]entities.PatientsAllergy, error) {
-	//TODO implement me
-	panic("implement me")
+
+func GetAllergyByPatientID(patientID uint) ([]entities.Allergy, error) {
+	panic("")
 }
