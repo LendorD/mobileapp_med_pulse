@@ -1,8 +1,9 @@
 package interfaces
 
 import (
-	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"time"
+
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 )
 
 type Repository interface {
@@ -15,6 +16,7 @@ type Repository interface {
 	ContactInfoRepository
 	EmergencyReceptionRepository
 	PersonalInfoRepository
+	ReceptionRepository
 }
 
 type DoctorRepository interface {

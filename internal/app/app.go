@@ -17,7 +17,7 @@ func New() *fx.App {
 			config.LoadConfig,
 		),
 
-		//LoggingModule,
+		LoggingModule,
 
 		RepositoryModule,
 		ServiceModule,
@@ -31,6 +31,7 @@ func ProvideLoggers(cfg *config.Config) *logging.Logger {
 	loggerCfg := logging.Config(
 		cfg.Logging.Enable,
 		cfg.Logging.Level,
+		cfg.Logging.Format,
 		cfg.Logging.LogsDir,
 		IntToUint(cfg.Logging.SavingDays),
 	)

@@ -8,14 +8,26 @@ import (
 )
 
 type Usecases interface {
-	SmpService
-	ReceptionService
-	PatientService
+	AllergyUsecase
+	ContactInfoUsecase
+	DoctorUsecase
+	EmergencyReceptionUsecase
+	EmergencyReceptionMedServicesUsecase
+	MedServiceUsecase
+	PatientUsecase
+	PersonalInfoUsecase
+	ReceptionUsecase
 }
 
-type SmpService interface {
-	GetCallings(doctorID uint) ([]models.ReceptionResponse, error)
-}
+type AllergyUsecase interface{}
+
+type ContactInfoUsecase interface{}
+
+type DoctorUsecase interface{}
+
+type EmergencyReceptionUsecase interface{}
+
+type EmergencyReceptionMedServicesUsecase interface{}
 
 // ReceptionService определяет контракт для работы с записями на прием
 type ReceptionService interface {
@@ -30,7 +42,10 @@ type ReceptionService interface {
 	GetReceptionsByStatus(status entities.ReceptionStatus) ([]models.Reception, error)
 	GetReceptionsByDoctorAndDate(doctorID uint, date time.Time) ([]models.Reception, error)
 }
+type MedServiceUsecase interface{}
 
-type PatientService interface {
-	GetAllPatientsByDoctorID(doctorID uint) ([]models.ShortPatientResponse, error)
-}
+type PatientUsecase interface{}
+
+type PersonalInfoUsecase interface{}
+
+type ReceptionUsecase interface{}
