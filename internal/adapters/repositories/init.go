@@ -84,7 +84,7 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 		reception.NewReceptionRepository(db),
 	}, nil
 
-	return nil, nil
+	//return nil, nil
 }
 
 // autoMigrate - выполнение автомиграций для моделей

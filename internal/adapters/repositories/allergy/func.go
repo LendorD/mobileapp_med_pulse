@@ -2,6 +2,7 @@ package allergy
 
 import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
+	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 )
 
 func (r *AllergyRepositoryImpl) CreateAllergy(allergy *entities.Allergy) error {
@@ -54,4 +55,11 @@ func (r *AllergyRepositoryImpl) GetPatientAllergiesByID(patientID uint) ([]entit
 	}
 
 	return allergies, nil
+}
+
+func (r *AllergyRepositoryImpl) AddAllergyToPatient(patientID, allergyID uint, description string) (entities.PatientsAllergy, *errors.AppError) {
+	panic("implement me")
+}
+func (r *AllergyRepositoryImpl) GetAllergyByPatientID(patientID uint) ([]entities.Allergy, *errors.AppError) {
+	panic("implement me")
 }
