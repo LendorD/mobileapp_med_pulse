@@ -1,4 +1,4 @@
-package emergencyReceptionMedServices
+package emergencyReceptionMedServicesRepository
 
 import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"

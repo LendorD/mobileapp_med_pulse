@@ -2,11 +2,13 @@ package app
 
 import (
 	"context"
-	"net/http"
-
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/handlers"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/services"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/usecases"
 	"go.uber.org/fx"
+	"net/http"
 )
 
 func New() *fx.App {
@@ -15,7 +17,7 @@ func New() *fx.App {
 			config.LoadConfig,
 		),
 
-		//LoggingModule,
+		LoggingModule,
 
 		RepositoryModule,
 		ServiceModule,
@@ -29,6 +31,7 @@ func ProvideLoggers(cfg *config.Config) *logging.Logger {
 	loggerCfg := logging.Config(
 		cfg.Logging.Enable,
 		cfg.Logging.Level,
+		cfg.Logging.Format,
 		cfg.Logging.LogsDir,
 		IntToUint(cfg.Logging.SavingDays),
 	)
@@ -97,21 +100,21 @@ var HttpServerModule = fx.Module("http_server_module",
 
 /* -------------------------------------------- */
 
-var ServiceModule = fx.Module("service_module")
-
-// fx.Provide(services.NewService),
-
-/* -------------------------------------------- */
-
-var RepositoryModule = fx.Module("postgres_module")
-
-// fx.Provide(repositories.NewRepository),
+var ServiceModule = fx.Module("service_module",
+	fx.Provide(services.NewService),
+)
 
 /* -------------------------------------------- */
 
-var UsecaseModule = fx.Module("usecases_module")
+var RepositoryModule = fx.Module("postgres_module",
+	fx.Provide(repositories.NewRepository),
+)
 
-// fx.Provide(usecases.NewUsecases),
+/* -------------------------------------------- */
+
+var UsecaseModule = fx.Module("usecases_module",
+	fx.Provide(usecases.NewUsecases),
+)
 
 /* -------------------------------------------- */
 

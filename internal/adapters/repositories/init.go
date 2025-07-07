@@ -2,23 +2,22 @@ package repositories
 
 import (
 	"fmt"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/allergy"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/contactInfo"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/doctor"
+	emergencyReceptionRepository "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emergencyReception"
+	emergencyReceptionMedServicesRepository "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emergencyReceptionMedServices"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/medService"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/patient"
+	patientsAllergyRepository "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/patientsAllergy"
+	personalInfoRepository "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/personalInfo"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"log"
 	"os"
 	"time"
 
-	emergencyReceptionMedServices "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repository/EmergencyReceptionMedServices"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repository/allergy"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repository/contactInfo"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repository/doctor"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repository/emergencyReception"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repository/medService"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repository/patient"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repository/patientsAllergy"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repository/personalInfo"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repository/reception"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -34,7 +33,6 @@ type Repository struct {
 	interfaces.ContactInfoRepository
 	interfaces.EmergencyReceptionRepository
 	interfaces.PersonalInfoRepository
-	interfaces.ReceptionRepository
 }
 
 func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
@@ -72,16 +70,15 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 	*/
 
 	return &Repository{
-		AllergyRepository:                       allergy.NewAllergyRepository(db),
-		ContactInfoRepository:                   contactInfo.NewContactInfoRepository(db),
-		DoctorRepository:                        doctor.NewDoctorRepository(db),
-		EmergencyReceptionRepository:            emergencyReception.NewEmergencyReceptionRepository(db),
-		EmergencyReceptionMedServicesRepository: emergencyReceptionMedServices.NewEmergencyReceptionMedServicesRepository(db),
-		MedServiceRepository:                    medService.NewMedServiceRepository(db),
-		PatientRepository:                       patient.NewPatientRepository(db),
-		PatientsAllergyRepository:               patientsAllergy.NewPatientsAllergyRepository(db),
-		PersonalInfoRepository:                  personalInfo.NewPersonalInfoRepository(db),
-		ReceptionRepository:                     reception.NewReceptionRepository(db),
+		allergyRepository.NewAllergyRepository(db),
+		doctorRepository.NewDoctorRepository(db),
+		medServiceRepository.NewMedServiceRepository(db),
+		emergencyReceptionMedServicesRepository.NewEmergencyReceptionMedServicesRepository(db),
+		patientRepository.NewPatientRepository(db),
+		patientsAllergyRepository.NewPatientsAllergyRepository(db),
+		contactInfoRepository.NewContactInfoRepository(db),
+		emergencyReceptionRepository.NewEmergencyReceptionRepository(db),
+		personalInfoRepository.NewPersonalInfoRepository(db),
 	}, nil
 
 	return nil, nil
