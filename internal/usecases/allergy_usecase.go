@@ -7,53 +7,103 @@ import (
 )
 
 type AllergyUsecase struct {
-	repo               interfaces.AllergyRepository
+	allergyRepo        interfaces.AllergyRepository
+	patientRepo        interfaces.PatientRepository
 	patientAllergyRepo interfaces.PatientsAllergyRepository
 }
 
-func NewAllergyUsecase(repo interfaces.AllergyRepository, patientAllergyRepo interfaces.PatientsAllergyRepository) interfaces.AllergyUsecase {
+func NewAllergyUsecase(repo interfaces.AllergyRepository,
+	patientRepo interfaces.PatientRepository,
+	patientAllergyRepo interfaces.PatientsAllergyRepository) interfaces.AllergyUsecase {
 	return &AllergyUsecase{
-		repo:               repo,
+		allergyRepo:        repo,
+		patientRepo:        patientRepo,
 		patientAllergyRepo: patientAllergyRepo,
 	}
 }
 
-// TODO:Дописать нормальную связь аллергий с пациентом через третью таблицу
-
 func (u *AllergyUsecase) AddAllergyToPatient(patientID, allergyID uint, description string) (entities.PatientsAllergy, *errors.AppError) {
-	//TODO implement me
-	panic("implement me")
-	/*
-			allergy := entities.PatientsAllergy{
-				PatientID:   patientID,
-				AllergyID:   allergyID,
-				Description: description,
-			}
-
-			createdAllergy, err := u.patientAllergyRepo.AddAllergy(&allergy)
-			if err != nil {
-				//return entities.PatientsAllergy{}, errors.NewDBError("failed to add allergy to patient", err)
-			}
-
-			return *createdAllergy, nil
-		}
-
-	*/
-}
-func (u *AllergyUsecase) GetAllergyByPatientID(patientID uint) ([]entities.Allergy, *errors.AppError) {
-	allergies, err := u.patientAllergyRepo.GetPatientAllergiesByID(patientID)
-	if err != nil {
-		//return nil, errors.NewDBError("failed to get patient allergies", err)
+	// Проверяем существование пациента
+	if _, err := u.patientRepo.GetPatientByID(patientID); err != nil {
+		return entities.PatientsAllergy{}, errors.NewAppError(500, "patient not found", errors.ErrDataNotFound, true)
 	}
+
+	// Проверяем существование аллергии
+	if _, err := u.allergyRepo.GetAllergyByID(allergyID); err != nil {
+		return entities.PatientsAllergy{}, errors.NewAppError(500, "allergy not found", errors.ErrDataNotFound, true)
+	}
+
+	// Проверяем, не добавлена ли уже эта аллергия пациенту
+	exists, err := u.patientAllergyRepo.ExistsAllergy(patientID, allergyID)
+	if err != nil {
+		return entities.PatientsAllergy{}, errors.NewAppError(500, "failed to check allergy existence", errors.ErrDataNotFound, true)
+	}
+	if exists {
+
+		return entities.PatientsAllergy{}, errors.NewAppError(500, "allergy already added to patient", errors.ErrDataNotFound, true)
+	}
+
+	// Создаем связь
+	allergy := entities.PatientsAllergy{
+		PatientID:   patientID,
+		AllergyID:   allergyID,
+		Description: description,
+	}
+
+	if err := u.patientAllergyRepo.CreatePatientsAllergy(&allergy); err != nil {
+		return entities.PatientsAllergy{}, errors.NewAppError(500, "failed to add allergy to patient", errors.ErrDataNotFound, true)
+	}
+
+	return allergy, nil
+}
+
+func (u *AllergyUsecase) GetAllergyByPatientID(patientID uint) ([]entities.Allergy, *errors.AppError) {
+	// Проверяем существование пациента
+	if _, err := u.patientRepo.GetPatientByID(patientID); err != nil {
+
+		return nil, errors.NewAppError(500, "patient not found", errors.ErrDataNotFound, true)
+	}
+	// Получаем аллергии пациента
+	allergies, err := u.patientAllergyRepo.GetAllergyByPatientID(patientID)
+	if err != nil {
+		return nil, errors.NewAppError(500, "failed to get patient allergies", errors.ErrDataNotFound, true)
+	}
+
 	return allergies, nil
 }
 
-func (u UseCases) AddAllergyToPatient(patientID, allergyID uint, description string) (entities.PatientsAllergy, *errors.AppError) {
-	//TODO implement me
-	panic("implement me")
+func (u *AllergyUsecase) RemoveAllergyFromPatient(patientID, allergyID uint) *errors.AppError {
+	// Проверяем существование связи
+	exists, err := u.patientAllergyRepo.ExistsAllergy(patientID, allergyID)
+	if err != nil {
+		return errors.NewAppError(500, "failed to check allergy existence", err, true)
+	}
+	if !exists {
+		return errors.NewAppError(500, "allergy not found for this patient", errors.ErrDataNotFound, true)
+	}
+
+	// Удаляем связь
+	if err := u.patientAllergyRepo.DeletePatientsAllergy(patientID); err != nil {
+		return errors.NewAppError(500, "failed to remove allergy from patient", err, true)
+	}
+
+	return nil
 }
 
-func (u UseCases) GetAllergyByPatientID(patientID uint) ([]entities.Allergy, *errors.AppError) {
-	//TODO implement me
-	panic("implement me")
+func (u *AllergyUsecase) UpdateAllergyDescription(patientID, allergyID uint, description string) (entities.PatientsAllergy, *errors.AppError) {
+	// Получаем существующую связь
+	relation, err := u.patientAllergyRepo.GetPatientsAllergyByID(patientID)
+	if err != nil {
+		return entities.PatientsAllergy{}, errors.NewAppError(500, "failed to get allergy relation", err, true)
+	}
+
+	// Обновляем описание
+	relation.Description = description
+
+	if err := u.patientAllergyRepo.UpdatePatientsAllergy(relation); err != nil {
+
+		return entities.PatientsAllergy{}, errors.NewAppError(500, "failed to update allergy description", err, true)
+	}
+
+	return *relation, nil
 }
