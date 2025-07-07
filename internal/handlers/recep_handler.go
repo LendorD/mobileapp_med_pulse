@@ -2,58 +2,69 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
+	"time"
 
-	"github.com/AlexanderMorozov1919/mobileapp/internal/models"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services"
 	"github.com/gin-gonic/gin"
 )
 
-type AuthHandler struct {
-	authService *services.AuthService
+type ReceptionHandler struct {
+	receptionService services.ReceptionService
 }
 
-func NewAuthHandler(authService *services.AuthService) *AuthHandler {
-	return &AuthHandler{authService: authService}
+func NewReceptionHandler(receptionService services.ReceptionService) *ReceptionHandler {
+	return &ReceptionHandler{receptionService: receptionService}
 }
 
-func (h *AuthHandler) Register(c *gin.Context) {
-	var doctor models.Doctor
-	if err := c.ShouldBindJSON(&doctor); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Обрабатываем ошибку и выводим статус запроса
-	if err := h.authService.Register(&doctor); err != nil {
-		status := http.StatusInternalServerError
-		if err.Error() == "doctor with this login already exists" {
-			status = http.StatusConflict
-		}
-		c.JSON(status, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Не возвращаем хеш пароля
-	doctor.PasswordHash = ""
-	c.JSON(http.StatusCreated, doctor)
-}
-
-func (h *AuthHandler) Login(c *gin.Context) {
-	var credentials struct {
-		Login    string `json:"login" binding:"required"`
-		Password string `json:"password" binding:"required"`
-	}
-
-	if err := c.ShouldBindJSON(&credentials); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	token, err := h.authService.Login(credentials.Login, credentials.Password)
+// GetReceptionsByDoctorAndDate godoc
+// @Summary Получить записи врача на дату с пагинацией
+// @Description Возвращает список записей для указанного врача на конкретную дату с сортировкой по статусу и пагинацией
+// @Tags receptions
+// @Produce json
+// @Param doctor_id path int true "ID врача"
+// @Param date query string true "Дата в формате YYYY-MM-DD"
+// @Param page query int false "Номер страницы (начиная с 1)" default(1)
+// @Success 200 {array} models.Reception
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /doctors/{doctor_id}/receptions [get]
+func (h *ReceptionHandler) GetReceptionsByDoctorAndDate(c *gin.Context) {
+	// Получаем ID врача из URL
+	doctorID, err := strconv.Atoi(c.Param("doctor_id"))
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid doctor ID"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	// Получаем дату из query-параметров
+	dateStr := c.Query("date")
+	if dateStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Date parameter is required"})
+		return
+	}
+
+	// Парсим дату
+	date, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format, use YYYY-MM-DD"})
+		return
+	}
+
+	// Получаем номер страницы (по умолчанию 1)
+	pageStr := c.DefaultQuery("page", "1")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Page must be integer greater than 0"})
+		return
+	}
+
+	// Вызываем сервис
+	receptions, err := h.receptionService.GetReceptionsByDoctorAndDate(uint(doctorID), date, page)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, receptions)
 }
