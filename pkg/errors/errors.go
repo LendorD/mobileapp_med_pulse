@@ -57,3 +57,8 @@ func Is(err any, err2 error) bool {
 	}
 	return false
 }
+
+func NewNotFoundError(s string) *AppError {
+	return &AppError{}
+	//errors.NewNotFoundError("patient not found")
+}

@@ -1,6 +1,13 @@
 package usecases
 
-/*
+import (
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
+	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
+	"gorm.io/gorm"
+)
+
 type PatientUsecase struct {
 	repo interfaces.PatientRepository
 }
@@ -16,7 +23,7 @@ func (u *PatientUsecase) Create(input models.CreatePatientRequest) (entities.Pat
 		IsMale:    input.IsMale,
 	}
 
-	createdPatient, err := u.repo.Create(&patient)
+	createdPatient, err := u.repo.CreatePatient(&patient)
 	if err != nil {
 		return entities.Patient{}, errors.NewDBError("failed to create patient", err)
 	}
@@ -24,7 +31,7 @@ func (u *PatientUsecase) Create(input models.CreatePatientRequest) (entities.Pat
 }
 
 func (u *PatientUsecase) GetByID(id uint) (entities.Patient, *errors.AppError) {
-	patient, err := u.repo.GetByID(id)
+	patient, err := u.repo.GetPatientByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return entities.Patient{}, errors.NewNotFoundError("patient not found")
@@ -35,7 +42,7 @@ func (u *PatientUsecase) GetByID(id uint) (entities.Patient, *errors.AppError) {
 }
 
 func (u *PatientUsecase) Update(input models.UpdatePatientRequest) (entities.Patient, *errors.AppError) {
-	patient, err := u.repo.GetByID(input.ID)
+	patient, err := u.repo.GetPatientByID(input.ID)
 	if err != nil {
 		return entities.Patient{}, errors.NewDBError("failed to find patient", err)
 	}
@@ -47,7 +54,7 @@ func (u *PatientUsecase) Update(input models.UpdatePatientRequest) (entities.Pat
 		patient.BirthDate = input.BirthDate
 	}
 
-	updatedPatient, err := u.repo.Update(patient)
+	updatedPatient, err := u.repo.UpdatePatient(patient)
 	if err != nil {
 		return entities.Patient{}, errors.NewDBError("failed to update patient", err)
 	}
@@ -56,10 +63,8 @@ func (u *PatientUsecase) Update(input models.UpdatePatientRequest) (entities.Pat
 }
 
 func (u *PatientUsecase) Delete(id uint) *errors.AppError {
-	if err := u.repo.Delete(id); err != nil {
+	if err := u.repo.DeletePatient(id); err != nil {
 		return errors.NewDBError("failed to delete patient", err)
 	}
 	return nil
 }
-
-*/

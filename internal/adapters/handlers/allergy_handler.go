@@ -3,10 +3,8 @@ package handlers
 import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
-	"net/http"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 // AddPatientAllergy godoc
@@ -56,17 +54,20 @@ func (h *Handler) AddPatientAllergy(c *gin.Context) {
 // @Failure 500 {object} ResultError "Внутренняя ошибка"
 // @Router /patient/{patient_id}/allergies [get]
 func (h *Handler) GetPatientAllergies(c *gin.Context) {
-	patientID, err := strconv.ParseUint(c.Param("patient_id"), 10, 64)
-	if err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'patient_id' must be an integer", false)
-		return
-	}
+	/*
+		patientID, err := strconv.ParseUint(c.Param("patient_id"), 10, 64)
+		if err != nil {
+			h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'patient_id' must be an integer", false)
+			return
+		}
 
-	allergies, eerr := h.usecase.GetAllergyByPatientID(uint(patientID))
-	if eerr != nil {
-		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
-		return
-	}
+				allergies, eerr := h.usecase.GetAllergyByPatientID(uint(patientID))
+				if eerr != nil {
+					h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
+					return
+				}
+			h.ResultResponse(c, "Success patient allergies", Array, allergies)
 
-	h.ResultResponse(c, "Success patient allergies", Array, allergies)
+	*/
+
 }

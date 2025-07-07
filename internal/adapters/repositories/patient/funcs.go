@@ -4,12 +4,12 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 )
 
-func (r *PatientRepositoryImpl) CreatePatient(patient *entities.Patient) error {
-	return r.db.Create(patient).Error
+func (r *PatientRepositoryImpl) CreatePatient(patient *entities.Patient) (*entities.Patient, error) {
+	return patient, r.db.Create(patient).Error
 }
 
-func (r *PatientRepositoryImpl) UpdatePatient(patient *entities.Patient) error {
-	return r.db.Save(patient).Error
+func (r *PatientRepositoryImpl) UpdatePatient(patient *entities.Patient) (*entities.Patient, error) {
+	return patient, r.db.Save(patient).Error
 }
 
 func (r *PatientRepositoryImpl) DeletePatient(id uint) error {
