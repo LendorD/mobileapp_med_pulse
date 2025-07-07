@@ -7,6 +7,8 @@ import (
 	"github.com/go-playground/validator/v10"
 
 	logging "gitlab.com/devkit3/logger"
+	_ "gitlab.com/enterprisemes/booking-service/docs"
+	"gitlab.com/enterprisemes/booking-service/internal/interfaces"
 )
 
 var validate *validator.Validate
