@@ -114,5 +114,6 @@ type PatientsAllergyRepository interface {
 	DeletePatientsAllergy(id uint) error
 
 	GetPatientsAllergyByID(id uint) (*entities.PatientsAllergy, error)
-	GetPatientsAllergyByPatientID(patientID uint) ([]entities.PatientsAllergy, error)
+	GetPatientsAllergiesByPatientID(patientID uint) ([]entities.PatientsAllergy, error)
+	GetPatientAllergiesByID(patientID uint) ([]entities.Allergy, error)
 }

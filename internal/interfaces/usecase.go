@@ -3,6 +3,7 @@ package interfaces
 import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
+	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 
 	"time"
 )
@@ -19,7 +20,10 @@ type Usecases interface {
 	ReceptionUsecase
 }
 
-type AllergyUsecase interface{}
+type AllergyUsecase interface {
+	AddAllergyToPatient(patientID, allergyID uint, description string) (entities.PatientsAllergy, *errors.AppError)
+	GetAllergyByPatientID(patientID uint) ([]entities.Allergy, *errors.AppError)
+}
 
 type ContactInfoUsecase interface{}
 
