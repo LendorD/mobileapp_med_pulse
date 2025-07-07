@@ -1,11 +1,10 @@
 package repository
 
 import (
-	"github.com/AlexanderMorozov1919/mobileapp/internal_v2/domain/entities"
 	"time"
 
-	"github.com/AlexanderMorozov1919/mobileapp/internal/models"
-	_ "github.com/AlexanderMorozov1919/mobileapp/internal_v2/domain/entities"
+	_ "github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
 
 type DoctorRepository interface {
@@ -28,7 +27,6 @@ type ReceptionRepository interface {
 	GetAllByPatientID(patientID uint) ([]models.Reception, error)
 	GetSMPReceptionsByDoctorID(doctorID uint, isSMP bool) ([]models.Reception, error)
 	GetReceptionsByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.Reception, error)
-	GetEmergencyReceptionByID(patientID uint) (entities.EmergencyReception, error)
 }
 
 type PatientRepository interface {

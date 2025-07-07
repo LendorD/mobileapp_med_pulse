@@ -1,4 +1,4 @@
-module github.com/AlexanderMorozov1919/mobileapp
+module github.com/AlexanderMorozov1919/mobileapp/tree/Dudko
 
 go 1.24.4
 

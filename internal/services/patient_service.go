@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/AlexanderMorozov1919/mobileapp/internal/models"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/repository"
 )
 
@@ -38,7 +38,6 @@ func (s *patientService) GetAllPatientsByDoctorID(doctorID uint) ([]models.Short
 	for i, patient := range patients {
 		response[i] = models.ShortPatientResponse{
 			ID:        patient.ID,
-			FullName:  patient.FullName,
 			BirthDate: patient.BirthDate,
 			IsMale:    patient.IsMale,
 		}

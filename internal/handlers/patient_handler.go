@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	_ "github.com/AlexanderMorozov1919/mobileapp/internal/models"
+	_ "github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services"
 	"github.com/gin-gonic/gin"
 )

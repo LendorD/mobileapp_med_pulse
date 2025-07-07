@@ -1,25 +1,15 @@
 package repository
 
 import (
-	"github.com/AlexanderMorozov1919/mobileapp/internal_v2/domain/entities"
 	"sort"
 	"time"
 
-	"github.com/AlexanderMorozov1919/mobileapp/internal/models"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"gorm.io/gorm"
 )
 
 type receptionRepository struct {
 	db *gorm.DB
-}
-
-func (r receptionRepository) GetEmergencyReceptionByID(patientID uint) (entities.EmergencyReception, error) {
-	var receptions entities.EmergencyReception
-
-	if err := r.db.First(&receptions, patientID).Error; err != nil {
-		return nil, err
-	}
-	return receptions, nil
 }
 
 func NewReceptionRepository(db *gorm.DB) ReceptionRepository {
