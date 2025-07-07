@@ -1,73 +1,59 @@
 package handlers
 
-// import (
-// 	"encoding/json"
-// 	"fmt"
-// 	"net/http"
+import (
+	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
 
-// 	"github.com/gin-gonic/gin"
-// 	// apiresp "gitlab.com/devkit3/apiresponse"
-// )
+const (
+	Object = "object"
+	Array  = "array"
+	Empty  = "empty"
+)
 
-// const (
-// 	InternalServerError = "internal server error"
-// 	BadRequest          = "bad request"
-// )
+type Response interface {
+	ErrorResponse(c *gin.Context, err error, statusCode int, message string, showError bool)
+	ResultResponse(c *gin.Context, message string, dataType string, data interface{})
+}
 
-// type Response interface {
-// 	ErrorResponse(c *gin.Context, err error, code int, message string, isUserFacing bool)
-// 	ResultResponse(c *gin.Context, clientMsg string, datatype apiresp.ResponseDataType, data any)
-// }
+func (h *Handler) ErrorResponse(c *gin.Context, err error, statusCode int, message string, showError bool) {
+	errorMessage := message
+	if showError && err != nil {
+		errorMessage = message + ": " + err.Error()
+	}
 
-// type ResultOk struct {
-// 	Status   string `json:"status"` // ok
-// 	Response struct {
-// 		Message string      `json:"message"`
-// 		Type    string      `json:"type"`           // [AVALIABLE]: object, array, empty
-// 		Data    interface{} `json:"data,omitempty"` // [AVALIABLE]: object, array of objects, empty
-// 	} `json:"response"`
-// }
+	c.JSON(statusCode, gin.H{
+		"status": "error",
+		"error": gin.H{
+			"code":    statusCode,
+			"message": errorMessage,
+		},
+	})
+}
 
-// type ResultError struct {
-// 	Status   string `json:"status"` // error
-// 	Response struct {
-// 		Code    int    `json:"code"` // [RULE]: must be one of codes from table (Check DEV.PAGE)
-// 		Message string `json:"message"`
-// 	} `json:"response"`
-// }
+func (h *Handler) ResultResponse(c *gin.Context, message string, dataType string, data interface{}) {
+	response := gin.H{
+		"status":  "success",
+		"message": message,
+		"type":    dataType,
+	}
 
-// func (h *Handler) ErrorResponse(c *gin.Context, err error, code int, message string, isUserFacing bool) {
-// 	errText := "empty error"
-// 	if err != nil {
-// 		errText = err.Error()
-// 	}
+	if data != nil {
+		response["data"] = data
+	}
 
-// 	h.logger.Error(fmt.Sprintf("(Client Answer) %s : (Dev Message) %s", message, errText))
+	c.JSON(http.StatusOK, response)
+}
 
-// 	errMessage := message
-// 	if err != nil && isUserFacing {
-// 		errMessage = fmt.Sprintf("%s, %s", message, err.Error())
-// 	}
+func (h *Handler) BadRequest(c *gin.Context, err error) {
+	h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
+}
 
-// 	httpError := apiresp.NewError(code, errMessage)
-// 	httpResult := apiresp.NewResult(apiresp.ERROR, httpError)
+func (h *Handler) InternalError(c *gin.Context, err error) {
+	h.ErrorResponse(c, err, http.StatusInternalServerError, errors.InternalServerError, false)
+}
 
-// 	c.Header("Content-Type", "application/json")
-// 	c.Writer.WriteHeader(code)
-
-// 	if err := json.NewEncoder(c.Writer).Encode(httpResult); err != nil {
-// 		h.logger.Error("invalid write resultError", "(error)", err.Error())
-// 	}
-// }
-
-// func (h *Handler) ResultResponse(c *gin.Context, clientMsg string, datatype apiresp.ResponseDataType, data any) {
-// 	httpResponse := apiresp.NewResponse(clientMsg, datatype, data)
-// 	httpResult := apiresp.NewResult(apiresp.OK, httpResponse)
-
-// 	c.Header("Content-Type", "application/json")
-// 	c.Writer.WriteHeader(http.StatusOK)
-
-// 	if err := json.NewEncoder(c.Writer).Encode(httpResult); err != nil {
-// 		h.logger.Error("invalid write resultOk", "(error)", err.Error())
-// 	}
-// }
+func (h *Handler) NotFound(c *gin.Context, err error) {
+	h.ErrorResponse(c, err, http.StatusNotFound, errors.NotFound, true)
+}

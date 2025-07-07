@@ -39,3 +39,19 @@ func (r *AllergyRepositoryImpl) GetAllAllergy() ([]entities.Allergy, error) {
 	}
 	return list, nil
 }
+
+func (r *AllergyRepositoryImpl) GetPatientAllergiesByID(patientID uint) ([]entities.Allergy, error) {
+	var allergies []entities.Allergy
+
+	// Используем JOIN через patient_allergies таблицу
+	err := r.db.
+		Joins("JOIN patient_allergies ON patient_allergies.allergy_id = allergies.id").
+		Where("patient_allergies.patient_id = ?", patientID).
+		Find(&allergies).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return allergies, nil
+}
