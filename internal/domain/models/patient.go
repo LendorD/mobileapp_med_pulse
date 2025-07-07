@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+type CreatePatientRequest struct {
+}
 type ShortPatientResponse struct {
 	gorm.Model
 	FullName  string    `json:"-" example:"Смирнов Алексей Петрович" rus:"ФИО"`
