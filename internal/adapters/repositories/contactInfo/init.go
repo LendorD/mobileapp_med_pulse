@@ -1,4 +1,4 @@
-package contactInfo
+package contactInfoRepository
 
 import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"

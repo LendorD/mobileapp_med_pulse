@@ -1,4 +1,4 @@
-package allergy
+package allergyRepository
 
 import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"

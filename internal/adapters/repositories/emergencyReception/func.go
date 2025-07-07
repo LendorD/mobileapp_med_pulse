@@ -1,4 +1,4 @@
-package emergencyReception
+package emergencyReceptionRepository
 
 import (
 	"time"

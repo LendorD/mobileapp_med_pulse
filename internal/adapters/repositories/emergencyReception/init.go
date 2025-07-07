@@ -1,4 +1,4 @@
-package emergencyReception
+package emergencyReceptionRepository
 
 import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"

@@ -6,16 +6,15 @@ import (
 )
 
 type Repository interface {
+	AllergyRepository
 	DoctorRepository
-	PersonalInfoRepository
-	EmergencyReceptionRepository
 	MedServiceRepository
 	EmergencyReceptionMedServicesRepository
-	ReceptionRepository
 	PatientRepository
-	ContactInfoRepository
-	AllergyRepository
 	PatientsAllergyRepository
+	ContactInfoRepository
+	EmergencyReceptionRepository
+	PersonalInfoRepository
 }
 
 type DoctorRepository interface {

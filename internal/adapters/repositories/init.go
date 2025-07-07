@@ -5,10 +5,12 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/allergy"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/contactInfo"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/doctor"
+	emergencyReceptionRepository "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emergencyReception"
 	emergencyReceptionMedServicesRepository "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emergencyReceptionMedServices"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/medService"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/patient"
 	patientsAllergyRepository "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/patientsAllergy"
-	personalinfo "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/personalInfo"
+	personalInfoRepository "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/personalInfo"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
@@ -68,15 +70,15 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 	*/
 
 	return &Repository{
-		allergy.NewAllergyRepository(db),
-		doctor.NewDoctorRepository(db),
-		medService.NewMedServiceRepository(db),
+		allergyRepository.NewAllergyRepository(db),
+		doctorRepository.NewDoctorRepository(db),
+		medServiceRepository.NewMedServiceRepository(db),
 		emergencyReceptionMedServicesRepository.NewEmergencyReceptionMedServicesRepository(db),
+		patientRepository.NewPatientRepository(db),
 		patientsAllergyRepository.NewPatientsAllergyRepository(db),
-		patientsAllergyRepository.NewPatientsAllergyRepository(db),
-		contactInfo.NewContactInfoRepository(db),
-		emergencyReceptionMedServicesRepository.NewEmergencyReceptionMedServicesRepository(db),
-		personalinfo.NewPersonalInfoRepository(db),
+		contactInfoRepository.NewContactInfoRepository(db),
+		emergencyReceptionRepository.NewEmergencyReceptionRepository(db),
+		personalInfoRepository.NewPersonalInfoRepository(db),
 	}, nil
 
 	return nil, nil

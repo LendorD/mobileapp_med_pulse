@@ -1,7 +1,5 @@
 package services
 
-import "github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
-
 import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 )
@@ -14,7 +12,7 @@ type Service struct {
 	*/
 }
 
-func NewService(parentLogger *logging.Logger) interfaces.Service {
+func NewService() interfaces.Service {
 	//logger := logging.NewModuleLogger("SERVICES", "GENERAL", parentLogger)
 
 	return Service{}

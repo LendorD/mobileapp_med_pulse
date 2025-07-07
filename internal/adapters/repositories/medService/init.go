@@ -1,4 +1,4 @@
-package medService
+package medServiceRepository
 
 import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"

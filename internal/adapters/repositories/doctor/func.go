@@ -1,4 +1,4 @@
-package doctor
+package doctorRepository
 
 import "github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 
