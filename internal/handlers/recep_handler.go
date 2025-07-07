@@ -1,5 +1,6 @@
 package handlers
 
+
 import (
 	"net/http"
 	"strconv"
@@ -68,3 +69,4 @@ func (h *ReceptionHandler) GetReceptionsByDoctorAndDate(c *gin.Context) {
 
 	c.JSON(http.StatusOK, receptions)
 }
+
