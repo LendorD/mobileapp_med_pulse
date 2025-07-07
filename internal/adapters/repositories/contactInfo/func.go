@@ -1,4 +1,4 @@
-package contactInfoRepository
+package contactInfo
 
 import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"

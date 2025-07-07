@@ -2,21 +2,23 @@ package repositories
 
 import (
 	"fmt"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/allergy"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/contactInfo"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/doctor"
-	emergencyReceptionRepository "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emergencyReception"
-	emergencyReceptionMedServicesRepository "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emergencyReceptionMedServices"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/medService"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/patient"
-	patientsAllergyRepository "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/patientsAllergy"
-	personalInfoRepository "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/personalInfo"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"log"
 	"os"
 	"time"
+
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/allergy"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/contactInfo"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/doctor"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emergencyReception"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emergencyReceptionMedServices"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/medService"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/patient"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/patientsAllergy"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/personalInfo"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/reception"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -33,6 +35,7 @@ type Repository struct {
 	interfaces.ContactInfoRepository
 	interfaces.EmergencyReceptionRepository
 	interfaces.PersonalInfoRepository
+	interfaces.ReceptionRepository
 }
 
 func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
@@ -68,17 +71,17 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 
 		}
 	*/
-
 	return &Repository{
-		allergyRepository.NewAllergyRepository(db),
-		doctorRepository.NewDoctorRepository(db),
-		medServiceRepository.NewMedServiceRepository(db),
-		emergencyReceptionMedServicesRepository.NewEmergencyReceptionMedServicesRepository(db),
-		patientRepository.NewPatientRepository(db),
-		patientsAllergyRepository.NewPatientsAllergyRepository(db),
-		contactInfoRepository.NewContactInfoRepository(db),
-		emergencyReceptionRepository.NewEmergencyReceptionRepository(db),
-		personalInfoRepository.NewPersonalInfoRepository(db),
+		allergy.NewAllergyRepository(db),
+		doctor.NewDoctorRepository(db),
+		medService.NewMedServiceRepository(db),
+		emergencyReceptionMedServices.NewEmergencyReceptionMedServicesRepository(db),
+		patient.NewPatientRepository(db),
+		patientsAllergy.NewPatientsAllergyRepository(db),
+		contactInfo.NewContactInfoRepository(db),
+		emergencyReception.NewEmergencyReceptionRepository(db),
+		personalInfo.NewPersonalInfoRepository(db),
+		reception.NewReceptionRepository(db),
 	}, nil
 
 	return nil, nil

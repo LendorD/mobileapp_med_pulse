@@ -1,4 +1,4 @@
-package receptionRepository
+package reception
 
 import (
 	"time"

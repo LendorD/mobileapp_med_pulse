@@ -1,4 +1,4 @@
-package doctorRepository
+package doctor
 
 import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"

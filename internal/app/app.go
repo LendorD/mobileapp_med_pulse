@@ -2,13 +2,14 @@ package app
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/handlers"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/usecases"
 	"go.uber.org/fx"
-	"net/http"
 )
 
 func New() *fx.App {
@@ -17,7 +18,7 @@ func New() *fx.App {
 			config.LoadConfig,
 		),
 
-		LoggingModule,
+		// LoggingModule,
 
 		RepositoryModule,
 		ServiceModule,

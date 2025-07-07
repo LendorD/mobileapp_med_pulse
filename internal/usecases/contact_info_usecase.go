@@ -1,11 +1,7 @@
 package usecases
 
 import (
-	"errors"
-
-	"github.com/AlexanderMorozov1919/mobileapp/internal_v2/domain/entities"
-	"github.com/AlexanderMorozov1919/mobileapp/internal_v2/interfaces"
-	"gorm.io/gorm"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 )
 
 type ContactInfoUsecase struct {
@@ -16,31 +12,31 @@ func NewContactInfoUsecase(repo interfaces.ContactInfoRepository) interfaces.Con
 	return &ContactInfoUsecase{repo: repo}
 }
 
-func (u *ContactInfoUsecase) GetByPatientID(patientID uint) (entities.ContactInfo, *errors.AppError) {
-	info, err := u.repo.GetByPatientID(patientID)
-	if err != nil {
-		if error.Is(err, gorm.ErrRecordNotFound) {
-			return entities.ContactInfo{}, errors.NewNotFoundError("contact info not found")
-		}
-		return entities.ContactInfo{}, errors.NewDBError("failed to get contact info", err)
-	}
-	return *info, nil
-}
+// func (u *ContactInfoUsecase) GetByPatientID(patientID uint) (entities.ContactInfo, *errors.AppError) {
+// 	info, err := u.repo.GetByPatientID(patientID)
+// 	if err != nil {
+// 		if error.Is(err, gorm.ErrRecordNotFound) {
+// 			return entities.ContactInfo{}, errors.NewNotFoundError("contact info not found")
+// 		}
+// 		return entities.ContactInfo{}, errors.NewDBError("failed to get contact info", err)
+// 	}
+// 	return *info, nil
+// }
 
-func (u *ContactInfoUsecase) Update(input models.UpdateContactInfoRequest) (entities.ContactInfo, *errors.AppError) {
-	info, err := u.repo.GetByPatientID(input.PatientID)
-	if err != nil {
-		return entities.ContactInfo{}, errors.NewDBError("failed to find contact info", err)
-	}
+// func (u *ContactInfoUsecase) Update(input models.UpdateContactInfoRequest) (entities.ContactInfo, *errors.AppError) {
+// 	info, err := u.repo.GetByPatientID(input.PatientID)
+// 	if err != nil {
+// 		return entities.ContactInfo{}, errors.NewDBError("failed to find contact info", err)
+// 	}
 
-	info.Phone = input.Phone
-	errorsinfo.Email = input.Email
-	info.Address = input.Address
+// 	info.Phone = input.Phone
+// 	errorsinfo.Email = input.Email
+// 	info.Address = input.Address
 
-	updatedInfo, err := u.repo.Update(info)
-	if err != nil {
-		return entities.ContactInfo{}, errors.NewDBError("failed to update contact info", err)
-	}
+// 	updatedInfo, err := u.repo.Update(info)
+// 	if err != nil {
+// 		return entities.ContactInfo{}, errors.NewDBError("failed to update contact info", err)
+// 	}
 
-	return *updatedInfo, nil
-}
+// 	return *updatedInfo, nil
+// }

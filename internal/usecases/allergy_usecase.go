@@ -1,15 +1,17 @@
 package usecases
 
-import "github.com/AlexanderMorozov1919/mobileapp/internal_v2/domain/entities"
+import (
+	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
+)
 
 type AllergyUsecase struct {
 	repo               interfaces.AllergyRepository
-	patientAllergyRepo interfaces.PatientAllergyRepository
+	patientAllergyRepo interfaces.PatientsAllergyRepository
 }
 
 func NewAllergyUsecase(
 	repo interfaces.AllergyRepository,
-	patientAllergyRepo interfaces.PatientAllergyRepository,
+	patientAllergyRepo interfaces.PatientsAllergyRepository,
 ) interfaces.AllergyUsecase {
 	return &AllergyUsecase{
 		repo:               repo,
@@ -17,25 +19,25 @@ func NewAllergyUsecase(
 	}
 }
 
-func (u *AllergyUsecase) AddToPatient(patientID, allergyID uint, description string) (entities.PatientsAllergy, *errors.AppError) {
-	allergy := entities.PatientsAllergy{
-		PatientID:   patientID,
-		AllergyID:   allergyID,
-		Description: description,
-	}
+// func (u *AllergyUsecase) AddToPatient(patientID, allergyID uint, description string) (entities.PatientsAllergy, *errors.AppError) {
+// 	allergy := entities.PatientsAllergy{
+// 		PatientID:   patientID,
+// 		AllergyID:   allergyID,
+// 		Description: description,
+// 	}
 
-	createdAllergy, err := u.patientAllergyRepo.AddAllergy(&allergy)
-	if err != nil {
-		return entities.PatientsAllergy{}, errors.NewDBError("failed to add allergy to patient", err)
-	}
+// 	createdAllergy, err := u.patientAllergyRepo.AddAllergy(&allergy)
+// 	if err != nil {
+// 		return entities.PatientsAllergy{}, errors.NewDBError("failed to add allergy to patient", err)
+// 	}
 
-	return *createdAllergy, nil
-}
+// 	return *createdAllergy, nil
+// }
 
-func (u *AllergyUsecase) GetByPatientID(patientID uint) ([]entities.PatientsAllergy, *errors.AppError) {
-	allergies, err := u.patientAllergyRepo.GetPatientAllergies(patientID)
-	if err != nil {
-		return nil, errors.NewDBError("failed to get patient allergies", err)
-	}
-	return allergies, nil
-}
+// func (u *AllergyUsecase) GetByPatientID(patientID uint) ([]entities.PatientsAllergy, *errors.AppError) {
+// 	allergies, err := u.patientAllergyRepo.GetPatientAllergies(patientID)
+// 	// if err != nil {
+// 	// 	return nil, errors.NewDBError("failed to get patient allergies", err)
+// 	// }
+// 	return allergies, nil
+// }
