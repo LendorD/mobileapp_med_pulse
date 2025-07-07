@@ -47,3 +47,13 @@ func (u *AllergyUsecase) GetAllergyByPatientID(patientID uint) ([]entities.Aller
 	}
 	return allergies, nil
 }
+
+func (u UseCases) AddAllergyToPatient(patientID, allergyID uint, description string) (entities.PatientsAllergy, *errors.AppError) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (u UseCases) GetAllergyByPatientID(patientID uint) ([]entities.Allergy, *errors.AppError) {
+	//TODO implement me
+	panic("implement me")
+}

@@ -16,18 +16,20 @@ func (r *PatientsAllergyRepositoryImpl) DeletePatientsAllergy(id uint) error {
 	return r.db.Delete(&entities.PatientsAllergy{}, id).Error
 }
 
-func (r *PatientsAllergyRepositoryImpl) GetPatientsAllergyByID(id uint) (*entities.PatientsAllergy, error) {
-	var pa entities.PatientsAllergy
-	if err := r.db.First(&pa, id).Error; err != nil {
-		return nil, err
-	}
-	return &pa, nil
-}
-
 func (r *PatientsAllergyRepositoryImpl) GetPatientsAllergyByPatientID(patientID uint) ([]entities.PatientsAllergy, error) {
 	var list []entities.PatientsAllergy
 	if err := r.db.Where("patient_id = ?", patientID).Find(&list).Error; err != nil {
 		return nil, err
 	}
 	return list, nil
+}
+
+func (r *PatientsAllergyRepositoryImpl) GetPatientsAllergiesByPatientID(patientID uint) ([]entities.PatientsAllergy, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *PatientsAllergyRepositoryImpl) GetPatientAllergiesByID(patientID uint) ([]entities.Allergy, error) {
+	//TODO implement me
+	panic("implement me")
 }
