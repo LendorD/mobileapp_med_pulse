@@ -20,7 +20,8 @@ type UseCases struct {
 }
 
 func NewUsecases(r interfaces.Repository, s interfaces.Service, conf *config.Config) interfaces.Usecases {
-	u := &UseCases{
+
+	return &UseCases{
 		NewAllergyUsecase(r, r, r),
 		NewContactInfoUsecase(r),
 		NewDoctorUsecase(r),
@@ -31,8 +32,5 @@ func NewUsecases(r interfaces.Repository, s interfaces.Service, conf *config.Con
 		NewPersonalInfoUsecase(r),
 		NewReceptionUsecase(r),
 	}
-
-	// Создание структуры UseCases
-	return u
 
 }

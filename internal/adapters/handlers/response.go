@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 const (
@@ -32,6 +33,9 @@ func (h *Handler) ErrorResponse(c *gin.Context, err error, statusCode int, messa
 	})
 }
 
+// ResultResponse - отправляет данные в JSON.
+// Принимает контексс, message: сообщение для фронта, dataType: передаем сюда типы с 9 строчка файла.
+// Последний параметр принимает сущность которую сформировали(DoctorResponce, ReceptionResponce и тд.)
 func (h *Handler) ResultResponse(c *gin.Context, message string, dataType string, data interface{}) {
 	response := gin.H{
 		"status":  "success",
