@@ -1,6 +1,11 @@
 package usecases
 
 import (
+	"errors"
+	"fmt"
+	"time"
+
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 )
 
@@ -58,3 +63,29 @@ func NewReceptionUsecase(repo interfaces.ReceptionRepository) interfaces.Recepti
 // 	}
 // 	return *reception, nil
 // }
+
+// isTimeOverlap проверяет пересечение временных интервалов
+func isTimeOverlap(t1, t2 time.Time, duration time.Duration) bool {
+	end1 := t1.Add(duration)
+	end2 := t2.Add(duration)
+	return t1.Before(end2) && end1.After(t2)
+}
+
+// Обновленный метод сервиса
+func (s *ReceptionUsecase) GetReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.ReceptionShortResponse, error) {
+
+	// Валидация номера страницы
+	if page < 1 {
+		return nil, errors.New("page must be greater than 0")
+	}
+
+	// Количество записей на странице
+	const perPage = 3
+	// Получаем данные из репозитория
+	receptions, err := s.repo.GetReceptionsByDoctorAndDate(doctorID, date, page, perPage)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get receptions: %w", err)
+	}
+
+	return receptions, nil
+}

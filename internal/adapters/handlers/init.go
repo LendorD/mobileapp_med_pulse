@@ -34,8 +34,8 @@ func ProvideRouter(h *Handler) http.Handler {
 	// r.Use(Logging(h.logger))
 	// baseRouter := r.Group("/api/v1")
 
-	// r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
+	r.GET("/main/:doctor_id", h.GetReceptionsByDoctorAndDate)
+	r.GET("/doctors/:doctor_id/receptions", h.GetReceptionsByDoctorAndDate) // Новый маршрут из Swagger
 	// Группа маршрутов для групп
 	// bookingBookingGroup := baseRouter.Group("/booking-group")
 	// bookingBookingGroup.POST("/", h.CreateGroup)
