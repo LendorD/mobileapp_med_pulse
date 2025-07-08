@@ -29,29 +29,38 @@ type AllergyUsecase interface {
 
 type ContactInfoUsecase interface{}
 
-type DoctorUsecase interface{}
+type DoctorUsecase interface {
+	CreateDoctor(doctor *models.CreateDoctorRequest) (entities.Doctor, *errors.AppError)
+	GetDoctorByID(doctorId uint) (entities.Doctor, *errors.AppError)
+	UpdateDoctor(doctor *models.UpdateDoctorRequest) (entities.Doctor, *errors.AppError)
+	DeleteDoctor(doctorId uint) *errors.AppError
+}
 
 type EmergencyReceptionUsecase interface{}
 
 type EmergencyReceptionMedServicesUsecase interface{}
 
-// ReceptionService определяет контракт для работы с записями на прием
-type ReceptionService interface {
-	CreateReception(reception *models.Reception) error
-	UpdateReception(reception *models.Reception) error
-	CancelReception(id uint, reason string) error
-	CompleteReception(id uint, diagnosis string, recommendations string) error
-	MarkAsNoShow(id uint) error
-	GetReceptionByID(id uint) (*models.Reception, error)
-	GetDoctorReceptions(doctorID uint, date *time.Time) ([]models.Reception, error)
-	GetPatientReceptions(patientID uint) ([]models.Reception, error)
-	GetReceptionsByStatus(status entities.ReceptionStatus) ([]models.Reception, error)
-	GetReceptionsByDoctorAndDate(doctorID uint, date time.Time) ([]models.Reception, error)
-}
 type MedServiceUsecase interface{}
 
-type PatientUsecase interface{}
+type PatientUsecase interface {
+	CreatPatient(input *models.CreatePatientRequest) (entities.Patient, *errors.AppError)
+	GetPatientByID(id uint) (entities.Patient, *errors.AppError)
+	UpdatePatient(input *models.UpdatePatientRequest) (entities.Patient, *errors.AppError)
+	DeletePatient(id uint) *errors.AppError
+}
 
 type PersonalInfoUsecase interface{}
 
-type ReceptionUsecase interface{}
+// ReceptionService определяет контракт для работы с записями на прием
+type ReceptionUsecase interface {
+	// CreateReception(reception *models.Reception) error
+	// UpdateReception(reception *models.Reception) error
+	// CancelReception(id uint, reason string) error
+	// CompleteReception(id uint, diagnosis string, recommendations string) error
+	// MarkAsNoShow(id uint) error
+	// GetReceptionByID(id uint) (*models.Reception, error)
+	// GetDoctorReceptions(doctorID uint, date *time.Time) ([]models.Reception, error)
+	// GetPatientReceptions(patientID uint) ([]models.Reception, error)
+	// GetReceptionsByStatus(status entities.ReceptionStatus) ([]models.Reception, error)
+	GetReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.ReceptionShortResponse, error)
+}

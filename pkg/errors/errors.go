@@ -2,6 +2,7 @@ package errors
 
 import (
 	"errors"
+	"fmt"
 )
 
 type AppError struct {
@@ -9,6 +10,17 @@ type AppError struct {
 	Message      string // Сообщение для пользователя
 	Err          error  // Подробная информация об ошибке (можно не показывать пользователю)
 	IsUserFacing bool   // Может ли ошибка быть показана пользователю
+}
+
+func (a *AppError) Error() string {
+	if a == nil {
+		return ""
+	}
+
+	if a.Err != nil {
+		return fmt.Sprintf("%s (code: %d): %v", a.Message, a.Code, a.Err)
+	}
+	return fmt.Sprintf("%s (code: %d)", a.Message, a.Code)
 }
 
 type DBError struct {

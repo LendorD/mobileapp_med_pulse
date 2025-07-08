@@ -71,6 +71,12 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 
 		}
 	*/
+	// Выполнение автомиграций
+	if err := autoMigrate(db); err != nil {
+		return nil, fmt.Errorf("ошибка выполнения автомиграций: %w", err)
+
+	}
+
 	return &Repository{
 		allergy.NewAllergyRepository(db),
 		doctor.NewDoctorRepository(db),
@@ -89,7 +95,28 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 
 // autoMigrate - выполнение автомиграций для моделей
 func autoMigrate(db *gorm.DB) error {
+
+	// Определяем порядок удаления таблиц с учётом зависимостей
+	tablesToDrop := []interface{}{
+		&entities.PatientsAllergy{},
+		&entities.EmergencyReceptionMedServices{},
+		&entities.EmergencyReception{},
+		&entities.Reception{},
+		&entities.Patient{},
+		&entities.PersonalInfo{},
+		&entities.ContactInfo{},
+		&entities.Doctor{},
+		&entities.MedService{},
+		&entities.Allergy{},
+	}
+	for _, model := range tablesToDrop {
+		if err := db.Migrator().DropTable(model); err != nil {
+			return fmt.Errorf("ошибка удаления таблицы %T: %w", model, err)
+		}
+	}
+
 	models := []interface{}{
+		&entities.Doctor{},
 		&entities.Allergy{},
 		&entities.Reception{},
 		&entities.Patient{},
@@ -106,81 +133,133 @@ func autoMigrate(db *gorm.DB) error {
 			return fmt.Errorf("ошибка миграции модели %T: %w", model, err)
 		}
 	}
-	/*
-		// Добавляем начальные записи в таблицу BookingStatus
-		initialStatuses := []entities.BookingStatus{
-			{ID: 1, Name: "Создан"},
-			{ID: 2, Name: "Выполняется"},
-			{ID: 3, Name: "Выполняется без отклонений"},
-			{ID: 4, Name: "Выполняется с отклонениями"},
-			{ID: 5, Name: "Авария"},
-			{ID: 6, Name: "Ошибка"},
-			{ID: 7, Name: "Остановка"},
-			{ID: 8, Name: "Выполнено"},
-			{ID: 9, Name: "Отменено"},
-		}
 
-		for _, status := range initialStatuses {
-			if err := db.FirstOrCreate(&status, entities.BookingStatus{ID: status.ID}).Error; err != nil {
-				return fmt.Errorf("ошибка создания начальной записи статуса %v: %w", status, err)
-			}
-		}
+	// Правильный вызов функции seedTestData
+	if err := seedTestData(db); err != nil {
+		return fmt.Errorf("ошибка заполнения тестовыми данными: %w", err)
+	}
 
-			// Добавляем начальные записи в таблицу Specialty
-			initialSpecialty := []entities.Specialty{
-				{ID: 1, Name: "Металообработка"},
-				{ID: 2, Name: "Гибридная обработка"},
-			}
-
-			for _, specialty := range initialSpecialty {
-				if err := db.FirstOrCreate(&specialty, entities.Specialty{ID: specialty.ID}).Error; err != nil {
-					return fmt.Errorf("ошибка создания начальной записи специализации %v: %w", specialty, err)
-				}
-			}
-			// Добавляем начальные записи в таблицу GroupMaterial
-			initialGroupMaterial := []entities.GroupMaterial{
-				{ID: 1, Name: "Основная группа материалов"},
-			}
-
-			for _, groupMaterial := range initialGroupMaterial {
-				if err := db.FirstOrCreate(&groupMaterial, entities.GroupMaterial{ID: groupMaterial.ID}).Error; err != nil {
-					return fmt.Errorf("ошибка создания начальной записи группы материалов %v: %w", groupMaterial, err)
-				}
-			}
-			// Добавляем начальные записи в таблицу GroupService
-			initialGroupService := []entities.GroupService{
-				{ID: 1, Name: "Основная группа номенклатуры"},
-			}
-
-			for _, groupService := range initialGroupService {
-				if err := db.FirstOrCreate(&groupService, entities.GroupService{ID: groupService.ID}).Error; err != nil {
-					return fmt.Errorf("ошибка создания начальной записи группы номенклатуры %v: %w", groupService, err)
-				}
-			}
-			// Добавляем начальные записи в таблицу TypeService
-			initialTypeService := []entities.TypeService{
-				{ID: 1, Name: "Деталь"},
-				{ID: 2, Name: "Заготовка"},
-			}
-
-			for _, typeService := range initialTypeService {
-				if err := db.FirstOrCreate(&typeService, entities.TypeService{ID: typeService.ID}).Error; err != nil {
-					return fmt.Errorf("ошибка создания начальной записи типов номенклатуры %v: %w", typeService, err)
-				}
-			}
-
-			// Добавляем начальные записи в таблицу Unit
-			initialUnit := []entities.Unit{
-				{ID: 1, Name: "шт."},
-				{ID: 2, Name: "кг."},
-			}
-
-			for _, unit := range initialUnit {
-				if err := db.FirstOrCreate(&unit, entities.Unit{ID: unit.ID}).Error; err != nil {
-					return fmt.Errorf("ошибка создания начальной записи единиц измерения %v: %w", unit, err)
-				}
-			}
-
-	*/
 	return nil
+}
+
+func seedTestData(db *gorm.DB) error {
+	// 1. Создаем докторов
+	doctors := []entities.Doctor{
+		{
+			FullName:       "Иванов Иван Иванович",
+			Login:          "doctor_ivanovich",
+			Email:          "ivanovsk@clinic.ru",
+			PasswordHash:   "$2a$10$somehafdsdpassword", // Пример хэша
+			Specialization: "Терапевт",
+		},
+		{
+			FullName:       "Петрова Мария Сергеевна",
+			Login:          "doctor_petrova",
+			Email:          "petrovavf@clinic.ru",
+			PasswordHash:   "$2a$10$somehashedpvtsword",
+			Specialization: "Хирург",
+		},
+		{
+			FullName:       "Сидоров Алексей Дмитриевич",
+			Login:          "doctor_sidorov",
+			Email:          "sidorovgd@clinic.ru",
+			PasswordHash:   "$2a$10$somehashedpasswofr",
+			Specialization: "Кардиолог",
+		},
+	}
+
+	if err := db.Create(&doctors).Error; err != nil {
+		return err
+	}
+
+	// 2. Создаем пациентов
+	patients := []entities.Patient{
+		{FullName: "Смирнов Алексей Петрович", BirthDate: parseDate("1980-05-15"), IsMale: true},
+		{FullName: "Кузнецова Анна Владимировна", BirthDate: parseDate("1992-08-21"), IsMale: false},
+		{FullName: "Попов Дмитрий Игоревич", BirthDate: parseDate("1975-11-03"), IsMale: true},
+		{FullName: "Васильева Елена Александровна", BirthDate: parseDate("1988-07-14"), IsMale: false},
+		{FullName: "Новиков Сергей Олегович", BirthDate: parseDate("1995-02-28"), IsMale: true},
+		{FullName: "Морозова Ольга Дмитриевна", BirthDate: parseDate("1983-09-17"), IsMale: false},
+		{FullName: "Лебедев Андрей Николаевич", BirthDate: parseDate("1978-12-05"), IsMale: true},
+		{FullName: "Соколова Татьяна Викторовна", BirthDate: parseDate("1990-04-30"), IsMale: false},
+		{FullName: "Козлов Артем Сергеевич", BirthDate: parseDate("1987-06-22"), IsMale: true},
+		{FullName: "Павлова Наталья Игоревна", BirthDate: parseDate("1993-03-11"), IsMale: false},
+	}
+
+	if err := db.Create(&patients).Error; err != nil {
+		return err
+	}
+
+	// 3. Создаем контактную информацию и персональные данные для пациентов
+	for i, patient := range patients {
+		contactInfo := entities.ContactInfo{
+			PatientID: patient.ID,
+			Phone:     fmt.Sprintf("+7915%07d", 1000000+i),
+			Email:     fmt.Sprintf("patient%d@example.com", i+1),
+			Address:   fmt.Sprintf("Москва, ул. Тестовая, д. %d", i+1),
+		}
+		personalInfo := entities.PersonalInfo{
+			PatientID:      patient.ID,
+			PassportSeries: fmt.Sprintf("4510 %06d", 100000+i),
+			SNILS:          fmt.Sprintf("123-456-789 %02d", i),
+			OMS:            fmt.Sprintf("1234567890%d", i),
+		}
+
+		if err := db.Create(&contactInfo).Error; err != nil {
+			return err
+		}
+		if err := db.Create(&personalInfo).Error; err != nil {
+			return err
+		}
+
+		// Обновляем пациента с ID контактной информации
+		db.Model(&patient).Updates(map[string]interface{}{
+			"ContactInfoID":  contactInfo.ID,
+			"PersonalInfoID": personalInfo.ID,
+		})
+	}
+
+	// 4. Создаем приемы на 10, 11 и 12 июля текущего года
+	now := time.Now()
+	dates := []time.Time{
+		time.Date(now.Year(), 7, 10, 0, 0, 0, 0, time.UTC),
+		time.Date(now.Year(), 7, 11, 0, 0, 0, 0, time.UTC),
+		time.Date(now.Year(), 7, 12, 0, 0, 0, 0, time.UTC),
+	}
+
+	statuses := []entities.ReceptionStatus{entities.StatusScheduled, entities.StatusCompleted, entities.StatusCancelled, entities.StatusNoShow}
+	addresses := []string{
+		"Москва, ул. Ленина, д. 15",
+		"Москва, ул. Пушкина, д. 10",
+		"Москва, пр. Вернадского, д. 25",
+	}
+
+	for i := 0; i < 50; i++ {
+		// Выбираем случайные данные
+		date := dates[i%len(dates)]
+		hour := 9 + i%8 // Время приема с 9:00 до 16:00
+		date = date.Add(time.Hour * time.Duration(hour))
+
+		reception := entities.Reception{
+			DoctorID:        doctors[i%len(doctors)].ID,
+			PatientID:       patients[i%len(patients)].ID,
+			Date:            date,
+			Diagnosis:       "ОРВИ",
+			Recommendations: "Постельный режим",
+			IsOut:           i%3 == 0, // Каждый третий - выездной
+			Status:          statuses[i%len(statuses)],
+			Address:         addresses[i%len(addresses)],
+		}
+
+		if err := db.Create(&reception).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func parseDate(dateStr string) time.Time {
+	t, _ := time.Parse("2006-01-02", dateStr)
+	return t
 }
