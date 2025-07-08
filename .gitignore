@@ -1,8 +1,8 @@
-# Sensitive data
+# Чувствительная информация
 .env
 .env.local
-go.mod
-go.sum
-# Cache files
+
+# Файлы кэша
 __debug_bin
 .vscode/
+.idea/
