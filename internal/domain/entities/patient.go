@@ -1,8 +1,9 @@
 package entities
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Patient struct {
@@ -14,6 +15,6 @@ type Patient struct {
 	PersonalInfo PersonalInfo `gorm:"foreignKey:PersonalInfoID" json:"personal_info" rus:"Персональные данные"`
 	ContactInfo  ContactInfo  `gorm:"foreignKey:ContactInfoID" json:"contact_info" rus:"Контактные данные"`
 
-	Reception          []Reception          `gorm:"foreignKey:ReceptionID"`
-	EmergencyReception []EmergencyReception `gorm:"foreignKey:EmergencyReceptionID"`
+	Reception          []Reception          `gorm:"foreignKey:PatientID"`
+	EmergencyReception []EmergencyReception `gorm:"foreignKey:PatientID"`
 }
