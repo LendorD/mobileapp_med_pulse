@@ -69,12 +69,6 @@ type PatientCreateRequest struct {
 	Contraindications string `json:"contraindications" example:"Аллергия на пенициллин" rus:"Противопоказания"`
 }
 
-type DoctorResponse struct {
-	ID             uint   `json:"id" example:"1" rus:"ID врача"`
-	FullName       string `json:"full_name" example:"Иванов Иван Иванович" rus:"ФИО"`
-	Specialization string `json:"specialization" example:"Терапевт" rus:"Специализация"`
-}
-
 type DoctorRegisterRequest struct {
 	FullName        string `json:"full_name" binding:"required" example:"Иванов Иван Иванович" rus:"ФИО"`
 	Login           string `json:"login" binding:"required" example:"doctor_ivanov" rus:"Логин"`

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
+	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 )
 
 type Repository interface {
@@ -20,14 +21,14 @@ type Repository interface {
 }
 
 type DoctorRepository interface {
-	CreateDoctor(doctor *entities.Doctor) error
-	UpdateDoctor(docor *entities.Doctor) error
-	DeleteDoctor(id uint) error
-	GetDoctorByID(id uint) (*entities.Doctor, error)
-	GetDoctorName(id uint) (string, error)
-	GetDoctorByLogin(login string) (*entities.Doctor, error)
-	GetDoctorSpecialization(id uint) (string, error)
-	GetDoctorPassHash(id uint) (string, error)
+	CreateDoctor(doctor *entities.Doctor) (uint, *errors.AppError)
+	UpdateDoctor(id uint, updateMap map[string]interface{}) (uint, *errors.AppError)
+	DeleteDoctor(id uint) *errors.AppError
+	GetDoctorByID(id uint) (*entities.Doctor, *errors.AppError)
+	GetDoctorName(id uint) (string, *errors.AppError)
+	GetDoctorByLogin(login string) (*entities.Doctor, *errors.AppError)
+	GetDoctorSpecialization(id uint) (string, *errors.AppError)
+	GetDoctorPassHash(id uint) (string, *errors.AppError)
 }
 
 type PersonalInfoRepository interface {

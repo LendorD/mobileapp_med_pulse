@@ -1,7 +1,14 @@
 package usecases
 
 import (
+	"time"
+
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
+	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type DoctorUsecase struct {
@@ -12,71 +19,70 @@ func NewDoctorUsecase(repo interfaces.DoctorRepository) interfaces.DoctorUsecase
 	return &DoctorUsecase{repo: repo}
 }
 
-// func (u *DoctorUsecase) Create(input models.CreateDoctorRequest) (entities.Doctor, *errors.AppError) {
-// 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
-// 	if err != nil {
-// 		return entities.Doctor{}, errors.NewInternalServerError("password hashing failed", err)
-// 	}
+func (u *DoctorUsecase) CreateDoctor(doctor models.CreateDoctorRequest) (entities.Doctor, *errors.AppError) {
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(doctor.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return entities.Doctor{}, errors.NewAppError(400, "error create doctor", err, true)
+	}
 
-// 	doctor := entities.Doctor{
-// 		FullName:       input.FullName,
-// 		Login:          input.Login,
-// 		Email:          input.Email,
-// 		PasswordHash:   string(passwordHash),
-// 		Specialization: input.Specialization,
-// 	}
+	createDoctor := entities.Doctor{
+		FullName:       doctor.FullName,
+		Login:          doctor.Login,
+		Email:          doctor.Email,
+		PasswordHash:   string(passwordHash),
+		Specialization: doctor.Specialization,
+	}
 
-// 	createdDoctor, err := u.repo.Create(&doctor)
-// 	if err != nil {
-// 		return entities.Doctor{}, errors.NewDBError("failed to create doctor", err)
-// 	}
+	createdDoctorID, errAp := u.repo.CreateDoctor(&createDoctor)
+	if errAp != nil {
+		return entities.Doctor{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to create doctor", err, true)
+	}
+	createdDoctor, errAp := u.repo.GetDoctorByID(createdDoctorID)
+	if errAp != nil {
+		return entities.Doctor{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to get doctor", err, true)
+	}
 
-// 	return *createdDoctor, nil
-// }
+	return *createdDoctor, nil
+}
 
-// func (u *DoctorUsecase) GetByID(id uint) (entities.Doctor, *errors.AppError) {
-// 	doctor, err := u.repo.GetByID(id)
-// 	if err != nil {
-// 		if errors.Is(err, gorm.ErrRecordNotFound) {
-// 			return entities.Doctor{}, errors.NewNotFoundError("doctor not found")
-// 		}
-// 		return entities.Doctor{}, errors.NewDBError("failed to get doctor", err)
-// 	}
-// 	return *doctor, nil
-// }
+func (u *DoctorUsecase) GetDoctorByID(id uint) (entities.Doctor, *errors.AppError) {
+	doctor, err := u.repo.GetDoctorByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return entities.Doctor{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to get doctor", err, true)
+		}
+		return entities.Doctor{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to get doctor", err, true)
+	}
+	return *doctor, nil
+}
 
-// func (u *DoctorUsecase) Update(input models.UpdateDoctorRequest) (entities.Doctor, *errors.AppError) {
-// 	doctor, err := u.repo.GetByID(input.ID)
-// 	if err != nil {
-// 		return entities.Doctor{}, errors.NewDBError("failed to find doctor", err)
-// 	}
+func (u *DoctorUsecase) UpdateDoctor(input models.UpdateDoctorRequest) (entities.Doctor, *errors.AppError) {
 
-// 	if input.FullName != "" {
-// 		doctor.FullName = input.FullName
-// 	}
-// 	if input.Email != "" {
-// 		doctor.Email = input.Email
-// 	}
-// 	if input.Specialization != "" {
-// 		doctor.Specialization = input.Specialization
-// 	}
+	updateMap := map[string]interface{}{
+		"full_name":      input.FullName,
+		"login":          input.Login,
+		"email":          input.Email,
+		"password":       input.Password,
+		"specialization": input.Specialization,
+		"updated_at":     time.Now(),
+	}
 
-// 	updatedDoctor, err := u.repo.Update(doctor)
-// 	if err != nil {
-// 		return entities.Doctor{}, errors.NewDBError("failed to update doctor", err)
-// 	}
+	updatedDoctorID, err := u.repo.UpdateDoctor(input.ID, updateMap)
+	if err != nil {
+		return entities.Doctor{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to update doctor", err, true)
+	}
+	updatedDoctor, err := u.repo.GetDoctorByID(updatedDoctorID)
+	if err != nil {
+		return entities.Doctor{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to get doctor", err, true)
+	}
 
-// 	return *updatedDoctor, nil
-// }
+	return *updatedDoctor, nil
+}
 
-// func (u *DoctorUsecase) Delete(id uint) *errors.AppError {
-// 	if err := u.repo.Delete(id); err != nil {
-// 		return errors.NewDBError("failed to delete doctor", err)
-// 	}
-// 	return nil
-// }
-
-// func (u *DoctorUsecase) GetFiltered(page, count int, order, filter string) (models.FilterResponse[[]entities.Doctor], *errors.AppError) {
-// 	// Реализация фильтрации аналогична примеру BookingGroupUsecase
-// 	// ...
-// }
+func (u *DoctorUsecase) DeleteDoctor(id uint) *errors.AppError {
+	err := u.repo.DeleteDoctor(id)
+	if err != nil {
+		return errors.NewAppError(errors.InternalServerErrorCode, "failed to delete doctor", err, true)
+	}
+	return nil
+}
