@@ -96,6 +96,7 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 // autoMigrate - выполнение автомиграций для моделей
 func autoMigrate(db *gorm.DB) error {
 	models := []interface{}{
+		&entities.Doctor{},
 		&entities.Allergy{},
 		&entities.Reception{},
 		&entities.Patient{},
