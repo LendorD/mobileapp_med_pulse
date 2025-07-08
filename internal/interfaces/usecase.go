@@ -55,7 +55,12 @@ type ReceptionService interface {
 }
 type MedServiceUsecase interface{}
 
-type PatientUsecase interface{}
+type PatientUsecase interface {
+	CreatPatient(input *models.CreatePatientRequest) (entities.Patient, *errors.AppError)
+	GetPatientByID(id uint) (entities.Patient, *errors.AppError)
+	UpdatePatient(input *models.UpdatePatientRequest) (entities.Patient, *errors.AppError)
+	DeletePatient(id uint) *errors.AppError
+}
 
 type PersonalInfoUsecase interface{}
 

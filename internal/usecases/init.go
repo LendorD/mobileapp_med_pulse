@@ -8,6 +8,15 @@ import (
 )
 
 type UseCases struct {
+	interfaces.AllergyUsecase
+	interfaces.ContactInfoUsecase
+	interfaces.DoctorUsecase
+	interfaces.EmergencyReceptionUsecase
+	interfaces.EmergencyReceptionMedServicesUsecase
+	interfaces.MedServiceUsecase
+	interfaces.PatientUsecase
+	interfaces.PersonalInfoUsecase
+	interfaces.ReceptionUsecase
 }
 
 func NewUsecases(r interfaces.Repository, s interfaces.Service, conf *config.Config) interfaces.Usecases {

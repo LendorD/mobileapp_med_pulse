@@ -11,6 +11,11 @@ type AppError struct {
 	IsUserFacing bool   // Может ли ошибка быть показана пользователю
 }
 
+func (a AppError) Error() string {
+	//TODO implement me
+	panic("implement me")
+}
+
 type DBError struct {
 	Message string
 	Err     error

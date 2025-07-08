@@ -31,17 +31,31 @@ func NewHandler(usecase interfaces.Usecases) *Handler {
 
 func ProvideRouter(h *Handler) http.Handler {
 	r := gin.Default()
-	// r.Use(Logging(h.logger))
-	// baseRouter := r.Group("/api/v1")
 
+	// Глобальные middleware
+	// r.Use(Logging(h.logger))
+
+	// Документация Swagger
 	// r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Группа маршрутов для групп
-	// bookingBookingGroup := baseRouter.Group("/booking-group")
-	// bookingBookingGroup.POST("/", h.CreateGroup)
-	// bookingBookingGroup.PUT("/", h.UpdateGroup)
-	// bookingBookingGroup.GET("/:id", h.GetGroupByID)
-	// bookingBookingGroup.GET("/", h.GetFilteredGroup)
+	// API v1 группа
+	api := r.Group("/api/v1")
+	{
+		// Группа маршрутов для пациентов
+		patients := api.Group("/patients")
+		{
+			patients.POST("", h.CreatePatient)       // POST /api/v1/patients
+			patients.PUT("/:id", h.UpdatePatient)    // PUT /api/v1/patients/:id
+			patients.GET("/:id", h.GetPatientByID)   // GET /api/v1/patients/:id
+			patients.DELETE("/:id", h.DeletePatient) // DELETE /api/v1/patients/:id
+		}
+
+		// Другие группы маршрутов можно добавить аналогично
+		// booking := api.Group("/booking")
+		// {
+		//     booking.POST("", h.CreateBooking)
+		// }
+	}
 
 	return r
 }

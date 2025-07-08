@@ -6,6 +6,7 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"gorm.io/gorm"
+	"time"
 )
 
 type PatientUsecase struct {
@@ -16,55 +17,63 @@ func NewPatientUsecase(repo interfaces.PatientRepository) interfaces.PatientUsec
 	return &PatientUsecase{repo: repo}
 }
 
-func (u *PatientUsecase) Create(input models.CreatePatientRequest) (entities.Patient, *errors.AppError) {
+func (u *PatientUsecase) CreatPatient(input *models.CreatePatientRequest) (entities.Patient, *errors.AppError) {
 	patient := entities.Patient{
 		FullName:  input.FullName,
 		BirthDate: input.BirthDate,
 		IsMale:    input.IsMale,
 	}
 
-	createdPatient, err := u.repo.CreatePatient(&patient)
+	createdPatientId, err := u.repo.CreatePatient(patient)
 	if err != nil {
-		return entities.Patient{}, errors.NewDBError("failed to create patient", err)
+		return entities.Patient{}, errors.NewAppError(errors.InternalServerErrorCode, errors.InternalServerError, err, false)
 	}
-	return *createdPatient, nil
+
+	createdPatient, err := u.repo.GetPatientByID(createdPatientId)
+	if err != nil {
+		return entities.Patient{}, errors.NewAppError(errors.InternalServerErrorCode, errors.InternalServerError, err, false)
+	}
+
+	return createdPatient, nil
 }
 
-func (u *PatientUsecase) GetByID(id uint) (entities.Patient, *errors.AppError) {
+func (u *PatientUsecase) GetPatientByID(id uint) (entities.Patient, *errors.AppError) {
+
 	patient, err := u.repo.GetPatientByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return entities.Patient{}, errors.NewNotFoundError("patient not found")
 		}
-		return entities.Patient{}, errors.NewDBError("failed to get patient", err)
+		return entities.Patient{}, errors.NewAppError(errors.InternalServerErrorCode, errors.InternalServerError, err, false)
 	}
-	return *patient, nil
+	return patient, nil
 }
 
-func (u *PatientUsecase) Update(input models.UpdatePatientRequest) (entities.Patient, *errors.AppError) {
-	patient, err := u.repo.GetPatientByID(input.ID)
+func (u *PatientUsecase) UpdatePatient(input *models.UpdatePatientRequest) (entities.Patient, *errors.AppError) {
+	updateMap := map[string]interface{}{
+		"id":         input.ID,        // Может быть nil
+		"birthdate":  input.BirthDate, // Может быть nil
+		"fullname":   input.FullName,  // Может быть nil
+		"updated_at": time.Now(),      // Всегда обновляем
+	}
+
+	updatedPatientId, err := u.repo.UpdatePatient(input.ID, updateMap)
 	if err != nil {
-		return entities.Patient{}, errors.NewDBError("failed to find patient", err)
+		return entities.Patient{}, errors.NewAppError(errors.InternalServerErrorCode, errors.InternalServerError, err, false)
 	}
 
-	if input.FullName != "" {
-		patient.FullName = input.FullName
-	}
-	if !input.BirthDate.IsZero() {
-		patient.BirthDate = input.BirthDate
-	}
-
-	updatedPatient, err := u.repo.UpdatePatient(patient)
+	updatedPatient, err := u.repo.GetPatientByID(updatedPatientId)
 	if err != nil {
-		return entities.Patient{}, errors.NewDBError("failed to update patient", err)
+		return entities.Patient{}, errors.NewAppError(errors.InternalServerErrorCode, errors.InternalServerError, err, false)
 	}
 
-	return *updatedPatient, nil
+	return updatedPatient, nil
+
 }
 
-func (u *PatientUsecase) Delete(id uint) *errors.AppError {
-	if err := u.repo.DeletePatient(id); err != nil {
-		return errors.NewDBError("failed to delete patient", err)
+func (u *PatientUsecase) DeletePatient(id uint) *errors.AppError {
+	if err := u.repo.DeletePatient(id); err.Err != nil {
+		return err
 	}
 	return nil
 }

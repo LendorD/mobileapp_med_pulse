@@ -1,6 +1,7 @@
 package interfaces
 
 import (
+	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
@@ -81,13 +82,12 @@ type ReceptionRepository interface {
 }
 
 type PatientRepository interface {
-	CreatePatient(*entities.Patient) (*entities.Patient, error)
-	UpdatePatient(patient *entities.Patient) (*entities.Patient, error)
-	DeletePatient(id uint) error
-	//GetPatientsAllergyByID(id uint) error
-	GetPatientByID(id uint) (*entities.Patient, error)
-	GetAllPatient() ([]entities.Patient, error)
-	GetPatientByFullName(name string) ([]entities.Patient, error)
+	CreatePatient(patient entities.Patient) (uint, *errors.AppError)
+	UpdatePatient(id uint, updateMap map[string]interface{}) (uint, *errors.AppError)
+	DeletePatient(id uint) *errors.AppError
+	GetPatientByID(id uint) (entities.Patient, *errors.AppError)
+	//GetAllPatients() ([]entities.Patient, *errors.AppError)
+	//GetPatientsByFullName(name string) ([]entities.Patient, *errors.AppError)
 }
 
 type ContactInfoRepository interface {
