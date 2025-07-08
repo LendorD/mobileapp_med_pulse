@@ -25,9 +25,9 @@ type DoctorRepository interface {
 	CreateDoctor(doctor *entities.Doctor) (uint, *errors.AppError)
 	UpdateDoctor(id uint, updateMap map[string]interface{}) (uint, *errors.AppError)
 	DeleteDoctor(id uint) *errors.AppError
-	GetDoctorByID(id uint) (*entities.Doctor, *errors.AppError)
+	GetDoctorByID(id uint) (entities.Doctor, *errors.AppError)
 	GetDoctorName(id uint) (string, *errors.AppError)
-	GetDoctorByLogin(login string) (*entities.Doctor, *errors.AppError)
+	GetDoctorByLogin(login string) (entities.Doctor, *errors.AppError)
 	GetDoctorSpecialization(id uint) (string, *errors.AppError)
 	GetDoctorPassHash(id uint) (string, *errors.AppError)
 }

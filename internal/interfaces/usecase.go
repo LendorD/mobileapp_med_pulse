@@ -30,9 +30,9 @@ type AllergyUsecase interface {
 type ContactInfoUsecase interface{}
 
 type DoctorUsecase interface {
-	CreateDoctor(doctor models.CreateDoctorRequest) (entities.Doctor, *errors.AppError)
+	CreateDoctor(doctor *models.CreateDoctorRequest) (entities.Doctor, *errors.AppError)
 	GetDoctorByID(doctorId uint) (entities.Doctor, *errors.AppError)
-	UpdateDoctor(doctor models.UpdateDoctorRequest) (entities.Doctor, *errors.AppError)
+	UpdateDoctor(doctor *models.UpdateDoctorRequest) (entities.Doctor, *errors.AppError)
 	DeleteDoctor(doctorId uint) *errors.AppError
 }
 

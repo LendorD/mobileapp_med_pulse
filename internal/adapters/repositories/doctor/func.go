@@ -41,20 +41,20 @@ func (r *DoctorRepository) DeleteDoctor(id uint) *errors.AppError {
 	return errors.NewDBError("Delete doctor error", r.db.Delete(&entities.Doctor{}, id).Error)
 }
 
-func (r *DoctorRepository) GetDoctorByID(id uint) (*entities.Doctor, *errors.AppError) {
+func (r *DoctorRepository) GetDoctorByID(id uint) (entities.Doctor, *errors.AppError) {
 	var doctor entities.Doctor
 	if err := r.db.First(&doctor, id).Error; err != nil {
-		return nil, errors.NewDBError("Error Get Doctor By Id", err)
+		return entities.Doctor{}, errors.NewDBError("Error Get Doctor By Id", err)
 	}
-	return &doctor, nil
+	return doctor, nil
 }
 
-func (r *DoctorRepository) GetDoctorByLogin(login string) (*entities.Doctor, *errors.AppError) {
+func (r *DoctorRepository) GetDoctorByLogin(login string) (entities.Doctor, *errors.AppError) {
 	var doctor entities.Doctor
 	if err := r.db.Where("login = ?", login).First(&doctor).Error; err != nil {
-		return nil, errors.NewDBError("Error Get Doctor By Login", err)
+		return entities.Doctor{}, errors.NewDBError("Error Get Doctor By Login", err)
 	}
-	return &doctor, nil
+	return doctor, nil
 }
 
 func (r *DoctorRepository) GetDoctorName(id uint) (string, *errors.AppError) {
