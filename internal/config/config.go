@@ -64,7 +64,7 @@ func LoadConfig() (*Config, error) {
 			Version: getEnv("VERSION", "1.0.0"),
 		},
 		HTTPServer: HTTPConfig{
-			Port:              getEnv("BOOKING_SERVER_PORT", "6004"),
+			Port:              getEnv("SERVER_PORT", "6004"),
 			ReadTimeout:       time.Second * 10,
 			ReadHeaderTimeout: time.Second * 20,
 			WriteTimeout:      time.Second * 20,
