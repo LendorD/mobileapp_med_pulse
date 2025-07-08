@@ -24,13 +24,9 @@ type Reception struct {
 	Address         string                   `json:"address" example:"Москва, ул. Ленина, д. 15" rus:"Адрес"`
 }
 
-type ReceptionResponse struct {
-	DoctorID        uint                     `json:"doctor_id" example:"1" rus:"ID врача"`
-	PatientID       uint                     `json:"patient_id" example:"1" rus:"ID пациента"`
-	Date            time.Time                `json:"date" example:"2023-10-15T14:30:00Z" rus:"Дата приема"`
-	Diagnosis       string                   `example:"ОРВИ" rus:"Диагноз"`
-	Recommendations string                   `json:"recommendations" example:"Постельный режим" rus:"Рекомендации"`
-	IsOut           bool                     `json:"is_out" example:"true" rus:"Вызов на выезд"` // 0 -  в стационаре, 1 - выезд
-	Status          entities.ReceptionStatus `json:"status" example:"scheduled" rus:"Статус"`
-	Address         string                   `json:"address" example:"Москва, ул. Ленина, д. 15" rus:"Адрес"`
+type ReceptionShortResponse struct {
+	Date        string `json:"date"`         // Форматированная дата
+	Status      string `json:"status"`       // Статус приёма
+	PatientName string `json:"patient_name"` // ФИО пациента
+	IsOut       bool   `json:"is_out"`       // Выездной приём
 }
