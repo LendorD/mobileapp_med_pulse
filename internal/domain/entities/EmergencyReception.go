@@ -1,8 +1,9 @@
 package entities
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type EmergencyStatus string
@@ -19,7 +20,7 @@ const (
 type EmergencyReception struct {
 	gorm.Model
 
-	DoctorID  uint            `gorm:"index" json:"doctor_id" example:"1" rus:"ID врача"`
+	DoctorID  uint            `gorm:"not null;index" json:"doctor_id" example:"1" rus:"ID врача"`
 	PatientID uint            `gorm:"not null;index" json:"patient_id" example:"1" rus:"ID пациента"`
 	Status    EmergencyStatus `json:"status"`
 	Priority  bool            `json:"priority"` // 1 - экстренный, 0 - неотложный

@@ -6,6 +6,7 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
 
 type Repository interface {
@@ -79,6 +80,7 @@ type ReceptionRepository interface {
 	GetReceptionByDoctorID(doctorID uint) ([]entities.Reception, error)
 	GetReceptionByPatientID(patientID uint) ([]entities.Reception, error)
 	GetReceptionByDateRange(start, end time.Time) ([]entities.Reception, error)
+	GetReceptionsByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.ReceptionShortResponse, error)
 }
 
 type PatientRepository interface {
