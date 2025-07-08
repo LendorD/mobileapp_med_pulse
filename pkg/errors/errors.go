@@ -40,11 +40,6 @@ func NewAppError(httpCode int, message string, err error, isUserFacing bool) *Ap
 	}
 }
 
-func (a AppError) Error() string {
-	//TODO implement me
-	panic("implement me")
-}
-
 func NewDBError(message string, dbError error) *AppError {
 
 	return &AppError{
