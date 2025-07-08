@@ -6,6 +6,7 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
 
 type Repository interface {
@@ -25,9 +26,9 @@ type DoctorRepository interface {
 	CreateDoctor(doctor *entities.Doctor) (uint, *errors.AppError)
 	UpdateDoctor(id uint, updateMap map[string]interface{}) (uint, *errors.AppError)
 	DeleteDoctor(id uint) *errors.AppError
-	GetDoctorByID(id uint) (*entities.Doctor, *errors.AppError)
+	GetDoctorByID(id uint) (entities.Doctor, *errors.AppError)
 	GetDoctorName(id uint) (string, *errors.AppError)
-	GetDoctorByLogin(login string) (*entities.Doctor, *errors.AppError)
+	GetDoctorByLogin(login string) (entities.Doctor, *errors.AppError)
 	GetDoctorSpecialization(id uint) (string, *errors.AppError)
 	GetDoctorPassHash(id uint) (string, *errors.AppError)
 }
@@ -79,6 +80,7 @@ type ReceptionRepository interface {
 	GetReceptionByDoctorID(doctorID uint) ([]entities.Reception, error)
 	GetReceptionByPatientID(patientID uint) ([]entities.Reception, error)
 	GetReceptionByDateRange(start, end time.Time) ([]entities.Reception, error)
+	GetReceptionsByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.ReceptionShortResponse, error)
 }
 
 type PatientRepository interface {

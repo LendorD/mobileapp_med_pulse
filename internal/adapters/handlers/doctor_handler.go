@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -26,17 +27,21 @@ func (h *Handler) CreateDoctor(c *gin.Context) {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "Error create CreateDoctorRequest", true)
 		return
 	}
+	log.Println("create JSON for Create Doctor")
 
 	if err := validate.Struct(input); err != nil {
 		h.ErrorResponse(c, err, 422, "Error validate CreateDoctorRequest", true)
 		return
 	}
+	log.Println("validate JSON for Create Doctor")
 
-	doctor, eerr := h.usecase.CreateDoctor(input)
-	if eerr.Err != nil {
+	doctor, eerr := h.usecase.CreateDoctor(&input)
+	if eerr != nil {
 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
 		return
 	}
+	log.Println("response JSON for Create Doctor")
+
 	h.ResultResponse(c, "Success doctro create", Object, doctor)
 }
 
@@ -93,7 +98,7 @@ func (h *Handler) UpdateDoctor(c *gin.Context) {
 		return
 	}
 
-	doctor, eerr := h.usecase.UpdateDoctor(input)
+	doctor, eerr := h.usecase.UpdateDoctor(&input)
 	if eerr.Err != nil {
 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
 		return

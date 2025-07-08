@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"log"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
@@ -19,12 +20,15 @@ func NewDoctorUsecase(repo interfaces.DoctorRepository) interfaces.DoctorUsecase
 	return &DoctorUsecase{repo: repo}
 }
 
-func (u *DoctorUsecase) CreateDoctor(doctor models.CreateDoctorRequest) (entities.Doctor, *errors.AppError) {
+func (u *DoctorUsecase) CreateDoctor(doctor *models.CreateDoctorRequest) (entities.Doctor, *errors.AppError) {
+
+	log.Println("before hash Pass  for Create Doctor")
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(doctor.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return entities.Doctor{}, errors.NewAppError(400, "error create doctor", err, true)
 	}
-
+	log.Println("hash Pass  for Create Doctor")
+	log.Println("")
 	createDoctor := entities.Doctor{
 		FullName:       doctor.FullName,
 		Login:          doctor.Login,
@@ -37,12 +41,14 @@ func (u *DoctorUsecase) CreateDoctor(doctor models.CreateDoctorRequest) (entitie
 	if errAp != nil {
 		return entities.Doctor{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to create doctor", err, true)
 	}
+	log.Println("Create Doctor in usace")
+
 	createdDoctor, errAp := u.repo.GetDoctorByID(createdDoctorID)
 	if errAp != nil {
 		return entities.Doctor{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to get doctor", err, true)
 	}
-
-	return *createdDoctor, nil
+	log.Println("Create Doctor in usace")
+	return createdDoctor, nil
 }
 
 func (u *DoctorUsecase) GetDoctorByID(id uint) (entities.Doctor, *errors.AppError) {
@@ -53,10 +59,10 @@ func (u *DoctorUsecase) GetDoctorByID(id uint) (entities.Doctor, *errors.AppErro
 		}
 		return entities.Doctor{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to get doctor", err, true)
 	}
-	return *doctor, nil
+	return doctor, nil
 }
 
-func (u *DoctorUsecase) UpdateDoctor(input models.UpdateDoctorRequest) (entities.Doctor, *errors.AppError) {
+func (u *DoctorUsecase) UpdateDoctor(input *models.UpdateDoctorRequest) (entities.Doctor, *errors.AppError) {
 
 	updateMap := map[string]interface{}{
 		"full_name":      input.FullName,
@@ -76,7 +82,7 @@ func (u *DoctorUsecase) UpdateDoctor(input models.UpdateDoctorRequest) (entities
 		return entities.Doctor{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to get doctor", err, true)
 	}
 
-	return *updatedDoctor, nil
+	return updatedDoctor, nil
 }
 
 func (u *DoctorUsecase) DeleteDoctor(id uint) *errors.AppError {
