@@ -13,7 +13,7 @@ type UpdatePatientRequest struct {
 
 type CreatePatientRequest struct {
 	FullName  string    `json:"full_name" example:"Смирнов Алексей Петрович" rus:"ФИО"`
-	BirthDate time.Time `json:"birth_date" example:"1980-05-15T00:00:00Z" rus:"Дата рождения"`
+	BirthDate time.Time `json:"birth_date" format:"date" example:"1980-05-15" rus:"Дата рождения"`
 	IsMale    bool      `json:"is_male" example:"true" rus:"Пол (true - мужской)"`
 }
 
