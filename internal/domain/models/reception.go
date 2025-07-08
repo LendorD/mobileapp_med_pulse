@@ -1,9 +1,10 @@
 package models
 
 import (
+	"time"
+
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/go-playground/validator/v10"
-	"time"
 )
 
 var validate *validator.Validate
