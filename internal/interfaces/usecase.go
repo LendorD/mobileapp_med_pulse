@@ -27,7 +27,10 @@ type AllergyUsecase interface {
 	UpdateAllergyDescription(patientID, allergyID uint, description string) (entities.PatientsAllergy, *errors.AppError)
 }
 
-type ContactInfoUsecase interface{}
+type ContactInfoUsecase interface {
+	CreateContactInfo(input *models.CreateContactInfoRequest) (entities.ContactInfo, *errors.AppError)
+	GetContactInfoByPatientID(patientID uint) (entities.ContactInfo, *errors.AppError)
+}
 
 type DoctorUsecase interface {
 	CreateDoctor(doctor *models.CreateDoctorRequest) (entities.Doctor, *errors.AppError)
@@ -43,7 +46,7 @@ type EmergencyReceptionMedServicesUsecase interface{}
 type MedServiceUsecase interface{}
 
 type PatientUsecase interface {
-	CreatPatient(input *models.CreatePatientRequest) (entities.Patient, *errors.AppError)
+	CreatePatient(input *models.CreatePatientRequest) (entities.Patient, *errors.AppError)
 	GetPatientByID(id uint) (entities.Patient, *errors.AppError)
 	UpdatePatient(input *models.UpdatePatientRequest) (entities.Patient, *errors.AppError)
 	DeletePatient(id uint) *errors.AppError
@@ -56,9 +59,9 @@ type ReceptionUsecase interface {
 	// CreateReception(reception *models.Reception) error
 	// UpdateReception(reception *models.Reception) error
 	// CancelReception(id uint, reason string) error
-	// CompleteReception(id uint, diagnosis string, recommendations string) error
-	// MarkAsNoShow(id uint) error
-	// GetReceptionByID(id uint) (*models.Reception, error)
+	// CompleteReow(id uint) error
+	// GetReceptiception(id uint, diagnosis string, recommendations string) error
+	//	// MarkAsNoShonByID(id uint) (*models.Reception, error)
 	// GetDoctorReceptions(doctorID uint, date *time.Time) ([]models.Reception, error)
 	// GetPatientReceptions(patientID uint) ([]models.Reception, error)
 	// GetReceptionsByStatus(status entities.ReceptionStatus) ([]models.Reception, error)

@@ -84,16 +84,16 @@ type ReceptionRepository interface {
 }
 
 type PatientRepository interface {
-	CreatePatient(patient entities.Patient) (uint, *errors.AppError)
-	UpdatePatient(id uint, updateMap map[string]interface{}) (uint, *errors.AppError)
-	DeletePatient(id uint) *errors.AppError
-	GetPatientByID(id uint) (entities.Patient, *errors.AppError)
+	CreatePatient(patient entities.Patient) (uint, error)
+	UpdatePatient(id uint, updateMap map[string]interface{}) (uint, error)
+	DeletePatient(id uint) error
+	GetPatientByID(id uint) (entities.Patient, error)
 	//GetAllPatients() ([]entities.Patient, *errors.AppError)
 	//GetPatientsByFullName(name string) ([]entities.Patient, *errors.AppError)
 }
 
 type ContactInfoRepository interface {
-	CreateContactInfo(info *entities.ContactInfo) error
+	CreateContactInfo(info entities.ContactInfo) (uint, error)
 	UpdateContactInfo(info *entities.ContactInfo) error
 	DeleteContactInfo(id uint) error
 

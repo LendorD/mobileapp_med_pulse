@@ -1,13 +1,22 @@
 package contactInfo
 
 import (
+	"fmt"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
+	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 )
 
-func (r *ContactInfoRepositoryImpl) CreateContactInfo(info *entities.ContactInfo) error {
-	return r.db.Create(info).Error
+func (r *ContactInfoRepositoryImpl) CreateContactInfo(info entities.ContactInfo) (uint, error) {
+	op := "repo.ContactInfo.CreateContactInfo"
+
+	if err := r.db.Create(&info).Error; err != nil {
+		return 0, errors.NewDBError(op, fmt.Errorf("failed to create Patient: %w", err))
+	}
+
+	return info.ID, nil
 }
 
+// TODO: переписать все что ниже на норм логику
 func (r *ContactInfoRepositoryImpl) UpdateContactInfo(info *entities.ContactInfo) error {
 	return r.db.Save(info).Error
 }

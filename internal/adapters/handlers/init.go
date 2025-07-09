@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,34 +17,61 @@ func init() {
 }
 
 type Handler struct {
-	// logger  *logging.Logger
+	logger  *logging.Logger
 	usecase interfaces.Usecases
 }
 
-func NewHandler(usecase interfaces.Usecases) *Handler {
-	//logger := logging.NewLogger("HANDLER", "GENERAL", parentLogger)
+func NewHandler(usecase interfaces.Usecases, parentLogger *logging.Logger) *Handler {
+	handlerLogger := parentLogger.WithPrefix("HANDLER")
+
+	handlerLogger.Info("Handler initialized",
+		"component", "GENERAL",
+	)
 
 	return &Handler{
-		//logger:  logger,
+		logger:  handlerLogger,
 		usecase: usecase,
 	}
 }
 
 func ProvideRouter(h *Handler) http.Handler {
 	r := gin.Default()
-	// r.Use(Logging(h.logger))
+	r.Use(LoggingMiddleware(h.logger))
 	baseRouter := r.Group("/api/v1")
+	//r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	// Группа маршрутов для доктора
-	doctorGroup := baseRouter.Group("/doctor-group")
+	// Группа маршрутов для main
+	doctorGroup := baseRouter.Group("/doctor")
 	doctorGroup.POST("/", h.CreateDoctor)
 	doctorGroup.GET("/:id", h.GetDoctorByID)
 
-	patientGroup := baseRouter.Group("/patient-group")
+	// Группа маршрутов для smp
+	//smpGroup := baseRouter.Group("/smp")
+	//smpGroup.GET("/:doc_id/")
+
+	// Группа маршрутов для patients
+	patientGroup := baseRouter.Group("/patients")
 	patientGroup.POST("/", h.CreatePatient)
+	patientGroup.GET("/:pat_id", h.GetPatientByID)
+	patientGroup.DELETE("/:pat_id", h.DeletePatient)
+	patientGroup.PATCH("/:pat_id", h.UpdatePatient)
 
+	// Группа маршрутов для patientContactInfo
+	contactInfoGroup := baseRouter.Group("/contact_info")
+	contactInfoGroup.POST("/:pat_id", h.CreateContactInfo)
+	contactInfoGroup.GET("/:pat_id", h.GetContactInfoByPatientID)
+	/*
+		contactInfoGroup.GET("/:pat_id", h.GetContactInfoByPatientID)
+		contactInfoGroup.DELETE("/:pat_id", h.DeleteContactInfoByPatientID)
+		contactInfoGroup.PATCH("/:pat_id", h.UpdateContactInfoByPatientID)
+
+		// Группа маршрутов для patientPersonalInfo
+		personalInfoGroup := baseRouter.Group("/pers_info")
+		personalInfoGroup.POST("/", h.CreatePersonalInfo)
+		personalInfoGroup.GET("/:pat_id", h.GetPersonalInfoByPatientID)
+		personalInfoGroup.DELETE("/:pat_id", h.DeletePersonalInfoByPatientID)
+		personalInfoGroup.PATCH("/:pat_id", h.UpdatePersonalInfoByPatientID)
+
+	*/
 	return r
-
 }

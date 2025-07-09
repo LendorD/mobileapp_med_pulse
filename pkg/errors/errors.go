@@ -32,7 +32,7 @@ const (
 	BadRequest          = "bad request"
 	NotFound            = "not_found"
 
-	IncorrectClientDataCode = 400
+	InvalidDataCode         = 402
 	InternalServerErrorCode = 500
 	NotFoundErrorCode       = 404
 )
