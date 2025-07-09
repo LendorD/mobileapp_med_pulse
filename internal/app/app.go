@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 	"net/http"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/handlers"
@@ -18,7 +19,7 @@ func New() *fx.App {
 			config.LoadConfig,
 		),
 
-		// LoggingModule,
+		LoggingModule,
 
 		RepositoryModule,
 		ServiceModule,
@@ -27,18 +28,15 @@ func New() *fx.App {
 	)
 }
 
-/*
 func ProvideLoggers(cfg *config.Config) *logging.Logger {
-	loggerCfg := logging.Config(
-		cfg.Logging.Enable,
-		cfg.Logging.Level,
-		cfg.Logging.Format,
-		cfg.Logging.LogsDir,
-		IntToUint(cfg.Logging.SavingDays),
-	)
+	loggerCfg := &logging.Config{
+		Enabled:    cfg.Logging.Enable,
+		Level:      cfg.Logging.Level,
+		LogsDir:    cfg.Logging.LogsDir,
+		SavingDays: IntToUint(cfg.Logging.SavingDays),
+	}
 
-	logger := logging.NewBaseLogger("VERSION", cfg.App.Version, loggerCfg, logging.WithDailyLogDelete())
-
+	logger := logging.NewLogger(loggerCfg, "APP", cfg.App.Version)
 	return logger
 }
 
@@ -46,11 +44,11 @@ var LoggingModule = fx.Module("logging_module",
 	fx.Provide(
 		ProvideLoggers,
 	),
-	fx.Invoke(logging.InvokeBaseLogger),
+	fx.Invoke(func(l *logging.Logger) {
+		l.Info("Logging system initialized")
+	}),
 )
 
-
-*/
 /* -------------------------------------------- */
 
 func InvokeHttpServer(lc fx.Lifecycle, cfg *config.Config, h http.Handler) {

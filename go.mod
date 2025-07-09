@@ -6,6 +6,7 @@ require (
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-playground/validator/v10 v10.27.0
 	github.com/joho/godotenv v1.5.1
+	github.com/swaggo/files v1.0.1
 	github.com/swaggo/swag v1.16.4
 	go.uber.org/fx v1.24.0
 	gorm.io/driver/postgres v1.6.0
