@@ -67,7 +67,7 @@ type MedServiceRepository interface {
 type EmergencyReceptionMedServicesRepository interface {
 	CreateEmergencyReceptionMedServices(link *entities.EmergencyReceptionMedServices) error
 	DeleteEmergencyReceptionMedServices(id uint) error
-
+	AddService(service *entities.EmergencyReceptionMedServices) (*entities.EmergencyReceptionMedServices, error)
 	GetEmergencyReceptionMedServicesByEmergencyReceptionID(erID uint) ([]entities.EmergencyReceptionMedServices, error)
 }
 

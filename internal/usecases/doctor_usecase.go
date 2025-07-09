@@ -9,7 +9,6 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 type DoctorUsecase struct {
@@ -52,13 +51,13 @@ func (u *DoctorUsecase) CreateDoctor(doctor *models.CreateDoctorRequest) (entiti
 }
 
 func (u *DoctorUsecase) GetDoctorByID(id uint) (entities.Doctor, *errors.AppError) {
+	log.Println("in usecase before get doctor repo")
 	doctor, err := u.repo.GetDoctorByID(id)
+	log.Println("in usecase after get doctor repo")
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return entities.Doctor{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to get doctor", err, true)
-		}
 		return entities.Doctor{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to get doctor", err, true)
 	}
+	log.Println("return doctor in repo")
 	return doctor, nil
 }
 
