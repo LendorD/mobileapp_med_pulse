@@ -95,6 +95,26 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 
 // autoMigrate - выполнение автомиграций для моделей
 func autoMigrate(db *gorm.DB) error {
+
+	// Определяем порядок удаления таблиц с учётом зависимостей
+	tablesToDrop := []interface{}{
+		&entities.PatientsAllergy{},
+		&entities.EmergencyReceptionMedServices{},
+		&entities.EmergencyReception{},
+		&entities.Reception{},
+		&entities.Patient{},
+		&entities.PersonalInfo{},
+		&entities.ContactInfo{},
+		&entities.Doctor{},
+		&entities.MedService{},
+		&entities.Allergy{},
+	}
+	for _, model := range tablesToDrop {
+		if err := db.Migrator().DropTable(model); err != nil {
+			return fmt.Errorf("ошибка удаления таблицы %T: %w", model, err)
+		}
+	}
+
 	models := []interface{}{
 		&entities.Doctor{},
 		&entities.Allergy{},
@@ -115,9 +135,9 @@ func autoMigrate(db *gorm.DB) error {
 	}
 
 	// Правильный вызов функции seedTestData
-	// if err := seedTestData(db); err != nil {
-	// 	return fmt.Errorf("ошибка заполнения тестовыми данными: %w", err)
-	// }
+	if err := seedTestData(db); err != nil {
+		return fmt.Errorf("ошибка заполнения тестовыми данными: %w", err)
+	}
 
 	return nil
 }
@@ -127,23 +147,23 @@ func seedTestData(db *gorm.DB) error {
 	doctors := []entities.Doctor{
 		{
 			FullName:       "Иванов Иван Иванович",
-			Login:          "doctor_ivanov",
-			Email:          "ivanov@clinic.ru",
-			PasswordHash:   "$2a$10$somehashedpassword", // Пример хэша
+			Login:          "doctor_ivanovich",
+			Email:          "ivanovsk@clinic.ru",
+			PasswordHash:   "$2a$10$somehafdsdpassword", // Пример хэша
 			Specialization: "Терапевт",
 		},
 		{
 			FullName:       "Петрова Мария Сергеевна",
 			Login:          "doctor_petrova",
-			Email:          "petrova@clinic.ru",
-			PasswordHash:   "$2a$10$somehashedpassword",
+			Email:          "petrovavf@clinic.ru",
+			PasswordHash:   "$2a$10$somehashedpvtsword",
 			Specialization: "Хирург",
 		},
 		{
 			FullName:       "Сидоров Алексей Дмитриевич",
 			Login:          "doctor_sidorov",
-			Email:          "sidorov@clinic.ru",
-			PasswordHash:   "$2a$10$somehashedpassword",
+			Email:          "sidorovgd@clinic.ru",
+			PasswordHash:   "$2a$10$somehashedpasswofr",
 			Specialization: "Кардиолог",
 		},
 	}
