@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
 
 func (r *EmergencyReceptionRepositoryImpl) CreateEmergencyReception(er *entities.EmergencyReception) error {
@@ -48,4 +49,60 @@ func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionPriorityCases() 
 	var list []entities.EmergencyReception
 	err := r.db.Where("priority = true").Find(&list).Error
 	return list, err
+}
+
+func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.EmergencyReceptionShortResponse, error) {
+	var response []struct {
+		Date        time.Time
+		Status      string
+		PatientName string
+		Priority    bool
+		Address     string
+	}
+
+	offset := (page - 1) * perPage
+	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+	endOfDay := startOfDay.Add(24 * time.Hour)
+
+	err := r.db.Model(&entities.EmergencyReception{}).
+		Select(`
+            emergency_receptions.date,
+            emergency_receptions.status,
+            emergency_receptions.priority,
+            emergency_receptions.address,
+            patients.full_name as patient_name
+        `).
+		Joins("LEFT JOIN patients ON patients.id = emergency_receptions.patient_id").
+		Where("emergency_receptions.doctor_id = ? AND emergency_receptions.date >= ? AND emergency_receptions.date < ?",
+			doctorID, startOfDay, endOfDay).
+		Offset(offset).
+		Limit(perPage).
+		Order(getEmergencyOrderByPriorityAndDate()).
+		Find(&response).
+		Error
+
+	// Преобразуем в финальную структуру
+	result := make([]models.EmergencyReceptionShortResponse, len(response))
+	for i, item := range response {
+		result[i] = models.EmergencyReceptionShortResponse{
+			Date:        item.Date.Format("2006-01-02 15:04"),
+			Status:      item.Status,
+			PatientName: item.PatientName,
+			Priority:    item.Priority,
+			Address:     item.Address,
+		}
+	}
+
+	return result, err
+}
+
+// Вспомогательная функция для сортировки
+func getEmergencyOrderByPriorityAndDate() string {
+	return `
+        CASE 
+            WHEN priority = true THEN 1
+            ELSE 2
+        END,
+        date ASC
+    `
 }

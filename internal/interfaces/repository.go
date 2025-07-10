@@ -52,6 +52,7 @@ type EmergencyReceptionRepository interface {
 	GetEmergencyReceptionByPatientID(patientID uint) ([]entities.EmergencyReception, error)
 	GetEmergencyReceptionByDateRange(start, end time.Time) ([]entities.EmergencyReception, error)
 	GetEmergencyReceptionPriorityCases() ([]entities.EmergencyReception, error)
+	GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.EmergencyReceptionShortResponse, error)
 }
 
 type MedServiceRepository interface {

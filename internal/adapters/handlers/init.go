@@ -44,6 +44,12 @@ func ProvideRouter(h *Handler) http.Handler {
 	patientGroup := baseRouter.Group("/patient-group")
 	patientGroup.POST("/", h.CreatePatient)
 
+	// emergencyGroup := baseRouter.Group("/emergency-group")
+	// emergencyGroup.GET("/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
+	r.GET("/emergency/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
+
+	r.GET("/receptions/:doctor_id", h.GetReceptionsByDoctorAndDate)
+
 	return r
 
 }
