@@ -11,7 +11,6 @@ type Repository interface {
 	AllergyRepository
 	DoctorRepository
 	MedServiceRepository
-	EmergencyReceptionMedServicesRepository
 	PatientRepository
 	PatientsAllergyRepository
 	ContactInfoRepository
