@@ -16,7 +16,6 @@ func (a *AppError) Error() string {
 	if a == nil {
 		return ""
 	}
-
 	if a.Err != nil {
 		return fmt.Sprintf("%s (code: %d): %v", a.Message, a.Code, a.Err)
 	}
@@ -33,7 +32,7 @@ const (
 	BadRequest          = "bad request"
 	NotFound            = "not_found"
 
-	IncorrectClientDataCode = 400
+	InvalidDataCode         = 402
 	InternalServerErrorCode = 500
 	NotFoundErrorCode       = 404
 )
