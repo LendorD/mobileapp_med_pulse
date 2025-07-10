@@ -13,7 +13,6 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/doctor"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/medService"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/patient"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/patientsAllergy"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/personalInfo"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/reception"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
@@ -30,7 +29,6 @@ type Repository struct {
 	interfaces.DoctorRepository
 	interfaces.MedServiceRepository
 	interfaces.PatientRepository
-	interfaces.PatientsAllergyRepository
 	interfaces.ContactInfoRepository
 	interfaces.EmergencyReceptionRepository
 	interfaces.PersonalInfoRepository
@@ -75,7 +73,6 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 		doctor.NewDoctorRepository(db),
 		medService.NewMedServiceRepository(db),
 		patient.NewPatientRepository(db),
-		patientsAllergy.NewPatientsAllergyRepository(db),
 		contactInfo.NewContactInfoRepository(db),
 		emergencyReception.NewEmergencyReceptionRepository(db),
 		personalInfo.NewPersonalInfoRepository(db),
@@ -95,8 +92,6 @@ func autoMigrate(db *gorm.DB) error {
 		&entities.PersonalInfo{},
 		&entities.MedService{},
 		&entities.EmergencyReception{},
-
-		&entities.PatientsAllergy{},
 	}
 
 	if err := dropTables(db); err != nil {
@@ -119,13 +114,16 @@ func autoMigrate(db *gorm.DB) error {
 
 func dropTables(db *gorm.DB) error {
 	tables := []string{
+		"allergies",
 		"receptions",
 		"contact_infos",
 		"personal_infos",
 		"patients",
 		"doctors",
+		"patient_allergy",
 		"med_services",
 		"emergency_receptions",
+		"emergency_receptions_med_services",
 	}
 
 	query := fmt.Sprintf("DROP TABLE IF EXISTS %s CASCADE", strings.Join(tables, ", "))
@@ -189,6 +187,18 @@ func seedTestData(db *gorm.DB) error {
 		}
 	}
 
+	allergies := []*entities.Allergy{
+		{Name: "Сыр"},
+		{Name: "Пыльца"},
+		{Name: "Орехи"},
+	}
+
+	for _, allergy := range allergies {
+		if err := db.Create(allergy).Error; err != nil {
+			return fmt.Errorf("ошибка при создании аллергии %s: %w", allergy.Name, err)
+		}
+	}
+
 	// 3. Создаем контактную информацию и персональные данные для пациентов
 	for i, patient := range patients {
 		contactInfo := entities.ContactInfo{
@@ -216,6 +226,10 @@ func seedTestData(db *gorm.DB) error {
 			"ContactInfoID":  &contactInfo.ID,
 			"PersonalInfoID": &personalInfo.ID,
 		})
+
+		if err := db.Model(patient).Association("Allergy").Replace(&allergies); err != nil {
+			return fmt.Errorf("ошибка при привязке аллергий к пациенту: %w", err)
+		}
 	}
 
 	// 4. Создаем приемы на 10, 11 и 12 июля текущего года
@@ -272,10 +286,10 @@ func seedTestData(db *gorm.DB) error {
 	}
 	for _, serv := range services {
 		if err := db.Create(serv).Error; err != nil {
-			continue
+			return fmt.Errorf("не удалось создать услугу %s: %w", serv.Name, err)
 		}
 	}
-
+	emergencyReceptions := make([]*entities.EmergencyReception, 0, 50)
 	// Заполнение 50 EmergencyReception с привязкой к MedService
 	for i := 0; i < 50; i++ {
 		date := dates[i%len(dates)]
@@ -283,9 +297,7 @@ func seedTestData(db *gorm.DB) error {
 		minute := 30 * (i % 2)
 		date = date.Add(time.Hour * time.Duration(hour)).Add(time.Minute * time.Duration(minute))
 
-		// Привязываем существующую услугу по ID, не создавая её заново
-		service := services[i%len(services)]
-		reception := entities.EmergencyReception{
+		reception := &entities.EmergencyReception{
 			DoctorID:        doctors[i%len(doctors)].ID,
 			PatientID:       patients[i%len(patients)].ID,
 			Date:            date,
@@ -296,13 +308,17 @@ func seedTestData(db *gorm.DB) error {
 			Recommendations: "Постельный режим",
 		}
 
-		// Сохраняем основной приём
-		if err := db.Create(&reception).Error; err != nil {
+		if err := db.Create(reception).Error; err != nil {
 			return fmt.Errorf("не удалось создать emergency reception: %w", err)
 		}
 
-		// Добавляем связь с существующей услугой (через join table)
-		if err := db.Model(&reception).Association("Services").Append(service); err != nil {
+		emergencyReceptions = append(emergencyReceptions, reception)
+	}
+
+	// 3. Связываем EmergencyReception с MedService
+	for i, reception := range emergencyReceptions {
+		service := services[i%len(services)]
+		if err := db.Model(reception).Association("Services").Append(service); err != nil {
 			return fmt.Errorf("не удалось привязать услугу к emergency reception: %w", err)
 		}
 	}

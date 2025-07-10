@@ -12,7 +12,6 @@ type Repository interface {
 	DoctorRepository
 	MedServiceRepository
 	PatientRepository
-	PatientsAllergyRepository
 	ContactInfoRepository
 	EmergencyReceptionRepository
 	PersonalInfoRepository
@@ -62,14 +61,6 @@ type MedServiceRepository interface {
 	GetAllMedService() ([]entities.MedService, error)
 }
 
-type EmergencyReceptionMedServicesRepository interface {
-	CreateEmergencyReceptionMedServices(link entities.EmergencyReceptionMedServices) error
-	DeleteEmergencyReceptionMedServices(id uint) error
-	AddService(service *entities.EmergencyReceptionMedServices) (*entities.EmergencyReceptionMedServices, error)
-	GetEmergencyReceptionMedServicesByEmergencyReceptionID(erID uint) ([]entities.EmergencyReceptionMedServices, error)
-	GetServicesForEmergency(emergencyID uint) ([]entities.MedService, error)
-}
-
 type ReceptionRepository interface {
 	CreateReception(reception *entities.Reception) error
 	UpdateReception(reception *entities.Reception) error
@@ -110,14 +101,4 @@ type AllergyRepository interface {
 	GetAllergyByName(name string) (*entities.Allergy, error)
 	GetAllAllergy() ([]entities.Allergy, error)
 	//GetPatientAllergyByID(id uint) (*entities.PatientsAllergy, error)
-}
-
-type PatientsAllergyRepository interface {
-	CreatePatientsAllergy(pa *entities.PatientsAllergy) error
-	UpdatePatientsAllergy(pa *entities.PatientsAllergy) error
-	DeletePatientsAllergy(id uint) error
-	ExistsAllergy(patientID, allergyID uint) (bool, error)
-	//GetPatientsAllergyByAllergyID(id uint) (*entities.PatientsAllergy, error)
-	//GetPatientsAllergiesByPatientID(patientID uint) ([]entities.PatientsAllergy, error)
-	//GetAllergyByPatientID(patientID uint) ([]entities.Allergy, error)
 }

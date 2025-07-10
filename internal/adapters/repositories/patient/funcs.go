@@ -75,6 +75,7 @@ func (r *PatientRepositoryImpl) GetPatientByID(id uint) (entities.Patient, error
 	err := r.db.
 		Preload("PersonalInfo").
 		Preload("ContactInfo").
+		Preload("Allergy").
 		First(&patient, id).Error
 	if err != nil {
 		return entities.Patient{}, errors.NewDBError(op, err)

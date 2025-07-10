@@ -56,8 +56,8 @@ func (r *AllergyRepositoryImpl) GetPatientAllergiesByID(patientID uint) ([]entit
 	return allergies, nil
 }
 
-func (r *AllergyRepositoryImpl) GetPatientAllergyByID(id uint) (*entities.PatientsAllergy, error) {
-	var allergy entities.PatientsAllergy
+func (r *AllergyRepositoryImpl) GetPatientAllergyByID(id uint) (*entities.Allergy, error) {
+	var allergy entities.Allergy
 	if err := r.db.First(&allergy, id).Error; err != nil {
 		return nil, err
 	}
