@@ -1,6 +1,10 @@
 package usecases
 
-import "github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
+import (
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
+	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
+)
 
 type MedServiceUsecase struct {
 	repo                    interfaces.MedServiceRepository
@@ -17,24 +21,24 @@ func NewMedServiceUsecase(
 	}
 }
 
-// func (u *MedServiceUsecase) AddToEmergency(emergencyID, serviceID uint) (entities.EmergencyReceptionMedServices, *errors.AppError) {
-// 	service := entities.EmergencyReceptionMedServices{
-// 		EmergencyReceptionID: emergencyID,
-// 		MedServiceID:         serviceID,
-// 	}
+func (u *MedServiceUsecase) AddToEmergency(emergencyID, serviceID uint) (entities.EmergencyReceptionMedServices, *errors.AppError) {
+	service := entities.EmergencyReceptionMedServices{
+		EmergencyReceptionID: emergencyID,
+		MedServiceID:         serviceID,
+	}
 
-// 	createdService, err := u.emergencyMedServiceRepo.AddService(&service)
-// 	if err != nil {
-// 		return entities.EmergencyReceptionMedServices{}, errors.NewDBError("failed to add service to emergency", err)
-// 	}
+	createdService, err := u.emergencyMedServiceRepo.AddService(&service)
+	if err != nil {
+		return entities.EmergencyReceptionMedServices{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to update doctor", err, true)
+	}
 
-// 	return *createdService, nil
-// }
+	return *createdService, nil
+}
 
-// func (u *MedServiceUsecase) GetByEmergencyID(emergencyID uint) ([]entities.MedService, *errors.AppError) {
-// 	services, err := u.emergencyMedServiceRepo.GetServicesForEmergency(emergencyID)
-// 	if err != nil {
-// 		return nil, errors.NewDBError("failed to get emergency services", err)
-// 	}
-// 	return services, nil
-// }
+func (u *MedServiceUsecase) GetByEmergencyID(emergencyID uint) ([]entities.MedService, *errors.AppError) {
+	services, err := u.emergencyMedServiceRepo.GetServicesForEmergency(emergencyID)
+	if err != nil {
+		return nil, errors.NewDBError("failed to get emergency services", err)
+	}
+	return services, nil
+}

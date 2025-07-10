@@ -65,13 +65,7 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ошибка подключения к базе данных: %w", err)
 	}
-	/*
-		// Выполнение автомиграций
-		if err := autoMigrate(db); err != nil {
-			return nil, fmt.Errorf("ошибка выполнения автомиграций: %w", err)
 
-		}
-	*/
 	// Выполнение автомиграций
 	if err := autoMigrate(db); err != nil {
 		return nil, fmt.Errorf("ошибка выполнения автомиграций: %w", err)
