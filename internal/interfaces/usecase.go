@@ -39,7 +39,9 @@ type DoctorUsecase interface {
 	DeleteDoctor(doctorId uint) *errors.AppError
 }
 
-type EmergencyReceptionUsecase interface{}
+type EmergencyReceptionUsecase interface {
+	GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.EmergencyReceptionShortResponse, error)
+}
 
 type EmergencyReceptionMedServicesUsecase interface{}
 

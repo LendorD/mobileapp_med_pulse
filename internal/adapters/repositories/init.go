@@ -256,6 +256,36 @@ func seedTestData(db *gorm.DB) error {
 		}
 	}
 
+	statusesE := []entities.EmergencyStatus{
+		entities.EmergencyStatusScheduled,
+		entities.EmergencyStatusAccepted,
+		entities.EmergencyStatusOnPlace,
+		entities.EmergencyStatusCompleted,
+		entities.EmergencyStatusCancelled,
+		entities.EmergencyStatusNoShow,
+	}
+
+	for i := 0; i < 50; i++ {
+		// Выбираем случайные данные
+		date := dates[i%len(dates)]
+		hour := 9 + i%8        // Время приема с 9:00 до 16:00
+		minute := 30 * (i % 2) // 0 или 30 минут
+		date = date.Add(time.Hour * time.Duration(hour)).Add(time.Minute * time.Duration(minute))
+
+		emergencyReception := entities.EmergencyReception{
+			DoctorID:  doctors[i%len(doctors)].ID,
+			PatientID: patients[i%len(patients)].ID,
+			Date:      date,
+			Status:    statusesE[i%len(statusesE)],
+			Priority:  i%2 == 0, // Каждый второй - экстренный (true), остальные - неотложные (false)
+			Address:   addresses[i%len(addresses)],
+		}
+
+		if err := db.Create(&emergencyReception).Error; err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
