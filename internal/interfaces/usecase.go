@@ -16,8 +16,15 @@ type Usecases interface {
 	MedServiceUsecase
 	PatientUsecase
 	PersonalInfoUsecase
-	ReceptionUsecase
+	ReceptionHospitalUsecase
+	ReceptionSmpUsecase
 	MedCardUsecase
+}
+
+type ReceptionHospitalUsecase interface {
+}
+
+type ReceptionSmpUsecase interface {
 }
 
 type MedCardUsecase interface {

@@ -7,46 +7,46 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
 
-func (r *EmergencyReceptionRepositoryImpl) CreateEmergencyReception(er *entities.EmergencyReception) error {
+func (r *EmergencyReceptionRepositoryImpl) CreateEmergencyReception(er *entities.EmergencyCall) error {
 	return r.db.Create(er).Error
 }
 
-func (r *EmergencyReceptionRepositoryImpl) UpdateEmergencyReception(er *entities.EmergencyReception) error {
+func (r *EmergencyReceptionRepositoryImpl) UpdateEmergencyReception(er *entities.EmergencyCall) error {
 	return r.db.Save(er).Error
 }
 
 func (r *EmergencyReceptionRepositoryImpl) DeleteEmergencyReception(id uint) error {
-	return r.db.Delete(&entities.EmergencyReception{}, id).Error
+	return r.db.Delete(&entities.EmergencyCall{}, id).Error
 }
 
-func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionByID(id uint) (*entities.EmergencyReception, error) {
-	var er entities.EmergencyReception
+func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionByID(id uint) (*entities.EmergencyCall, error) {
+	var er entities.EmergencyCall
 	if err := r.db.First(&er, id).Error; err != nil {
 		return nil, err
 	}
 	return &er, nil
 }
 
-func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionByDoctorID(doctorID uint) ([]entities.EmergencyReception, error) {
-	var list []entities.EmergencyReception
+func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionByDoctorID(doctorID uint) ([]entities.EmergencyCall, error) {
+	var list []entities.EmergencyCall
 	err := r.db.Where("doctor_id = ?", doctorID).Find(&list).Error
 	return list, err
 }
 
-func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionByPatientID(patientID uint) ([]entities.EmergencyReception, error) {
-	var list []entities.EmergencyReception
+func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionByPatientID(patientID uint) ([]entities.EmergencyCall, error) {
+	var list []entities.EmergencyCall
 	err := r.db.Where("patient_id = ?", patientID).Find(&list).Error
 	return list, err
 }
 
-func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionByDateRange(start, end time.Time) ([]entities.EmergencyReception, error) {
-	var list []entities.EmergencyReception
+func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionByDateRange(start, end time.Time) ([]entities.EmergencyCall, error) {
+	var list []entities.EmergencyCall
 	err := r.db.Where("date BETWEEN ? AND ?", start, end).Find(&list).Error
 	return list, err
 }
 
-func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionPriorityCases() ([]entities.EmergencyReception, error) {
-	var list []entities.EmergencyReception
+func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionPriorityCases() ([]entities.EmergencyCall, error) {
+	var list []entities.EmergencyCall
 	err := r.db.Where("priority = true").Find(&list).Error
 	return list, err
 }
@@ -64,7 +64,7 @@ func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionsByDoctorAndDate
 	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
 	endOfDay := startOfDay.Add(24 * time.Hour)
 
-	err := r.db.Model(&entities.EmergencyReception{}).
+	err := r.db.Model(&entities.EmergencyCall{}).
 		Select(`
             emergency_receptions.date,
             emergency_receptions.status,

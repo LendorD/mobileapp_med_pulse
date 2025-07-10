@@ -20,7 +20,7 @@ func New() *fx.App {
 			// Добавляем провайдер для JWT secret
 			func(cfg *config.Config) string { return cfg.JWTSecret },
 		),
-		LoggingModule,
+		// LoggingModule,
 		RepositoryModule,
 		ServiceModule,
 		UsecaseModule,

@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 	"net/http"
+
+	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/usecases"
@@ -24,24 +25,27 @@ type Handler struct {
 	authUC  *usecases.AuthUsecase // Добавляем AuthUsecase напрямую
 }
 
-func NewHandler(usecase interfaces.Usecases, parentLogger *logging.Logger) *Handler {
-	handlerLogger := parentLogger.WithPrefix("HANDLER")
-
-	handlerLogger.Info("Handler initialized",
-		"component", "GENERAL",
-	)
-
 // NewHandler создает новый экземпляр Handler со всеми зависимостями
-func NewHandler(usecase interfaces.Usecases, authUC *usecases.AuthUsecase) *Handler {
-	//logger := logging.NewLogger("HANDLER", "GENERAL", parentLogger)
-
-
+func NewHandler(usecase interfaces.Usecases) *Handler {
 	return &Handler{
-		logger:  handlerLogger,
 		usecase: usecase,
-		authUC:  authUC,
 	}
 }
+
+// // NewHandler создает новый экземпляр Handler со всеми зависимостями
+// func NewHandler(usecase interfaces.Usecases, parentLogger *logging.Logger, authUC *usecases.AuthUsecase) *Handler {
+// 	//logger := logging.NewLogger("HANDLER", "GENERAL", parentLogger)
+
+// 	handlerLogger := parentLogger.WithPrefix("HANDLER")
+// 	handlerLogger.Info("Handler initialized",
+// 		"component", "GENERAL",
+// 	)
+// 	return &Handler{
+// 		logger:  handlerLogger,
+// 		usecase: usecase,
+// 		authUC:  authUC,
+// 	}
+// }
 
 // ProvideRouter создает и настраивает маршруты
 func ProvideRouter(h *Handler) http.Handler {
@@ -59,7 +63,6 @@ func ProvideRouter(h *Handler) http.Handler {
 	// Группа маршрутов для smp
 	//smpGroup := baseRouter.Group("/smp")
 	//smpGroup.GET("/:doc_id/")
-
 
 	// Swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -91,7 +94,7 @@ func ProvideRouter(h *Handler) http.Handler {
 	// emergencyGroup.GET("/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
 	r.GET("/emergency/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
 
-	r.GET("/receptions/:doctor_id", h.GetReceptionsByDoctorAndDate)
+	// r.GET("/receptions/:doctor_id", h.GetReceptionsByDoctorAndDate)
 
 	// Группа маршрутов для patientContactInfo
 	contactInfoGroup := baseRouter.Group("/contact_info")
