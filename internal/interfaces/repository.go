@@ -65,14 +65,6 @@ type MedServiceRepository interface {
 	GetAllMedService() ([]entities.MedService, error)
 }
 
-type EmergencyReceptionMedServicesRepository interface {
-	CreateEmergencyReceptionMedServices(link entities.EmergencyReceptionMedServices) error
-	DeleteEmergencyReceptionMedServices(id uint) error
-	AddService(service *entities.EmergencyReceptionMedServices) (*entities.EmergencyReceptionMedServices, error)
-	GetEmergencyReceptionMedServicesByEmergencyReceptionID(erID uint) ([]entities.EmergencyReceptionMedServices, error)
-	GetServicesForEmergency(emergencyID uint) ([]entities.MedService, error)
-}
-
 type ReceptionRepository interface {
 	CreateReception(reception *entities.Reception) error
 	UpdateReception(reception *entities.Reception) error
@@ -116,8 +108,8 @@ type AllergyRepository interface {
 }
 
 type PatientsAllergyRepository interface {
-	CreatePatientsAllergy(pa *entities.PatientsAllergy) error
-	UpdatePatientsAllergy(pa *entities.PatientsAllergy) error
+	CreatePatientsAllergy(pa *entities.Allergy) error
+	UpdatePatientsAllergy(pa *entities.Allergy) error
 	DeletePatientsAllergy(id uint) error
 	ExistsAllergy(patientID, allergyID uint) (bool, error)
 	//GetPatientsAllergyByAllergyID(id uint) (*entities.PatientsAllergy, error)

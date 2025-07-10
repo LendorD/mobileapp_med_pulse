@@ -21,7 +21,7 @@ type UseCases struct {
 func NewUsecases(r interfaces.Repository, s interfaces.Service, conf *config.Config) interfaces.Usecases {
 
 	return &UseCases{
-		NewAllergyUsecase(r, r, r),
+		NewAllergyUsecase(r, r),
 		NewContactInfoUsecase(r),
 		NewDoctorUsecase(r),
 		NewEmergencyReceptionUsecase(r),

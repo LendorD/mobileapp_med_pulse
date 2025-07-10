@@ -1,14 +1,11 @@
 package usecases
 
 import (
-	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
-	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 )
 
 type MedServiceUsecase struct {
-	repo                    interfaces.MedServiceRepository
-	emergencyMedServiceRepo interfaces.EmergencyReceptionMedServicesRepository
+	repo interfaces.MedServiceRepository
 }
 
 func NewMedServiceUsecase(
@@ -19,6 +16,7 @@ func NewMedServiceUsecase(
 	}
 }
 
+/*
 func (u *MedServiceUsecase) AddToEmergency(emergencyID, serviceID uint) (entities.EmergencyReceptionMedServices, *errors.AppError) {
 	service := entities.EmergencyReceptionMedServices{
 		EmergencyReceptionID: emergencyID,
@@ -40,3 +38,5 @@ func (u *MedServiceUsecase) GetByEmergencyID(emergencyID uint) ([]entities.MedSe
 	}
 	return services, nil
 }
+
+*/

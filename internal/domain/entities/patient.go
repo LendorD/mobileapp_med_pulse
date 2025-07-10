@@ -19,7 +19,8 @@ type Patient struct {
 	ContactInfo   *ContactInfo `gorm:"foreignKey:ContactInfoID" json:"contact_info" rus:"Контактные данные"`
 	ContactInfoID *uint        `gorm:"default:null" json:"-"`
 
-	Reception          []Reception          `gorm:"foreignKey:PatientID"` // Исправлено
-	EmergencyReception []EmergencyReception `gorm:"foreignKey:PatientID"` // Исправлено
+	Reception          []Reception          `gorm:"foreignKey:PatientID" json:"reception"`
+	EmergencyReception []EmergencyReception `gorm:"foreignKey:PatientID" json:"emergency_reception"`
 
+	Allergy []Allergy `gorm:"many2many:patient_allergy;default:null;" json:"allergy"`
 }
