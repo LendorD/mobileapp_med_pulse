@@ -3,10 +3,11 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-
-	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 var validate *validator.Validate
@@ -29,19 +30,18 @@ func NewHandler(usecase interfaces.Usecases) *Handler {
 	}
 }
 
-func ProvideRouter(h *Handler) http.Handler {
+func ProvideRouter(handlers *Handlers) http.Handler {
 	r := gin.Default()
-	// r.Use(Logging(h.logger))
-	// baseRouter := r.Group("/api/v1")
 
-	// r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// Swagger
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Группа маршрутов для групп
-	// bookingBookingGroup := baseRouter.Group("/booking-group")
-	// bookingBookingGroup.POST("/", h.CreateGroup)
-	// bookingBookingGroup.PUT("/", h.UpdateGroup)
-	// bookingBookingGroup.GET("/:id", h.GetGroupByID)
-	// bookingBookingGroup.GET("/", h.GetFilteredGroup)
+	// Группа аутентификации
+	authGroup := r.Group("/auth")
+	{
+		authGroup.POST("/register", handlers.Auth.RegisterDoctor)
+		authGroup.POST("/login", handlers.Auth.LoginDoctor)
+	}
 
 	return r
 }
