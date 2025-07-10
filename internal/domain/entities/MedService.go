@@ -7,4 +7,6 @@ type MedService struct {
 
 	Name  string `gorm:"not null" json:"name" example:"EKG" rus:"ЭКГ"`
 	Price uint   `gorm:"not null" json:"price" example:"100" rus:"Цена"`
+
+	Receptions []EmergencyReception `gorm:"many2many:emergency_reception_med_services;"`
 }
