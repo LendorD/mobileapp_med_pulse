@@ -7,6 +7,7 @@ import (
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -21,7 +22,7 @@ type AuthRepository interface {
 	Create(ctx context.Context, user *entities.User) error
 }
 
-func NewAuthUsecase(authRepo AuthRepository, secretKey string) *AuthUsecase {
+func NewAuthUsecase(authRepo interfaces.Repository, secretKey string) *AuthUsecase {
 	return &AuthUsecase{
 		authRepo:  authRepo,
 		secretKey: secretKey,
