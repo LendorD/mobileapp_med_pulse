@@ -3,10 +3,8 @@ package usecases
 import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
-	_ "github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
-	_ "github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 )
 
 type UseCases struct {
