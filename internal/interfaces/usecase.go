@@ -13,7 +13,6 @@ type Usecases interface {
 	ContactInfoUsecase
 	DoctorUsecase
 	EmergencyReceptionUsecase
-	EmergencyReceptionMedServicesUsecase
 	MedServiceUsecase
 	PatientUsecase
 	PersonalInfoUsecase
@@ -42,8 +41,6 @@ type DoctorUsecase interface {
 type EmergencyReceptionUsecase interface {
 	GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.EmergencyReceptionShortResponse, error)
 }
-
-type EmergencyReceptionMedServicesUsecase interface{}
 
 type MedServiceUsecase interface{}
 

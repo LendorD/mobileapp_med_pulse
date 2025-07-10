@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"fmt"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emergencyReception"
 	"log"
 	"os"
 	"strings"
@@ -10,8 +11,6 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/allergy"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/contactInfo"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/doctor"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emergencyReception"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emergencyReceptionMedServices"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/medService"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/patient"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/patientsAllergy"
@@ -30,7 +29,6 @@ type Repository struct {
 	interfaces.AllergyRepository
 	interfaces.DoctorRepository
 	interfaces.MedServiceRepository
-	interfaces.EmergencyReceptionMedServicesRepository
 	interfaces.PatientRepository
 	interfaces.PatientsAllergyRepository
 	interfaces.ContactInfoRepository
@@ -76,7 +74,6 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 		allergy.NewAllergyRepository(db),
 		doctor.NewDoctorRepository(db),
 		medService.NewMedServiceRepository(db),
-		emergencyReceptionMedServices.NewEmergencyReceptionMedServicesRepository(db),
 		patient.NewPatientRepository(db),
 		patientsAllergy.NewPatientsAllergyRepository(db),
 		contactInfo.NewContactInfoRepository(db),
@@ -96,9 +93,9 @@ func autoMigrate(db *gorm.DB) error {
 		&entities.Patient{},
 		&entities.ContactInfo{},
 		&entities.PersonalInfo{},
-		&entities.EmergencyReception{},
-		&entities.EmergencyReceptionMedServices{},
 		&entities.MedService{},
+		&entities.EmergencyReception{},
+
 		&entities.PatientsAllergy{},
 	}
 
@@ -127,6 +124,8 @@ func dropTables(db *gorm.DB) error {
 		"personal_infos",
 		"patients",
 		"doctors",
+		"med_services",
+		"emergency_receptions",
 	}
 
 	query := fmt.Sprintf("DROP TABLE IF EXISTS %s CASCADE", strings.Join(tables, ", "))
@@ -265,24 +264,46 @@ func seedTestData(db *gorm.DB) error {
 		entities.EmergencyStatusNoShow,
 	}
 
+	// Добавим услуги заранее
+	services := []*entities.MedService{
+		{Name: "ЭКГ", Price: 500},
+		{Name: "Рентген", Price: 1500},
+		{Name: "УЗИ", Price: 1000},
+	}
+	for _, serv := range services {
+		if err := db.Create(serv).Error; err != nil {
+			continue
+		}
+	}
+
+	// Заполнение 50 EmergencyReception с привязкой к MedService
 	for i := 0; i < 50; i++ {
-		// Выбираем случайные данные
 		date := dates[i%len(dates)]
-		hour := 9 + i%8        // Время приема с 9:00 до 16:00
-		minute := 30 * (i % 2) // 0 или 30 минут
+		hour := 9 + i%8
+		minute := 30 * (i % 2)
 		date = date.Add(time.Hour * time.Duration(hour)).Add(time.Minute * time.Duration(minute))
 
-		emergencyReception := entities.EmergencyReception{
-			DoctorID:  doctors[i%len(doctors)].ID,
-			PatientID: patients[i%len(patients)].ID,
-			Date:      date,
-			Status:    statusesE[i%len(statusesE)],
-			Priority:  i%2 == 0, // Каждый второй - экстренный (true), остальные - неотложные (false)
-			Address:   addresses[i%len(addresses)],
+		// Привязываем существующую услугу по ID, не создавая её заново
+		service := services[i%len(services)]
+		reception := entities.EmergencyReception{
+			DoctorID:        doctors[i%len(doctors)].ID,
+			PatientID:       patients[i%len(patients)].ID,
+			Date:            date,
+			Status:          statusesE[i%len(statusesE)],
+			Priority:        i%2 == 0,
+			Address:         addresses[i%len(addresses)],
+			Diagnosis:       "ОРВИ",
+			Recommendations: "Постельный режим",
 		}
 
-		if err := db.Create(&emergencyReception).Error; err != nil {
-			return err
+		// Сохраняем основной приём
+		if err := db.Create(&reception).Error; err != nil {
+			return fmt.Errorf("не удалось создать emergency reception: %w", err)
+		}
+
+		// Добавляем связь с существующей услугой (через join table)
+		if err := db.Model(&reception).Association("Services").Append(service); err != nil {
+			return fmt.Errorf("не удалось привязать услугу к emergency reception: %w", err)
 		}
 	}
 
