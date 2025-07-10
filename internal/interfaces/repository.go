@@ -27,7 +27,6 @@ type DoctorRepository interface {
 	DeleteDoctor(id uint) error
 	GetDoctorByID(id uint) (*entities.Doctor, error)
 	GetDoctorName(id uint) (string, error)
-	GetDoctorByLogin(login string) (*entities.Doctor, error)
 	GetDoctorSpecialization(id uint) (string, error)
 	GetDoctorPassHash(id uint) (string, error)
 }

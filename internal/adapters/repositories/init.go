@@ -18,8 +18,9 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/personalInfo"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/reception"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
-
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -65,13 +66,22 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ошибка подключения к базе данных: %w", err)
 	}
-	/*
-		// Выполнение автомиграций
-		if err := autoMigrate(db); err != nil {
-			return nil, fmt.Errorf("ошибка выполнения автомиграций: %w", err)
 
-		}
-	*/
+	// Выполнение автомиграций
+	if err := db.AutoMigrate(
+		&entities.Doctor{},
+		&entities.Reception{},
+		&entities.EmergencyReception{},
+		// ... другие модели
+	); err != nil {
+		return nil, fmt.Errorf("ошибка выполнения автомиграций: %w", err)
+	}
+
+	// Создание тестовых данных
+	if err := createTestDoctors(db); err != nil {
+		return nil, fmt.Errorf("ошибка создания тестовых данных: %w", err)
+	}
+
 	return &Repository{
 		auth.NewAuthRepository(db),
 		allergy.NewAllergyRepository(db),
@@ -85,6 +95,41 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 		personalInfo.NewPersonalInfoRepository(db),
 		reception.NewReceptionRepository(db),
 	}, nil
+}
 
-	//return nil, nil
+// createTestDoctors создает тестовых врачей при инициализации
+func createTestDoctors(db *gorm.DB) error {
+	testDoctors := []entities.Doctor{
+		{
+			FullName:       "Иванов Иван Иванович",
+			Specialization: "Терапевт",
+			Login:          "doctor1",
+			PasswordHash:   hashPassword("password1"),
+		},
+		{
+			FullName:       "Петров Петр Петрович",
+			Specialization: "Хирург",
+			Login:          "doctor2",
+			PasswordHash:   hashPassword("password2"),
+		},
+		{
+			FullName:       "Сидорова Анна Владимировна",
+			Specialization: "Невролог",
+			Login:          "doctor3",
+			PasswordHash:   hashPassword("password3"),
+		},
+	}
+
+	for _, doctor := range testDoctors {
+		if err := db.FirstOrCreate(&doctor, entities.Doctor{Login: doctor.Login}).Error; err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// hashPassword хэширует пароль для безопасного хранения
+func hashPassword(password string) string {
+	hash, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(hash)
 }
