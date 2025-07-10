@@ -36,7 +36,7 @@ func (u *DoctorUsecase) CreateDoctor(doctor *models.CreateDoctorRequest) (entiti
 		Specialization: doctor.Specialization,
 	}
 
-	createdDoctorID, errAp := u.repo.CreateDoctor(&createDoctor)
+	createdDoctorID, errAp := u.repo.CreateDoctor(createDoctor)
 	if errAp != nil {
 		return entities.Doctor{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to create doctor", err, true)
 	}

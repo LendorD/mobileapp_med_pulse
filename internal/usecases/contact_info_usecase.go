@@ -34,7 +34,7 @@ func (u ContactInfoUsecase) CreateContactInfo(input *models.CreateContactInfoReq
 		return entities.ContactInfo{}, errors.NewAppError(errors.InternalServerErrorCode, errors.InternalServerError, err, false)
 	}
 
-	return *createdContactInfo, nil
+	return createdContactInfo, nil
 }
 
 func (u *ContactInfoUsecase) GetContactInfoByPatientID(patientID uint) (entities.ContactInfo, *errors.AppError) {
@@ -45,7 +45,7 @@ func (u *ContactInfoUsecase) GetContactInfoByPatientID(patientID uint) (entities
 		}
 		return entities.ContactInfo{}, errors.NewDBError("failed to get contact info", err)
 	}
-	return *info, nil
+	return info, nil
 }
 
 // func (u *ContactInfoUsecase) Update(input models.UpdateContactInfoRequest) (entities.ContactInfo, *errors.AppError) {

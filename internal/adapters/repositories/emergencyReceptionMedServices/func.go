@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func (r *EmergencyReceptionMedServicesRepositoryImpl) CreateEmergencyReceptionMedServices(link *entities.EmergencyReceptionMedServices) error {
+func (r *EmergencyReceptionMedServicesRepositoryImpl) CreateEmergencyReceptionMedServices(link entities.EmergencyReceptionMedServices) error {
 	return r.db.Create(link).Error
 }
 
@@ -61,18 +61,18 @@ func (r *EmergencyReceptionMedServicesRepositoryImpl) GetServicesForEmergency(em
 }
 
 // func (r *EmergencyReceptionMedServicesRepositoryImpl) GetServicesForEmergency_(emergencyID uint) ([]entities.MedService, error) {
-// 	var emergencyReception entities.EmergencyReception
+// var emergencyReception entities.EmergencyReceptionMedServices
 
-// 	err := r.db.
-// 		Preload("MedServices").
-// 		First(&emergencyReception, emergencyID).Error
+// err := r.db.
+// 	Preload("MedServices").
+// 	First(&emergencyReception, emergencyID).Error
 
-// 	if err != nil {
-// 		if errors.Is(err, gorm.ErrRecordNotFound) {
-// 			return []entities.MedService{}, nil
-// 		}
-// 		return nil, err
+// if err != nil {
+// 	if errors.Is(err, gorm.ErrRecordNotFound) {
+// 		return []entities.MedService{}, nil
 // 	}
+// 	return nil, err
+// }
 
-// 	return emergencyReception.MedServices, nil
+// return emergencyReception.MedService, nil
 // }

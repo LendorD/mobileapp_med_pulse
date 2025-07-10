@@ -3,8 +3,6 @@ package interfaces
 import (
 	"time"
 
-	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
-
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
@@ -23,14 +21,14 @@ type Repository interface {
 }
 
 type DoctorRepository interface {
-	CreateDoctor(doctor *entities.Doctor) (uint, *errors.AppError)
-	UpdateDoctor(id uint, updateMap map[string]interface{}) (uint, *errors.AppError)
-	DeleteDoctor(id uint) *errors.AppError
-	GetDoctorByID(id uint) (entities.Doctor, *errors.AppError)
-	GetDoctorName(id uint) (string, *errors.AppError)
-	GetDoctorByLogin(login string) (entities.Doctor, *errors.AppError)
-	GetDoctorSpecialization(id uint) (string, *errors.AppError)
-	GetDoctorPassHash(id uint) (string, *errors.AppError)
+	CreateDoctor(doctor entities.Doctor) (uint, error)
+	UpdateDoctor(id uint, updateMap map[string]interface{}) (uint, error)
+	DeleteDoctor(id uint) error
+	GetDoctorByID(id uint) (entities.Doctor, error)
+	GetDoctorName(id uint) (string, error)
+	GetDoctorByLogin(login string) (entities.Doctor, error)
+	GetDoctorSpecialization(id uint) (string, error)
+	GetDoctorPassHash(id uint) (string, error)
 }
 
 type PersonalInfoRepository interface {
@@ -65,10 +63,11 @@ type MedServiceRepository interface {
 }
 
 type EmergencyReceptionMedServicesRepository interface {
-	CreateEmergencyReceptionMedServices(link *entities.EmergencyReceptionMedServices) error
+	CreateEmergencyReceptionMedServices(link entities.EmergencyReceptionMedServices) error
 	DeleteEmergencyReceptionMedServices(id uint) error
 	AddService(service *entities.EmergencyReceptionMedServices) (*entities.EmergencyReceptionMedServices, error)
 	GetEmergencyReceptionMedServicesByEmergencyReceptionID(erID uint) ([]entities.EmergencyReceptionMedServices, error)
+	GetServicesForEmergency(emergencyID uint) ([]entities.MedService, error)
 }
 
 type ReceptionRepository interface {
@@ -88,17 +87,17 @@ type PatientRepository interface {
 	UpdatePatient(id uint, updateMap map[string]interface{}) (uint, error)
 	DeletePatient(id uint) error
 	GetPatientByID(id uint) (entities.Patient, error)
-	//GetAllPatients() ([]entities.Patient, *errors.AppError)
-	//GetPatientsByFullName(name string) ([]entities.Patient, *errors.AppError)
+	GetAllPatients() ([]entities.Patient, error)
+	GetPatientsByFullName(name string) ([]entities.Patient, error)
 }
 
 type ContactInfoRepository interface {
 	CreateContactInfo(info entities.ContactInfo) (uint, error)
-	UpdateContactInfo(info *entities.ContactInfo) error
+	UpdateContactInfo(info entities.ContactInfo) error
 	DeleteContactInfo(id uint) error
 
-	GetContactInfoByID(id uint) (*entities.ContactInfo, error)
-	GetContactInfoByPatientID(patientID uint) (*entities.ContactInfo, error)
+	GetContactInfoByID(id uint) (entities.ContactInfo, error)
+	GetContactInfoByPatientID(patientID uint) (entities.ContactInfo, error)
 }
 
 type AllergyRepository interface {
