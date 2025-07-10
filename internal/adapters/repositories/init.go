@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"fmt"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emergencyReception"
 	"log"
 	"os"
 	"strings"
@@ -10,8 +11,6 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/allergy"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/contactInfo"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/doctor"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emergencyReception"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emergencyReceptionMedServices"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/medService"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/patient"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/patientsAllergy"
@@ -30,7 +29,6 @@ type Repository struct {
 	interfaces.AllergyRepository
 	interfaces.DoctorRepository
 	interfaces.MedServiceRepository
-	interfaces.EmergencyReceptionMedServicesRepository
 	interfaces.PatientRepository
 	interfaces.PatientsAllergyRepository
 	interfaces.ContactInfoRepository
@@ -76,7 +74,6 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 		allergy.NewAllergyRepository(db),
 		doctor.NewDoctorRepository(db),
 		medService.NewMedServiceRepository(db),
-		emergencyReceptionMedServices.NewEmergencyReceptionMedServicesRepository(db),
 		patient.NewPatientRepository(db),
 		patientsAllergy.NewPatientsAllergyRepository(db),
 		contactInfo.NewContactInfoRepository(db),

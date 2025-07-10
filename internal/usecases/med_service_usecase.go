@@ -13,11 +13,9 @@ type MedServiceUsecase struct {
 
 func NewMedServiceUsecase(
 	repo interfaces.MedServiceRepository,
-	emergencyMedServiceRepo interfaces.EmergencyReceptionMedServicesRepository,
 ) interfaces.MedServiceUsecase {
 	return &MedServiceUsecase{
-		repo:                    repo,
-		emergencyMedServiceRepo: emergencyMedServiceRepo,
+		repo: repo,
 	}
 }
 
