@@ -1,6 +1,7 @@
 package interfaces
 
 import (
+	"context"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
@@ -8,6 +9,7 @@ import (
 )
 
 type Repository interface {
+	AuthRepository
 	AllergyRepository
 	DoctorRepository
 	MedServiceRepository
@@ -26,6 +28,7 @@ type DoctorRepository interface {
 	GetDoctorByID(id uint) (entities.Doctor, error)
 	GetDoctorName(id uint) (string, error)
 	GetDoctorByLogin(login string) (entities.Doctor, error)
+
 	GetDoctorSpecialization(id uint) (string, error)
 	GetDoctorPassHash(id uint) (string, error)
 }
@@ -60,14 +63,6 @@ type MedServiceRepository interface {
 	GetMedServiceByID(id uint) (*entities.MedService, error)
 	GetMedServiceByName(name string) (*entities.MedService, error)
 	GetAllMedService() ([]entities.MedService, error)
-}
-
-type EmergencyReceptionMedServicesRepository interface {
-	CreateEmergencyReceptionMedServices(link entities.EmergencyReceptionMedServices) error
-	DeleteEmergencyReceptionMedServices(id uint) error
-	AddService(service *entities.EmergencyReceptionMedServices) (*entities.EmergencyReceptionMedServices, error)
-	GetEmergencyReceptionMedServicesByEmergencyReceptionID(erID uint) ([]entities.EmergencyReceptionMedServices, error)
-	GetServicesForEmergency(emergencyID uint) ([]entities.MedService, error)
 }
 
 type ReceptionRepository interface {
@@ -113,11 +108,15 @@ type AllergyRepository interface {
 }
 
 type PatientsAllergyRepository interface {
-	CreatePatientsAllergy(pa *entities.PatientsAllergy) error
-	UpdatePatientsAllergy(pa *entities.PatientsAllergy) error
+	CreatePatientsAllergy(pa *entities.Allergy) error
+	UpdatePatientsAllergy(pa *entities.Allergy) error
 	DeletePatientsAllergy(id uint) error
 	ExistsAllergy(patientID, allergyID uint) (bool, error)
 	//GetPatientsAllergyByAllergyID(id uint) (*entities.PatientsAllergy, error)
 	//GetPatientsAllergiesByPatientID(patientID uint) ([]entities.PatientsAllergy, error)
 	//GetAllergyByPatientID(patientID uint) ([]entities.Allergy, error)
+}
+
+type AuthRepository interface {
+	GetByLogin(ctx context.Context, login string) (*entities.Doctor, error)
 }

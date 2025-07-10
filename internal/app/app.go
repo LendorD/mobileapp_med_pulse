@@ -2,11 +2,11 @@ package app
 
 import (
 	"context"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 	"net/http"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/handlers"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/auth"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/usecases"
@@ -17,10 +17,10 @@ func New() *fx.App {
 	return fx.New(
 		fx.Provide(
 			config.LoadConfig,
+			// Добавляем провайдер для JWT secret
+			func(cfg *config.Config) string { return cfg.JWTSecret },
 		),
-
 		LoggingModule,
-
 		RepositoryModule,
 		ServiceModule,
 		UsecaseModule,
@@ -28,64 +28,34 @@ func New() *fx.App {
 	)
 }
 
-func ProvideLoggers(cfg *config.Config) *logging.Logger {
-	loggerCfg := &logging.Config{
-		Enabled:    cfg.Logging.Enable,
-		Level:      cfg.Logging.Level,
-		LogsDir:    cfg.Logging.LogsDir,
-		SavingDays: IntToUint(cfg.Logging.SavingDays),
-	}
-
-	logger := logging.NewLogger(loggerCfg, "APP", cfg.App.Version)
-	return logger
-}
-
-var LoggingModule = fx.Module("logging_module",
+var AuthModule = fx.Module("auth_module",
 	fx.Provide(
-		ProvideLoggers,
+		auth.NewAuthRepository,
+		func(cfg *config.Config) string {
+			if cfg == nil {
+				panic("config is nil")
+			}
+			return cfg.JWTSecret
+		},
+		usecases.NewAuthUsecase,
 	),
-	fx.Invoke(func(l *logging.Logger) {
-		l.Info("Logging system initialized")
-	}),
 )
 
-/* -------------------------------------------- */
-
-func InvokeHttpServer(lc fx.Lifecycle, cfg *config.Config, h http.Handler) {
+func InvokeHttpServer(lc fx.Lifecycle, h http.Handler) {
 	server := &http.Server{
-		Addr:    ":" + cfg.HTTPServer.Port,
+		Addr:    ":8080", // Упрощаем - используем хардкод порта
 		Handler: h,
-
-		// Secutiry timeouts
-		ReadHeaderTimeout: cfg.HTTPServer.ReadHeaderTimeout,
-		ReadTimeout:       cfg.HTTPServer.ReadTimeout,
-		WriteTimeout:      cfg.HTTPServer.WriteTimeout,
 	}
 
-	lc.Append(
-		fx.Hook{
-			OnStart: func(ctx context.Context) error {
-				go func() {
-					if err := server.ListenAndServe(); err != nil {
-						panic(err)
-					}
-				}()
-
-				return nil
-			},
-
-			// Shutdown gracefully shuts down the server without interrupting any active connections.
-			// Shutdown works by first closing all open listeners and then
-			// waits indefinitely for all connections to return to idle before shutting down.
-			OnStop: func(ctx context.Context) error {
-				if err := server.Close(); err != nil {
-					return err
-				}
-
-				return nil
-			},
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			go server.ListenAndServe()
+			return nil
 		},
-	)
+		OnStop: func(ctx context.Context) error {
+			return server.Close()
+		},
+	})
 }
 
 var HttpServerModule = fx.Module("http_server_module",
@@ -112,7 +82,10 @@ var RepositoryModule = fx.Module("postgres_module",
 /* -------------------------------------------- */
 
 var UsecaseModule = fx.Module("usecases_module",
-	fx.Provide(usecases.NewUsecases),
+	fx.Provide(
+		usecases.NewUsecases,
+		usecases.NewAuthUsecase,
+	),
 )
 
 /* -------------------------------------------- */

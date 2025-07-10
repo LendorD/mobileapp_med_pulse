@@ -25,10 +25,10 @@ type MedCardUsecase interface {
 	UpdateMedCard(input *models.UpdateDoctorRequest) (models.MedCardResponse, *errors.AppError)
 }
 type AllergyUsecase interface {
-	AddAllergyToPatient(patientID, allergyID uint, description string) (entities.PatientsAllergy, *errors.AppError)
+	AddAllergyToPatient(patientID, allergyID uint, description string) (entities.Allergy, *errors.AppError)
 	GetAllergyByPatientID(patientID uint) ([]entities.Allergy, *errors.AppError)
 	RemoveAllergyFromPatient(patientID, allergyID uint) *errors.AppError
-	UpdateAllergyDescription(patientID, allergyID uint, description string) (entities.PatientsAllergy, *errors.AppError)
+	UpdateAllergyDescription(patientID, allergyID uint, description string) (entities.Allergy, *errors.AppError)
 }
 
 type ContactInfoUsecase interface {
