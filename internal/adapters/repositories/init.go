@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/allergy"
@@ -88,26 +89,6 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 
 // autoMigrate - выполнение автомиграций для моделей
 func autoMigrate(db *gorm.DB) error {
-
-	// Определяем порядок удаления таблиц с учётом зависимостей
-	tablesToDrop := []interface{}{
-		&entities.PatientsAllergy{},
-		&entities.EmergencyReceptionMedServices{},
-		&entities.EmergencyReception{},
-		&entities.Reception{},
-		&entities.Patient{},
-		&entities.PersonalInfo{},
-		&entities.ContactInfo{},
-		&entities.Doctor{},
-		&entities.MedService{},
-		&entities.Allergy{},
-	}
-	for _, model := range tablesToDrop {
-		if err := db.Migrator().DropTable(model); err != nil {
-			return fmt.Errorf("ошибка удаления таблицы %T: %w", model, err)
-		}
-	}
-
 	models := []interface{}{
 		&entities.Doctor{},
 		&entities.Allergy{},
@@ -120,7 +101,11 @@ func autoMigrate(db *gorm.DB) error {
 		&entities.MedService{},
 		&entities.PatientsAllergy{},
 	}
-	log.Println("create DB")
+
+	if err := dropTables(db); err != nil {
+		return fmt.Errorf("ошибка удаления таблиц: %w", err)
+	}
+
 	for _, model := range models {
 		if err := db.AutoMigrate(model); err != nil {
 			return fmt.Errorf("ошибка миграции модели %T: %w", model, err)
@@ -135,38 +120,58 @@ func autoMigrate(db *gorm.DB) error {
 	return nil
 }
 
+func dropTables(db *gorm.DB) error {
+	tables := []string{
+		"receptions",
+		"contact_infos",
+		"personal_infos",
+		"patients",
+		"doctors",
+	}
+
+	query := fmt.Sprintf("DROP TABLE IF EXISTS %s CASCADE", strings.Join(tables, ", "))
+
+	if err := db.Exec(query).Error; err != nil {
+		return fmt.Errorf("failed to drop tables: %w", err)
+	}
+
+	return nil
+}
+
 func seedTestData(db *gorm.DB) error {
 	// 1. Создаем докторов
-	doctors := []entities.Doctor{
+	doctors := []*entities.Doctor{
 		{
 			FullName:       "Иванов Иван Иванович",
-			Login:          "doctor_ivanovich",
-			Email:          "ivanovsk@clinic.ru",
-			PasswordHash:   "$2a$10$somehafdsdpassword", // Пример хэша
+			Login:          "doctor_ivanov",
+			Email:          "ivanov@clinic.ru",
+			PasswordHash:   "$2a$10$somehashedpassword", // Пример хэша
 			Specialization: "Терапевт",
 		},
 		{
 			FullName:       "Петрова Мария Сергеевна",
 			Login:          "doctor_petrova",
-			Email:          "petrovavf@clinic.ru",
-			PasswordHash:   "$2a$10$somehashedpvtsword",
+			Email:          "petrova@clinic.ru",
+			PasswordHash:   "$2a$10$somehashedpassword",
 			Specialization: "Хирург",
 		},
 		{
 			FullName:       "Сидоров Алексей Дмитриевич",
 			Login:          "doctor_sidorov",
-			Email:          "sidorovgd@clinic.ru",
-			PasswordHash:   "$2a$10$somehashedpasswofr",
+			Email:          "sidorov@clinic.ru",
+			PasswordHash:   "$2a$10$somehashedpassword",
 			Specialization: "Кардиолог",
 		},
 	}
 
-	if err := db.Create(&doctors).Error; err != nil {
-		return err
+	for _, doc := range doctors {
+		if err := db.Create(doc).Error; err != nil {
+			continue
+		}
 	}
 
 	// 2. Создаем пациентов
-	patients := []entities.Patient{
+	patients := []*entities.Patient{
 		{FullName: "Смирнов Алексей Петрович", BirthDate: parseDate("1980-05-15"), IsMale: true},
 		{FullName: "Кузнецова Анна Владимировна", BirthDate: parseDate("1992-08-21"), IsMale: false},
 		{FullName: "Попов Дмитрий Игоревич", BirthDate: parseDate("1975-11-03"), IsMale: true},
@@ -179,14 +184,16 @@ func seedTestData(db *gorm.DB) error {
 		{FullName: "Павлова Наталья Игоревна", BirthDate: parseDate("1993-03-11"), IsMale: false},
 	}
 
-	if err := db.Create(&patients).Error; err != nil {
-		return err
+	for _, pat := range patients {
+		if err := db.Create(pat).Error; err != nil {
+			continue
+		}
 	}
 
 	// 3. Создаем контактную информацию и персональные данные для пациентов
 	for i, patient := range patients {
 		contactInfo := entities.ContactInfo{
-			PatientID: patient.ID,
+			PatientID: patient.ID, // теперь тут правильный ID
 			Phone:     fmt.Sprintf("+7915%07d", 1000000+i),
 			Email:     fmt.Sprintf("patient%d@example.com", i+1),
 			Address:   fmt.Sprintf("Москва, ул. Тестовая, д. %d", i+1),
@@ -207,8 +214,8 @@ func seedTestData(db *gorm.DB) error {
 
 		// Обновляем пациента с ID контактной информации
 		db.Model(&patient).Updates(map[string]interface{}{
-			"ContactInfoID":  contactInfo.ID,
-			"PersonalInfoID": personalInfo.ID,
+			"ContactInfoID":  &contactInfo.ID,
+			"PersonalInfoID": &personalInfo.ID,
 		})
 	}
 

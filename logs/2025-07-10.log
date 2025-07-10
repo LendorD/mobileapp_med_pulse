@@ -1,2 +1,109 @@
+2025/07/10 01:02:24 [INFO] APPLogging system initialized
+2025/07/10 01:02:25 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 01:03:52 [INFO] APPLogging system initialized
+2025/07/10 01:03:52 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 01:04:33 [INFO] APPLogging system initialized
+2025/07/10 01:04:33 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 01:05:39 [INFO] APPLogging system initialized
+2025/07/10 01:05:39 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 01:06:23 [INFO] APPLogging system initialized
+2025/07/10 01:06:23 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 01:07:19 [INFO] APPLogging system initialized
+2025/07/10 01:07:20 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 01:08:18 [INFO] APPLogging system initialized
+2025/07/10 01:08:18 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 01:13:23 [INFO] APPLogging system initialized
+2025/07/10 01:13:24 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 01:13:32 [INFO] APP[HANDLER] [HTTP] Request started method=DELETE path=/api/v1/patients/1 remote_addr=127.0.0.1:61529
+2025/07/10 01:13:32 [DEBUG] APP[HANDLER] [HTTP] Request details details={"remote_addr":"127.0.0.1:61529","method":"DELETE","path":"/api/v1/patients/1","headers":{"Accept":["*/*"],"Accept-Encoding":["gzip, deflate, br"],"Connection":["keep-alive"],"Content-Length":["85"],"Content-Type":["application/json"],"Postman-Token":["555626b3-86e2-4a03-aa89-0f72baeb3733"],"User-Agent":["PostmanRuntime/7.44.1"]}}
+2025/07/10 01:13:32 [INFO] APP[HANDLER] [HTTP] Request completed status=500 latency=1.2199ms client_ip=127.0.0.1
+2025/07/10 01:16:04 [INFO] APPLogging system initialized
+2025/07/10 01:16:05 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 01:16:07 [INFO] APP[HANDLER] [HTTP] Request started method=GET path=/api/v1/patients/1 remote_addr=127.0.0.1:61895
+2025/07/10 01:16:07 [DEBUG] APP[HANDLER] [HTTP] Request details details={"remote_addr":"127.0.0.1:61895","method":"GET","path":"/api/v1/patients/1","headers":{"Accept":["*/*"],"Accept-Encoding":["gzip, deflate, br"],"Connection":["keep-alive"],"Content-Length":["85"],"Content-Type":["application/json"],"Postman-Token":["55adc129-a7c2-495c-8697-f8eabca2b4fc"],"User-Agent":["PostmanRuntime/7.44.1"]}}
+2025/07/10 01:16:07 [INFO] APP[HANDLER] [HTTP] Request completed status=500 latency=1.0303ms client_ip=127.0.0.1
+2025/07/10 01:16:12 [INFO] APP[HANDLER] [HTTP] Request started method=GET path=/api/v1/patients/1 remote_addr=127.0.0.1:61895
+2025/07/10 01:16:12 [DEBUG] APP[HANDLER] [HTTP] Request details details={"remote_addr":"127.0.0.1:61895","method":"GET","path":"/api/v1/patients/1","headers":{"Accept":["*/*"],"Accept-Encoding":["gzip, deflate, br"],"Connection":["keep-alive"],"Content-Length":["85"],"Content-Type":["application/json"],"Postman-Token":["55a441b5-0cd5-427e-b247-17014201c55b"],"User-Agent":["PostmanRuntime/7.44.1"]}}
+2025/07/10 01:16:12 [INFO] APP[HANDLER] [HTTP] Request completed status=500 latency=506.2µs client_ip=127.0.0.1
+2025/07/10 01:16:21 [INFO] APP[HANDLER] [HTTP] Request started method=GET path=/api/v1/patients/3 remote_addr=127.0.0.1:61895
+2025/07/10 01:16:21 [DEBUG] APP[HANDLER] [HTTP] Request details details={"remote_addr":"127.0.0.1:61895","method":"GET","path":"/api/v1/patients/3","headers":{"Accept":["*/*"],"Accept-Encoding":["gzip, deflate, br"],"Connection":["keep-alive"],"Content-Length":["85"],"Content-Type":["application/json"],"Postman-Token":["0e51e106-c950-42de-8cbd-76f864f1040e"],"User-Agent":["PostmanRuntime/7.44.1"]}}
+2025/07/10 01:16:21 [INFO] APP[HANDLER] [HTTP] Request completed status=500 latency=507.5µs client_ip=127.0.0.1
+2025/07/10 01:16:57 [INFO] APP[HANDLER] [HTTP] Request started method=POST path=/api/v1/patients/ remote_addr=127.0.0.1:62003
+2025/07/10 01:16:57 [DEBUG] APP[HANDLER] [HTTP] Request details details={"remote_addr":"127.0.0.1:62003","method":"POST","path":"/api/v1/patients/","headers":{"Accept":["*/*"],"Accept-Encoding":["gzip, deflate, br"],"Connection":["keep-alive"],"Content-Length":["85"],"Content-Type":["application/json"],"Postman-Token":["bff62dbc-84dd-428b-a206-3784afd550e0"],"User-Agent":["PostmanRuntime/7.44.1"]}}
+2025/07/10 01:16:57 [INFO] APP[HANDLER] [HTTP] Request completed status=200 latency=2.1203ms client_ip=127.0.0.1
+2025/07/10 01:45:34 [INFO] APPLogging system initialized
+2025/07/10 01:45:34 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 01:46:53 [INFO] APP[HANDLER] [HTTP] Request started method=POST path=/api/v1/contact_info/ remote_addr=127.0.0.1:63449
+2025/07/10 01:46:53 [DEBUG] APP[HANDLER] [HTTP] Request details details={"remote_addr":"127.0.0.1:63449","method":"POST","path":"/api/v1/contact_info/","headers":{"Accept":["*/*"],"Accept-Encoding":["gzip, deflate, br"],"Connection":["keep-alive"],"Content-Length":["65"],"Content-Type":["application/json"],"Postman-Token":["0e433790-a510-46b8-aec9-2a5db08047a0"],"User-Agent":["PostmanRuntime/7.44.1"]}}
+2025/07/10 01:46:53 [INFO] APP[HANDLER] [HTTP] Request completed status=404 latency=0s client_ip=127.0.0.1
+2025/07/10 01:47:12 [INFO] APP[HANDLER] [HTTP] Request started method=POST path=/api/v1/contact_info/1 remote_addr=127.0.0.1:54536
+2025/07/10 01:47:12 [DEBUG] APP[HANDLER] [HTTP] Request details details={"remote_addr":"127.0.0.1:54536","method":"POST","path":"/api/v1/contact_info/1","headers":{"Accept":["*/*"],"Accept-Encoding":["gzip, deflate, br"],"Connection":["keep-alive"],"Content-Length":["65"],"Content-Type":["application/json"],"Postman-Token":["b4f76f9e-e5c8-49f4-a691-1d353d319b76"],"User-Agent":["PostmanRuntime/7.44.1"]}}
+2025/07/10 01:47:12 [INFO] APP[HANDLER] [HTTP] Request completed status=200 latency=3.601ms client_ip=127.0.0.1
+2025/07/10 01:52:01 [INFO] APPLogging system initialized
+2025/07/10 01:52:01 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 01:52:06 [INFO] APP[HANDLER] [HTTP] Request started method=GET path=/api/v1/contact_info/1 remote_addr=127.0.0.1:51856
+2025/07/10 01:52:06 [DEBUG] APP[HANDLER] [HTTP] Request details details={"remote_addr":"127.0.0.1:51856","method":"GET","path":"/api/v1/contact_info/1","headers":{"Accept":["*/*"],"Accept-Encoding":["gzip, deflate, br"],"Connection":["keep-alive"],"Content-Length":["65"],"Content-Type":["application/json"],"Postman-Token":["cd879473-2513-4b1f-9ad7-27845d2cda5e"],"User-Agent":["PostmanRuntime/7.44.1"]}}
+2025/07/10 01:52:06 [INFO] APP[HANDLER] [HTTP] Request completed status=400 latency=0s client_ip=127.0.0.1
+2025/07/10 01:52:40 [INFO] APPLogging system initialized
+2025/07/10 01:52:41 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 01:52:44 [INFO] APP[HANDLER] [HTTP] Request started method=GET path=/api/v1/contact_info/1 remote_addr=127.0.0.1:51940
+2025/07/10 01:52:44 [DEBUG] APP[HANDLER] [HTTP] Request details details={"remote_addr":"127.0.0.1:51940","method":"GET","path":"/api/v1/contact_info/1","headers":{"Accept":["*/*"],"Accept-Encoding":["gzip, deflate, br"],"Connection":["keep-alive"],"Content-Length":["65"],"Content-Type":["application/json"],"Postman-Token":["24c88a2c-007f-42d4-ac5d-49f0f64e2e06"],"User-Agent":["PostmanRuntime/7.44.1"]}}
+2025/07/10 01:52:44 [INFO] APP[HANDLER] [HTTP] Request completed status=200 latency=1.1157ms client_ip=127.0.0.1
+2025/07/10 01:53:35 [INFO] APP[HANDLER] [HTTP] Request started method=GET path=/api/v1/contact_info/1 remote_addr=127.0.0.1:52077
+2025/07/10 01:53:35 [DEBUG] APP[HANDLER] [HTTP] Request details details={"remote_addr":"127.0.0.1:52077","method":"GET","path":"/api/v1/contact_info/1","headers":{"Accept":["*/*"],"Accept-Encoding":["gzip, deflate, br"],"Connection":["keep-alive"],"Content-Length":["65"],"Content-Type":["application/json"],"Postman-Token":["90bbcfd2-0148-4844-bea2-d831880309df"],"User-Agent":["PostmanRuntime/7.44.1"]}}
+2025/07/10 01:53:35 [INFO] APP[HANDLER] [HTTP] Request completed status=200 latency=664.9µs client_ip=127.0.0.1
+2025/07/10 11:04:31 [INFO] APPLogging system initialized
+2025/07/10 11:04:43 [INFO] APPLogging system initialized
+2025/07/10 11:05:00 [INFO] APPLogging system initialized
+2025/07/10 11:08:04 [INFO] APPLogging system initialized
+2025/07/10 11:08:05 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 11:09:39 [INFO] APPLogging system initialized
+2025/07/10 11:14:24 [INFO] APPLogging system initialized
+2025/07/10 11:20:42 [INFO] APPLogging system initialized
+2025/07/10 11:20:42 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 11:21:13 [INFO] APP[HANDLER] [HTTP] Request started method=GET path=/api/v1/patient/1 remote_addr=[::1]:58941
+2025/07/10 11:21:13 [DEBUG] APP[HANDLER] [HTTP] Request details details={"remote_addr":"[::1]:58941","method":"GET","path":"/api/v1/patient/1","headers":{"Accept":["*/*"],"Accept-Encoding":["gzip, deflate, br"],"Connection":["keep-alive"],"Content-Length":["65"],"Content-Type":["application/json"],"Postman-Token":["29433c4a-ed2d-462d-bd46-2a8e4143c0ea"],"User-Agent":["PostmanRuntime/7.44.1"]}}
+2025/07/10 11:21:13 [INFO] APP[HANDLER] [HTTP] Request completed status=404 latency=0s client_ip=::1
+2025/07/10 11:21:54 [INFO] APP[HANDLER] [HTTP] Request started method=GET path=/api/v1/patients/1 remote_addr=[::1]:58956
+2025/07/10 11:21:54 [DEBUG] APP[HANDLER] [HTTP] Request details details={"remote_addr":"[::1]:58956","method":"GET","path":"/api/v1/patients/1","headers":{"Accept":["*/*"],"Accept-Encoding":["gzip, deflate, br"],"Connection":["keep-alive"],"Content-Length":["65"],"Content-Type":["application/json"],"Postman-Token":["f0362f65-8560-43f9-8b3c-28446638c92f"],"User-Agent":["PostmanRuntime/7.44.1"]}}
+2025/07/10 11:21:54 [INFO] APP[HANDLER] [HTTP] Request completed status=200 latency=1.7443ms client_ip=::1
+2025/07/10 11:23:17 [INFO] APP[HANDLER] [HTTP] Request started method=POST path=/api/v1/patients/ remote_addr=[::1]:59143
+2025/07/10 11:23:17 [DEBUG] APP[HANDLER] [HTTP] Request details details={"remote_addr":"[::1]:59143","method":"POST","path":"/api/v1/patients/","headers":{"Accept":["*/*"],"Accept-Encoding":["gzip, deflate, br"],"Connection":["keep-alive"],"Content-Length":["61"],"Content-Type":["application/json"],"Postman-Token":["d06caad5-132e-4191-b383-f48d9f0a5a7a"],"User-Agent":["PostmanRuntime/7.44.1"]}}
+2025/07/10 11:23:17 [INFO] APP[HANDLER] [HTTP] Request completed status=402 latency=0s client_ip=::1
+2025/07/10 11:23:39 [INFO] APP[HANDLER] [HTTP] Request started method=POST path=/api/v1/patients/ remote_addr=[::1]:59161
+2025/07/10 11:23:39 [DEBUG] APP[HANDLER] [HTTP] Request details details={"remote_addr":"[::1]:59161","method":"POST","path":"/api/v1/patients/","headers":{"Accept":["*/*"],"Accept-Encoding":["gzip, deflate, br"],"Connection":["keep-alive"],"Content-Length":["62"],"Content-Type":["application/json"],"Postman-Token":["1b68afcc-56be-40df-88e7-2ec40234c55e"],"User-Agent":["PostmanRuntime/7.44.1"]}}
+2025/07/10 11:23:39 [INFO] APP[HANDLER] [HTTP] Request completed status=402 latency=0s client_ip=::1
+2025/07/10 11:24:08 [INFO] APP[HANDLER] [HTTP] Request started method=POST path=/api/v1/patients/ remote_addr=[::1]:59165
+2025/07/10 11:24:08 [DEBUG] APP[HANDLER] [HTTP] Request details details={"remote_addr":"[::1]:59165","method":"POST","path":"/api/v1/patients/","headers":{"Accept":["*/*"],"Accept-Encoding":["gzip, deflate, br"],"Connection":["keep-alive"],"Content-Length":["63"],"Content-Type":["application/json"],"Postman-Token":["e1279ea2-1b8b-4366-8395-21c100c0b813"],"User-Agent":["PostmanRuntime/7.44.1"]}}
+2025/07/10 11:24:08 [INFO] APP[HANDLER] [HTTP] Request completed status=200 latency=2.7324ms client_ip=::1
+2025/07/10 11:24:22 [INFO] APP[HANDLER] [HTTP] Request started method=GET path=/api/v1/patients/11 remote_addr=[::1]:59168
+2025/07/10 11:24:22 [DEBUG] APP[HANDLER] [HTTP] Request details details={"remote_addr":"[::1]:59168","method":"GET","path":"/api/v1/patients/11","headers":{"Accept":["*/*"],"Accept-Encoding":["gzip, deflate, br"],"Connection":["keep-alive"],"Content-Length":["63"],"Content-Type":["application/json"],"Postman-Token":["54224c77-c8e9-4b95-84f8-443579960b42"],"User-Agent":["PostmanRuntime/7.44.1"]}}
+2025/07/10 11:24:22 [INFO] APP[HANDLER] [HTTP] Request completed status=200 latency=513.6µs client_ip=::1
+2025/07/10 11:37:30 [INFO] APPLogging system initialized
+2025/07/10 11:37:30 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 11:37:54 [INFO] APPLogging system initialized
+2025/07/10 11:37:54 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 11:38:08 [INFO] APPLogging system initialized
+2025/07/10 11:48:47 [INFO] APPLogging system initialized
+2025/07/10 11:53:50 [INFO] APPLogging system initialized
+2025/07/10 11:54:38 [INFO] APPLogging system initialized
+2025/07/10 11:55:37 [INFO] APPLogging system initialized
+2025/07/10 12:08:26 [INFO] APPLogging system initialized
+2025/07/10 12:09:51 [INFO] APPLogging system initialized
+2025/07/10 12:10:36 [INFO] APPLogging system initialized
+2025/07/10 12:10:36 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 12:11:00 [INFO] APPLogging system initialized
+2025/07/10 12:11:00 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 12:11:37 [INFO] APPLogging system initialized
+2025/07/10 12:12:02 [INFO] APPLogging system initialized
+2025/07/10 12:12:32 [INFO] APPLogging system initialized
+2025/07/10 12:14:24 [INFO] APPLogging system initialized
+2025/07/10 12:16:23 [INFO] APPLogging system initialized
+2025/07/10 12:17:06 [INFO] APPLogging system initialized
+2025/07/10 12:18:06 [INFO] APPLogging system initialized
+2025/07/10 12:18:06 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+2025/07/10 12:23:18 [INFO] APPLogging system initialized
+2025/07/10 12:23:19 [INFO] APP[HANDLER] Handler initialized component=GENERAL
 2025/07/10 12:01:37 [INFO] APPLogging system initialized
 2025/07/10 12:01:39 [INFO] APP[HANDLER] Handler initialized component=GENERAL
+
