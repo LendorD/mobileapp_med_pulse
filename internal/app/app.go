@@ -114,7 +114,10 @@ var RepositoryModule = fx.Module("postgres_module",
 /* -------------------------------------------- */
 
 var UsecaseModule = fx.Module("usecases_module",
-	fx.Provide(usecases.NewUsecases),
+	fx.Provide(
+		usecases.NewUsecases,
+		usecases.NewAuthUsecase,
+	),
 )
 
 /* -------------------------------------------- */
