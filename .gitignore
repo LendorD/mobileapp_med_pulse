@@ -8,4 +8,4 @@ __debug_bin
 .idea/
 
 # Логи
-.logs/
+logs/
