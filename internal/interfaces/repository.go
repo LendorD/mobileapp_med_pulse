@@ -1,6 +1,7 @@
 package interfaces
 
 import (
+	"context"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
@@ -8,6 +9,7 @@ import (
 )
 
 type Repository interface {
+	AuthRepository
 	AllergyRepository
 	DoctorRepository
 	MedServiceRepository
@@ -26,6 +28,7 @@ type DoctorRepository interface {
 	GetDoctorByID(id uint) (entities.Doctor, error)
 	GetDoctorName(id uint) (string, error)
 	GetDoctorByLogin(login string) (entities.Doctor, error)
+
 	GetDoctorSpecialization(id uint) (string, error)
 	GetDoctorPassHash(id uint) (string, error)
 }
@@ -120,4 +123,8 @@ type PatientsAllergyRepository interface {
 	//GetPatientsAllergyByAllergyID(id uint) (*entities.PatientsAllergy, error)
 	//GetPatientsAllergiesByPatientID(patientID uint) ([]entities.PatientsAllergy, error)
 	//GetAllergyByPatientID(patientID uint) ([]entities.Allergy, error)
+}
+
+type AuthRepository interface {
+	GetByLogin(ctx context.Context, login string) (*entities.Doctor, error)
 }

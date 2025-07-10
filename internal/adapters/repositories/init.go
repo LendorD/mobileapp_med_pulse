@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/allergy"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/auth"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/contactInfo"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/doctor"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/medService"
@@ -19,13 +20,14 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
-
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
 type Repository struct {
+	interfaces.AuthRepository
 	interfaces.AllergyRepository
 	interfaces.DoctorRepository
 	interfaces.MedServiceRepository
@@ -68,9 +70,27 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 	if err := autoMigrate(db); err != nil {
 		return nil, fmt.Errorf("ошибка выполнения автомиграций: %w", err)
 
+
+// KONKOV: для теста авторизации написал, уберите, если знаете, что да как
+	if err := db.AutoMigrate(
+		&entities.Doctor{},
+		&entities.Reception{},
+		&entities.EmergencyReception{},
+		// ... другие модели
+	); err != nil {
+		return nil, fmt.Errorf("ошибка выполнения автомиграций: %w", err)
+	}
+
+	// Создание тестовых данных
+	if err := createTestDoctors(db); err != nil {
+		return nil, fmt.Errorf("ошибка создания тестовых данных: %w", err)
+//
+
+
 	}
 
 	return &Repository{
+		auth.NewAuthRepository(db),
 		allergy.NewAllergyRepository(db),
 		doctor.NewDoctorRepository(db),
 		medService.NewMedServiceRepository(db),
@@ -81,6 +101,7 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 		personalInfo.NewPersonalInfoRepository(db),
 		reception.NewReceptionRepository(db),
 	}, nil
+<<<<<<< HEAD
 
 }
 
@@ -313,4 +334,45 @@ func seedTestData(db *gorm.DB) error {
 func parseDate(dateStr string) time.Time {
 	t, _ := time.Parse("2006-01-02", dateStr)
 	return t
+
+
+// KONKOV: аналогично, для своих тестов делал, уберите, если не нужно
 }
+
+// createTestDoctors создает тестовых врачей при инициализации
+func createTestDoctors(db *gorm.DB) error {
+	testDoctors := []entities.Doctor{
+		{
+			FullName:       "Иванов Иван Иванович",
+			Specialization: "Терапевт",
+			Login:          "doctor1",
+			PasswordHash:   hashPassword("password1"),
+		},
+		{
+			FullName:       "Петров Петр Петрович",
+			Specialization: "Хирург",
+			Login:          "doctor2",
+			PasswordHash:   hashPassword("password2"),
+		},
+		{
+			FullName:       "Сидорова Анна Владимировна",
+			Specialization: "Невролог",
+			Login:          "doctor3",
+			PasswordHash:   hashPassword("password3"),
+		},
+	}
+
+	for _, doctor := range testDoctors {
+		if err := db.FirstOrCreate(&doctor, entities.Doctor{Login: doctor.Login}).Error; err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// hashPassword хэширует пароль для безопасного хранения
+func hashPassword(password string) string {
+	hash, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(hash)
+}
+//
