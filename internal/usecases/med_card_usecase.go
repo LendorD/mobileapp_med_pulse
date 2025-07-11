@@ -64,7 +64,7 @@ func (u *MedCardUsecase) GetMedCardByPatientID(id uint) (models.MedCardResponse,
 	}()
 
 	go func() {
-		allergies, err := u.allergyRepo.GetPatientAllergiesByID(id)
+		allergies, err := u.patientRepo.GetPatientAllergiesByID(id)
 		if err != nil {
 			errChan <- err
 			return

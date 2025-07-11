@@ -1,48 +1,97 @@
 package receptionSmp
 
 import (
+	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
 
-func (r *ReceptionSmpRepositoryImpl) CreateReceptionSmp(reception *entities.ReceptionSMP) error {
-	return r.db.Create(reception).Error
+func (r *ReceptionSmpRepositoryImpl) CreateReceptionSmp(reception entities.ReceptionSMP) error {
+	op := "repo.ReceptionSmp.CreateReceptionSmp"
+
+	if err := r.db.Create(reception).Error; err != nil {
+		return errors.NewDBError(op, err)
+	}
+	return nil
 }
 
-func (r *ReceptionSmpRepositoryImpl) UpdateReceptionSmp(reception *entities.ReceptionSMP) error {
-	return r.db.Save(reception).Error
+func (r *ReceptionSmpRepositoryImpl) UpdateReceptionSmp(id uint, updateMap map[string]interface{}) (uint, error) {
+	op := "repo.ReceptionSmp.UpdateReceptionSmp"
+
+	var updatedReception entities.ReceptionSMP
+	result := r.db.
+		Clauses(clause.Returning{}).
+		Model(&updatedReception).
+		Where("id = ?", id).
+		Updates(updateMap)
+
+	if result.Error != nil {
+		return 0, errors.NewDBError(op, result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return 0, errors.NewNotFoundError("reception not found")
+	}
+
+	return updatedReception.ID, nil
 }
 
 func (r *ReceptionSmpRepositoryImpl) DeleteReceptionSmp(id uint) error {
-	return r.db.Delete(&entities.ReceptionSMP{}, id).Error
+	op := "repo.ReceptionSmp.DeleteReceptionSmp"
+	result := r.db.Delete(&entities.ReceptionSMP{}, id)
+	if result.Error != nil {
+		return errors.NewDBError(op, result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return errors.NewNotFoundError("reception not found")
+	}
+	return nil
 }
 
-func (r *ReceptionSmpRepositoryImpl) GetReceptionSmpByID(id uint) (*entities.ReceptionSMP, error) {
+func (r *ReceptionSmpRepositoryImpl) GetReceptionSmpByID(id uint) (entities.ReceptionSMP, error) {
+	op := "repo.ReceptionSmp.GetReceptionSmpByID"
+
 	var reception entities.ReceptionSMP
 	if err := r.db.First(&reception, id).Error; err != nil {
-		return nil, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return entities.ReceptionSMP{}, errors.NewNotFoundError("reception not found")
+		}
+		return entities.ReceptionSMP{}, errors.NewDBError(op, err)
 	}
-	return &reception, nil
+	return reception, nil
 }
 
 func (r *ReceptionSmpRepositoryImpl) GetReceptionSmpByDoctorID(doctorID uint) ([]entities.ReceptionSMP, error) {
+	op := "repo.ReceptionSmp.GetReceptionSmpByDoctorID"
+
 	var receptions []entities.ReceptionSMP
-	err := r.db.Where("doctor_id = ?", doctorID).Find(&receptions).Error
-	return receptions, err
+	if err := r.db.Where("doctor_id = ?", doctorID).Find(&receptions).Error; err != nil {
+		return nil, errors.NewDBError(op, err)
+	}
+	return receptions, nil
 }
 
 func (r *ReceptionSmpRepositoryImpl) GetReceptionSmpByPatientID(patientID uint) ([]entities.ReceptionSMP, error) {
+	op := "repo.ReceptionSmp.GetReceptionSmpByPatientID"
+
 	var receptions []entities.ReceptionSMP
-	err := r.db.Where("patient_id = ?", patientID).Find(&receptions).Error
-	return receptions, err
+	if err := r.db.Where("patient_id = ?", patientID).Find(&receptions).Error; err != nil {
+		return nil, errors.NewDBError(op, err)
+	}
+	return receptions, nil
 }
 
 func (r *ReceptionSmpRepositoryImpl) GetReceptionSmpByDateRange(start, end time.Time) ([]entities.ReceptionSMP, error) {
+	op := "repo.ReceptionSmp.GetReceptionSmpByDateRange"
+
 	var receptions []entities.ReceptionSMP
-	err := r.db.Where("date BETWEEN ? AND ?", start, end).Find(&receptions).Error
-	return receptions, err
+	if err := r.db.Where("date BETWEEN ? AND ?", start, end).Find(&receptions).Error; err != nil {
+		return nil, errors.NewDBError(op, err)
+	}
+	return receptions, nil
 }
 
 func getReceptionPriority(status entities.ReceptionStatus) int {
