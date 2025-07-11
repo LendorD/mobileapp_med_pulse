@@ -65,26 +65,11 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 		return nil, fmt.Errorf("ошибка подключения к базе данных: %w", err)
 	}
 
-	// // Выполнение автомиграций
-	// if err := autoMigrate(db); err != nil {
-	// 	return nil, fmt.Errorf("ошибка выполнения автомиграций: %w", err)
+	// Выполнение автомиграций
+	if err := autoMigrate(db); err != nil {
+		return nil, fmt.Errorf("ошибка выполнения автомиграций: %w", err)
 
-	// }
-
-	// // KONKOV: для теста авторизации написал, уберите, если знаете, что да как
-	// 	if err := db.AutoMigrate(
-	// 		&entities.Doctor{},
-	// 		&entities.Reception{},
-	// 		&entities.EmergencyReception{},
-	// 		// ... другие модели
-	// 	); err != nil {
-	// 		return nil, fmt.Errorf("ошибка выполнения автомиграций: %w", err)
-	// 	}
-	// Создание тестовых данных
-	// 	if err := createTestDoctors(db); err != nil {
-	// 		return nil, fmt.Errorf("ошибка создания тестовых данных: %w", err)
-	// //
-	// 	}
+	}
 
 	return &Repository{
 		auth.NewAuthRepository(db),
@@ -103,20 +88,16 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 
 // autoMigrate - выполнение автомиграций для моделей
 func autoMigrate(db *gorm.DB) error {
-	// Отключаем проверку внешних ключей для PostgreSQL
-	if err := db.Exec("SET session_replication_role = 'replica'").Error; err != nil {
-		return fmt.Errorf("failed to disable foreign key checks: %w", err)
-	}
 
 	// Удаляем таблицы в правильном порядке зависимостей
 	tables := []string{
 		"reception_smp_med_services",
 		"emergency_call_patients",
 		"patient_allergy",
-		"receptions_smp_patients",
-		"reception_hospital",
-		"reception_smp",
-		"emergency_call",
+		"receptions_smp_patient",
+		"reception_hospitals",
+		"reception_smps",
+		"emergency_calls",
 		"contact_infos",
 		"personal_infos",
 		"patients",
@@ -148,11 +129,6 @@ func autoMigrate(db *gorm.DB) error {
 		return fmt.Errorf("failed to auto-migrate: %w", err)
 	}
 
-	// Включаем проверку внешних ключей обратно
-	if err := db.Exec("SET session_replication_role = 'origin'").Error; err != nil {
-		return fmt.Errorf("failed to enable foreign key checks: %w", err)
-	}
-
 	// Заполняем тестовыми данными
 	if err := seedTestData(db); err != nil {
 		return fmt.Errorf("failed to seed test data: %w", err)
@@ -160,32 +136,6 @@ func autoMigrate(db *gorm.DB) error {
 
 	return nil
 }
-
-// func dropTables(db *gorm.DB) error {
-// 	tables := []string{
-// 		"reception_smp_med_services",
-// 		"emergency_call_patients",
-// 		"patient_allergy",
-// 		"receptions_smp_patients",
-// 		"reception_hospital",
-// 		"reception_smp",
-// 		"emergency_call",
-// 		"contact_infos",
-// 		"personal_infos",
-// 		"patients",
-// 		"doctors",
-// 		"med_services",
-// 		"allergies",
-// 	}
-
-// 	for _, table := range tables {
-// 		if err := db.Migrator().DropTable(table); err != nil {
-// 			return fmt.Errorf("failed to drop table %s: %w", table, err)
-// 		}
-// 	}
-
-// 	return nil
-// }
 
 func seedTestData(db *gorm.DB) error {
 	// 1. Сначала создаем всех докторов
@@ -214,6 +164,7 @@ func seedTestData(db *gorm.DB) error {
 		if err := db.Create(doc).Error; err != nil {
 			return fmt.Errorf("failed to create doctor %s: %w", doc.FullName, err)
 		}
+		fmt.Printf("Doctor %s has ID %d\n", doc.FullName, doc.ID)
 	}
 
 	// 2. Создаем медицинские услуги

@@ -2,7 +2,6 @@ package patient
 
 import (
 	"fmt"
-
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"gorm.io/gorm/clause"
@@ -15,18 +14,16 @@ func (r *PatientRepositoryImpl) CreatePatient(patient entities.Patient) (uint, e
 		if err := r.db.Create(patient.PersonalInfo).Error; err != nil {
 			return 0, errors.NewDBError(op, fmt.Errorf("failed to create PersonalInfo: %w", err))
 		}
-		patient.PersonalInfoID = &patient.PersonalInfo.ID // Используем указатель
+		patient.PersonalInfoID = &patient.PersonalInfo.ID
 	}
 
-	// Затем создаем ContactInfo, если он передан
 	if patient.ContactInfo != nil {
 		if err := r.db.Create(patient.ContactInfo).Error; err != nil {
 			return 0, errors.NewDBError(op, fmt.Errorf("failed to create ContactInfo: %w", err))
 		}
-		patient.ContactInfoID = &patient.ContactInfo.ID // Используем указатель
+		patient.ContactInfoID = &patient.ContactInfo.ID
 	}
 
-	// Теперь создаем Patient
 	if err := r.db.Create(&patient).Error; err != nil {
 		return 0, errors.NewDBError(op, fmt.Errorf("failed to create Patient: %w", err))
 	}
@@ -97,7 +94,7 @@ func (r *PatientRepositoryImpl) GetAllPatients() ([]entities.Patient, error) {
 	}
 
 	if len(patients) == 0 {
-		//return nil,  errors.NewDBError(op, error(Nor))
+		return nil, errors.NewDBError(op, errors.NewDBError(op, nil))
 	}
 
 	return patients, nil
@@ -117,8 +114,23 @@ func (r *PatientRepositoryImpl) GetPatientsByFullName(name string) ([]entities.P
 	}
 
 	if len(patients) == 0 {
-		//return nil, errors.NewDBError(op, )
+		return nil, errors.NewDBError(op, errors.NewNotFoundError("no patients found"))
 	}
 
 	return patients, nil
+}
+
+func (r *PatientRepositoryImpl) GetPatientAllergiesByID(patientID uint) ([]entities.Allergy, error) {
+	op := "repo.Allergy.GetPatientAllergiesByID"
+
+	var patient entities.Patient
+	err := r.db.
+		Preload("Allergy").
+		First(&patient, patientID).Error
+
+	if err != nil {
+		return nil, errors.NewDBError(op, err)
+	}
+
+	return patient.Allergy, nil
 }

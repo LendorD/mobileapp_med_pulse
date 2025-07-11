@@ -84,28 +84,10 @@ func ProvideRouter(h *Handler) http.Handler {
 	patientGroup.DELETE("/:pat_id", h.DeletePatient)
 	patientGroup.PATCH("/:pat_id", h.UpdatePatient)
 
-	// emergencyGroup := baseRouter.Group("/emergency-group")
-	// emergencyGroup.GET("/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
-	r.GET("/emergency/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
-
-	// r.GET("/receptions/:doctor_id", h.GetReceptionsByDoctorAndDate)
-
 	// Группа маршрутов для patientContactInfo
 	contactInfoGroup := baseRouter.Group("/contact_info")
 	contactInfoGroup.POST("/:pat_id", h.CreateContactInfo)
 	contactInfoGroup.GET("/:pat_id", h.GetContactInfoByPatientID)
-	/*
-		contactInfoGroup.GET("/:pat_id", h.GetContactInfoByPatientID)
-		contactInfoGroup.DELETE("/:pat_id", h.DeleteContactInfoByPatientID)
-		contactInfoGroup.PATCH("/:pat_id", h.UpdateContactInfoByPatientID)
 
-		// Группа маршрутов для patientPersonalInfo
-		personalInfoGroup := baseRouter.Group("/pers_info")
-		personalInfoGroup.POST("/", h.CreatePersonalInfo)
-		personalInfoGroup.GET("/:pat_id", h.GetPersonalInfoByPatientID)
-		personalInfoGroup.DELETE("/:pat_id", h.DeletePersonalInfoByPatientID)
-		personalInfoGroup.PATCH("/:pat_id", h.UpdatePersonalInfoByPatientID)
-
-	*/
 	return r
 }
