@@ -53,12 +53,13 @@ func ProvideRouter(h *Handler) http.Handler {
 
 	r.Use(LoggingMiddleware(h.logger))
 	baseRouter := r.Group("/api/v1")
-	//r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Группа маршрутов для main
 	doctorGroup := baseRouter.Group("/doctor")
 	doctorGroup.POST("/", h.CreateDoctor)
 	doctorGroup.GET("/:id", h.GetDoctorByID)
+
+	medCardGroup := baseRouter.Group("/medcard")
+	medCardGroup.GET("/:id", h.GetMedCardByPatientID)
 
 	// Группа маршрутов для smp
 	//smpGroup := baseRouter.Group("/smp")
@@ -75,13 +76,6 @@ func ProvideRouter(h *Handler) http.Handler {
 	{
 		authGroup.POST("/login", gin.WrapF(authHandler.LoginDoctor))
 	}
-
-	// Другие группы роутов
-	// protected := r.Group("/api")
-	// protected.Use(AuthMiddleware(secretKey))
-	// {
-	//     protected.GET("/doctors", h.doctorHandler.GetAll)
-	// }
 
 	// Группа маршрутов для patients
 	patientGroup := baseRouter.Group("/patients")

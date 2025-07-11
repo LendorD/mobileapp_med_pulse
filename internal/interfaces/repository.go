@@ -35,12 +35,12 @@ type DoctorRepository interface {
 }
 
 type PersonalInfoRepository interface {
-	CreatePersonalInfo(info *entities.PersonalInfo) error
-	UpdatePersonalInfo(info *entities.PersonalInfo) error
+	CreatePersonalInfo(info entities.PersonalInfo) error
+	UpdatePersonalInfo(info entities.PersonalInfo) error
 	DeletePersonalInfo(id uint) error
 
-	GetPersonalInfoByID(id uint) (*entities.PersonalInfo, error)
-	GetPersonalInfoByPatientID(patientID uint) (*entities.PersonalInfo, error)
+	GetPersonalInfoByID(id uint) (entities.PersonalInfo, error)
+	GetPersonalInfoByPatientID(patientID uint) (entities.PersonalInfo, error)
 }
 
 type EmergencyReceptionRepository interface {
