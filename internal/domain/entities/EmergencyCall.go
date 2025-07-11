@@ -15,22 +15,6 @@ const (
 	EmergencyStatusNoShow    EmergencyStatus = "no_show"   // "Не явился"
 )
 
-// type EmergencyReception struct {
-// 	gorm.Model
-
-// 	DoctorID  uint            `gorm:"not null;index" json:"doctor_id" example:"1" rus:"ID врача"`
-// 	PatientID uint            `gorm:"not null;index" json:"patient_id" example:"1" rus:"ID пациента"`
-// 	Status    EmergencyStatus `json:"status"`
-// 	Priority  bool            `json:"priority"` // 1 - экстренный, 0 - неотложный
-// 	Address   string          `gorm:"not null" json:"address" example:"Москва, ул. Ленина, д. 15" rus:"Адрес"`
-// 	Date      time.Time       `gorm:"not null" json:"date" example:"2023-10-15T14:30:00Z" rus:"Дата приема"`
-
-// 	Diagnosis       string `json:"diagnosis" example:"ОРВИ" rus:"Диагноз"`
-// 	Recommendations string `json:"recommendations" example:"Постельный режим" rus:"Рекомендации"`
-
-// 	Services []MedService `gorm:"many2many:emergency_reception_med_services;"`
-// }
-
 // Список вызовов скорой помощи
 type EmergencyCall struct {
 	gorm.Model

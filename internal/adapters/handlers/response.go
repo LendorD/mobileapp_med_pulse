@@ -1,10 +1,7 @@
 package handlers
 
 import (
-<<<<<<< HEAD
-=======
 	"encoding/json"
->>>>>>> Konkov
 	"net/http"
 
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"

@@ -77,7 +77,7 @@ func (u *MedCardUsecase) GetMedCardByPatientID(id uint) (models.MedCardResponse,
 	var personalInfo entities.PersonalInfo
 	var contactInfo entities.ContactInfo
 	var allergies []entities.Allergy
-	var appErr *errors.AppError
+	var appErr error
 
 	// Ожидаем получения всех данных или первой ошибки
 	for i := 0; i < 4; i++ {
@@ -99,7 +99,7 @@ func (u *MedCardUsecase) GetMedCardByPatientID(id uint) (models.MedCardResponse,
 
 	// Если была ошибка, возвращаем ее
 	if appErr != nil {
-		return models.MedCardResponse{}, appErr
+		return models.MedCardResponse{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to get medCard", appErr, true)
 	}
 
 	// Преобразуем сущности в response-модели
