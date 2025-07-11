@@ -10,6 +10,6 @@ type Doctor struct {
 	Login          string `gorm:"unique;not null" json:"login" example:"doctor_ivanov" rus:"Логин"`
 	PasswordHash   string `gorm:"not null" json:"-" rus:"Хэш пароля"`
 
-	Reception          []Reception          `gorm:"foreignKey:DoctorID"`
-	EmergencyReception []EmergencyReception `gorm:"foreignKey:DoctorID"`
+	ReceptionsHospital []ReceptionHospital `gorm:"foreignKey:DoctorID" json:"receptions" rus:"Приемы"`
+	EmergencyCall      []EmergencyCall     `gorm:"foreignKey:DoctorID" json:"emergency_calls"`
 }

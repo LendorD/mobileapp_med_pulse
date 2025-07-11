@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 	"net/http"
+
+	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/usecases"
@@ -24,18 +25,21 @@ type Handler struct {
 	authUC  *usecases.AuthUsecase // Добавляем AuthUsecase напрямую
 }
 
-func NewHandler(usecase interfaces.Usecases, parentLogger *logging.Logger) *Handler {
-	handlerLogger := parentLogger.WithPrefix("HANDLER")
+// // NewHandler создает новый экземпляр Handler со всеми зависимостями
+// func NewHandler(usecase interfaces.Usecases) *Handler {
+// 	return &Handler{
+// 		usecase: usecase,
+// 	}
+// }
 
+// NewHandler создает новый экземпляр Handler со всеми зависимостями
+func NewHandler(usecase interfaces.Usecases, parentLogger *logging.Logger, authUC *usecases.AuthUsecase) *Handler {
+	//logger := logging.NewLogger("HANDLER", "GENERAL", parentLogger)
+
+	handlerLogger := parentLogger.WithPrefix("HANDLER")
 	handlerLogger.Info("Handler initialized",
 		"component", "GENERAL",
 	)
-
-// NewHandler создает новый экземпляр Handler со всеми зависимостями
-func NewHandler(usecase interfaces.Usecases, authUC *usecases.AuthUsecase) *Handler {
-	//logger := logging.NewLogger("HANDLER", "GENERAL", parentLogger)
-
-
 	return &Handler{
 		logger:  handlerLogger,
 		usecase: usecase,
@@ -49,17 +53,17 @@ func ProvideRouter(h *Handler) http.Handler {
 
 	r.Use(LoggingMiddleware(h.logger))
 	baseRouter := r.Group("/api/v1")
-	//r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Группа маршрутов для main
 	doctorGroup := baseRouter.Group("/doctor")
 	doctorGroup.POST("/", h.CreateDoctor)
 	doctorGroup.GET("/:id", h.GetDoctorByID)
 
+	medCardGroup := baseRouter.Group("/medcard")
+	medCardGroup.GET("/:id", h.GetMedCardByPatientID)
+
 	// Группа маршрутов для smp
 	//smpGroup := baseRouter.Group("/smp")
 	//smpGroup.GET("/:doc_id/")
-
 
 	// Swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -73,13 +77,6 @@ func ProvideRouter(h *Handler) http.Handler {
 		authGroup.POST("/login", gin.WrapF(authHandler.LoginDoctor))
 	}
 
-	// Другие группы роутов
-	// protected := r.Group("/api")
-	// protected.Use(AuthMiddleware(secretKey))
-	// {
-	//     protected.GET("/doctors", h.doctorHandler.GetAll)
-	// }
-
 	// Группа маршрутов для patients
 	patientGroup := baseRouter.Group("/patients")
 	patientGroup.POST("/", h.CreatePatient)
@@ -91,7 +88,7 @@ func ProvideRouter(h *Handler) http.Handler {
 	// emergencyGroup.GET("/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
 	r.GET("/emergency/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
 
-	r.GET("/receptions/:doctor_id", h.GetReceptionsByDoctorAndDate)
+	// r.GET("/receptions/:doctor_id", h.GetReceptionsByDoctorAndDate)
 
 	// Группа маршрутов для patientContactInfo
 	contactInfoGroup := baseRouter.Group("/contact_info")

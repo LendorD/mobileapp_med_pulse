@@ -31,7 +31,6 @@ func (u *DoctorUsecase) CreateDoctor(doctor *models.CreateDoctorRequest) (entiti
 	createDoctor := entities.Doctor{
 		FullName:       doctor.FullName,
 		Login:          doctor.Login,
-		Email:          doctor.Email,
 		PasswordHash:   string(passwordHash),
 		Specialization: doctor.Specialization,
 	}

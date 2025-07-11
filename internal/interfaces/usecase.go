@@ -16,9 +16,21 @@ type Usecases interface {
 	MedServiceUsecase
 	PatientUsecase
 	PersonalInfoUsecase
-	ReceptionUsecase
+	ReceptionHospitalUsecase
+	ReceptionSmpUsecase
+	MedCardUsecase
 }
 
+type ReceptionHospitalUsecase interface {
+}
+
+type ReceptionSmpUsecase interface {
+}
+
+type MedCardUsecase interface {
+	GetMedCardByPatientID(id uint) (models.MedCardResponse, *errors.AppError)
+	UpdateMedCard(input *models.UpdateDoctorRequest) (models.MedCardResponse, *errors.AppError)
+}
 type AllergyUsecase interface {
 	AddAllergyToPatient(patientID, allergyID uint, description string) (entities.Allergy, *errors.AppError)
 	GetAllergyByPatientID(patientID uint) ([]entities.Allergy, *errors.AppError)
