@@ -45,8 +45,8 @@ func (r *AllergyRepositoryImpl) GetPatientAllergiesByID(patientID uint) ([]entit
 
 	// Используем JOIN через patient_allergies таблицу
 	err := r.db.
-		Joins("JOIN patient_allergies ON patient_allergies.allergy_id = allergies.id").
-		Where("patient_allergies.patient_id = ?", patientID).
+		Joins("JOIN patient_allergy ON patient_allergy.allergy_id = allergies.id").
+		Where("patient_allergy.patient_id = ?", patientID).
 		Find(&allergies).Error
 
 	if err != nil {

@@ -51,7 +51,7 @@ func (u *MedCardUsecase) GetMedCardByPatientID(id uint) (models.MedCardResponse,
 			errChan <- err
 			return
 		}
-		personalInfoChan <- *personalInfo
+		personalInfoChan <- personalInfo
 	}()
 
 	go func() {

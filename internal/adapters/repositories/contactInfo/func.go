@@ -19,7 +19,7 @@ func (r *ContactInfoRepositoryImpl) CreateContactInfo(info entities.ContactInfo)
 
 // TODO: переписать все что ниже на норм логику
 func (r *ContactInfoRepositoryImpl) UpdateContactInfo(info entities.ContactInfo) error {
-	return r.db.Save(info).Error
+	return r.db.Save(&info).Error
 }
 
 func (r *ContactInfoRepositoryImpl) DeleteContactInfo(id uint) error {
