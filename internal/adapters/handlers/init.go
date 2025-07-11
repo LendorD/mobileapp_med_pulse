@@ -25,27 +25,27 @@ type Handler struct {
 	authUC  *usecases.AuthUsecase // Добавляем AuthUsecase напрямую
 }
 
-// NewHandler создает новый экземпляр Handler со всеми зависимостями
-func NewHandler(usecase interfaces.Usecases) *Handler {
-	return &Handler{
-		usecase: usecase,
-	}
-}
-
 // // NewHandler создает новый экземпляр Handler со всеми зависимостями
-// func NewHandler(usecase interfaces.Usecases, parentLogger *logging.Logger, authUC *usecases.AuthUsecase) *Handler {
-// 	//logger := logging.NewLogger("HANDLER", "GENERAL", parentLogger)
-
-// 	handlerLogger := parentLogger.WithPrefix("HANDLER")
-// 	handlerLogger.Info("Handler initialized",
-// 		"component", "GENERAL",
-// 	)
+// func NewHandler(usecase interfaces.Usecases) *Handler {
 // 	return &Handler{
-// 		logger:  handlerLogger,
 // 		usecase: usecase,
-// 		authUC:  authUC,
 // 	}
 // }
+
+// NewHandler создает новый экземпляр Handler со всеми зависимостями
+func NewHandler(usecase interfaces.Usecases, parentLogger *logging.Logger, authUC *usecases.AuthUsecase) *Handler {
+	//logger := logging.NewLogger("HANDLER", "GENERAL", parentLogger)
+
+	handlerLogger := parentLogger.WithPrefix("HANDLER")
+	handlerLogger.Info("Handler initialized",
+		"component", "GENERAL",
+	)
+	return &Handler{
+		logger:  handlerLogger,
+		usecase: usecase,
+		authUC:  authUC,
+	}
+}
 
 // ProvideRouter создает и настраивает маршруты
 func ProvideRouter(h *Handler) http.Handler {
