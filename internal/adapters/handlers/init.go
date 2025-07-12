@@ -4,13 +4,12 @@ import (
 	"net/http"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/swagger"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/usecases"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 var validate *validator.Validate
@@ -22,20 +21,11 @@ func init() {
 type Handler struct {
 	logger  *logging.Logger
 	usecase interfaces.Usecases
-	authUC  *usecases.AuthUsecase // Добавляем AuthUsecase напрямую
+	authUC  *usecases.AuthUsecase
 }
-
-// // NewHandler создает новый экземпляр Handler со всеми зависимостями
-// func NewHandler(usecase interfaces.Usecases) *Handler {
-// 	return &Handler{
-// 		usecase: usecase,
-// 	}
-// }
 
 // NewHandler создает новый экземпляр Handler со всеми зависимостями
 func NewHandler(usecase interfaces.Usecases, parentLogger *logging.Logger, authUC *usecases.AuthUsecase) *Handler {
-	//logger := logging.NewLogger("HANDLER", "GENERAL", parentLogger)
-
 	handlerLogger := parentLogger.WithPrefix("HANDLER")
 	handlerLogger.Info("Handler initialized",
 		"component", "GENERAL",
@@ -48,10 +38,14 @@ func NewHandler(usecase interfaces.Usecases, parentLogger *logging.Logger, authU
 }
 
 // ProvideRouter создает и настраивает маршруты
-func ProvideRouter(h *Handler) http.Handler {
+func ProvideRouter(h *Handler, swaggerCfg *swagger.Config) http.Handler {
 	r := gin.Default()
 
 	r.Use(LoggingMiddleware(h.logger))
+
+	// Konkov: Инициализация Swagger, самого его вынес в middleware
+	swagger.Setup(r, swaggerCfg)
+
 	baseRouter := r.Group("/api/v1")
 
 	doctorGroup := baseRouter.Group("/doctor")
@@ -60,13 +54,6 @@ func ProvideRouter(h *Handler) http.Handler {
 
 	medCardGroup := baseRouter.Group("/medcard")
 	medCardGroup.GET("/:id", h.GetMedCardByPatientID)
-
-	// Группа маршрутов для smp
-	//smpGroup := baseRouter.Group("/smp")
-	//smpGroup.GET("/:doc_id/")
-
-	// Swagger
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Создаем AuthHandler
 	authHandler := NewAuthHandler(h.authUC)
