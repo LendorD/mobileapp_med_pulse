@@ -105,7 +105,7 @@ func (u *MedCardUsecase) GetMedCardByPatientID(id uint) (models.MedCardResponse,
 	// Преобразуем сущности в response-модели
 	medCard := models.MedCardResponse{
 		Patient: models.ShortPatientResponse{
-			Model:     patient.Model,
+			ID:        patient.Model.ID,
 			FullName:  patient.FullName,
 			BirthDate: patient.BirthDate,
 			IsMale:    patient.IsMale,

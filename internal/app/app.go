@@ -9,6 +9,7 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/auth"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/swagger"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/usecases"
 	"go.uber.org/fx"
@@ -18,7 +19,6 @@ func New() *fx.App {
 	return fx.New(
 		fx.Provide(
 			config.LoadConfig,
-			// Добавляем провайдер для JWT secret
 			func(cfg *config.Config) string { return cfg.JWTSecret },
 		),
 		LoggingModule,
@@ -52,7 +52,7 @@ var LoggingModule = fx.Module("logging_module",
 
 func InvokeHttpServer(lc fx.Lifecycle, h http.Handler) {
 	server := &http.Server{
-		Addr:    ":8080", // Упрощаем - используем хардкод порта
+		Addr:    ":8080",
 		Handler: h,
 	}
 
@@ -67,28 +67,30 @@ func InvokeHttpServer(lc fx.Lifecycle, h http.Handler) {
 	})
 }
 
+// Konkov: Swagger-провайдер, тут конфигурируется Swaggo
+func NewSwaggerConfig(cfg *config.Config) *swagger.Config {
+	return &swagger.Config{
+		Enabled: true,       // Или cfg.Swagger.Enable, если есть
+		Path:    "/swagger", // Базовый путь для Swagger
+	}
+}
+
 var HttpServerModule = fx.Module("http_server_module",
 	fx.Provide(
+		NewSwaggerConfig, // <- Добавили сюда
 		handlers.NewHandler,
 		handlers.ProvideRouter,
 	),
-
 	fx.Invoke(InvokeHttpServer),
 )
-
-/* -------------------------------------------- */
 
 var ServiceModule = fx.Module("service_module",
 	fx.Provide(services.NewService),
 )
 
-/* -------------------------------------------- */
-
 var RepositoryModule = fx.Module("postgres_module",
 	fx.Provide(repositories.NewRepository),
 )
-
-/* -------------------------------------------- */
 
 var UsecaseModule = fx.Module("usecases_module",
 	fx.Provide(
@@ -96,8 +98,6 @@ var UsecaseModule = fx.Module("usecases_module",
 		usecases.NewAuthUsecase,
 	),
 )
-
-/* -------------------------------------------- */
 
 var AuthModule = fx.Module("auth_module",
 	fx.Provide(
@@ -112,12 +112,9 @@ var AuthModule = fx.Module("auth_module",
 	),
 )
 
-/* -------------------------------------------- */
-
 func IntToUint(c int) uint {
 	if c < 0 {
 		panic([2]any{"a negative number", c})
 	}
-
 	return uint(c)
 }
