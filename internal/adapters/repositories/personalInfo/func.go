@@ -2,6 +2,7 @@ package personalInfo
 
 import (
 	"fmt"
+
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"gorm.io/gorm"
@@ -75,4 +76,24 @@ func (r *PersonalInfoRepositoryImpl) GetPersonalInfoByPatientID(patientID uint) 
 		return entities.PersonalInfo{}, errors.NewDBError(op, err)
 	}
 	return info, nil
+}
+
+func (r *PersonalInfoRepositoryImpl) UpdatePersonalInfoByPatientID(id uint, updateMap map[string]interface{}) (uint, error) {
+	op := "repo.PersonalInfo.UpdateInfoByPatientID"
+
+	var updatedContact entities.PersonalInfo
+	result := r.db.
+		Clauses(clause.Returning{}).
+		Model(&updatedContact).
+		Where("patient_id = ?", id).
+		Updates(updateMap)
+
+	if result.Error != nil {
+		return 0, errors.NewDBError(op, result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return 0, errors.NewNotFoundError("contact info not found")
+	}
+
+	return updatedContact.ID, nil
 }

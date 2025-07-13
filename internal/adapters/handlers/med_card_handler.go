@@ -19,7 +19,7 @@ import (
 // @Failure 400 {object} ResultError "Некорректный ID"
 // @Failure 404 {object} ResultError "Медкарта не найдена"
 // @Failure 500 {object} ResultError "Внутренняя ошибка"
-// @Router /doctor/{id} [get]
+// @Router /medcard/{id} [get]
 func (h *Handler) GetMedCardByPatientID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
@@ -47,9 +47,9 @@ func (h *Handler) GetMedCardByPatientID(c *gin.Context) {
 // @Failure 404 {object} ResultError "Врач не найден"
 // @Failure 422 {object} ResultError "Ошибка валидации"
 // @Failure 500 {object} ResultError "Внутренняя ошибка"
-// @Router /doctor [put]
+// @Router /medcard [put]
 func (h *Handler) UpdateMedCard(c *gin.Context) {
-	var input models.UpdateDoctorRequest
+	var input models.UpdateMedCardRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "Error create DoctorRequest", true)
 		return
@@ -60,8 +60,8 @@ func (h *Handler) UpdateMedCard(c *gin.Context) {
 		return
 	}
 
-	doctor, eerr := h.usecase.UpdateDoctor(&input)
-	if eerr.Err != nil {
+	doctor, eerr := h.usecase.UpdateMedCard(&input)
+	if eerr != nil {
 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
 		return
 	}

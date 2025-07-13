@@ -2,6 +2,7 @@ package contactInfo
 
 import (
 	"fmt"
+
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -27,6 +28,26 @@ func (r *ContactInfoRepositoryImpl) UpdateContactInfo(id uint, updateMap map[str
 		Clauses(clause.Returning{}).
 		Model(&updatedContact).
 		Where("id = ?", id).
+		Updates(updateMap)
+
+	if result.Error != nil {
+		return 0, errors.NewDBError(op, result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return 0, errors.NewNotFoundError("contact info not found")
+	}
+
+	return updatedContact.ID, nil
+}
+
+func (r *ContactInfoRepositoryImpl) UpdateContactInfoByPatientID(id uint, updateMap map[string]interface{}) (uint, error) {
+	op := "repo.ContactInfo.UpdateContactInfo"
+
+	var updatedContact entities.ContactInfo
+	result := r.db.
+		Clauses(clause.Returning{}).
+		Model(&updatedContact).
+		Where("patient_id = ?", id).
 		Updates(updateMap)
 
 	if result.Error != nil {
