@@ -1,4 +1,4 @@
-// @title Booking-service API
+// @title ClinicHub API
 // @version 1.0.0
 // @description API для работы с приёмами пациентов
 // @contact.name API Support
