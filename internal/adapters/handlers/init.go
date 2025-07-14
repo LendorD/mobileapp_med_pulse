@@ -55,32 +55,38 @@ func ProvideRouter(h *Handler) http.Handler {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.Use(LoggingMiddleware(h.logger))
 
-	// Группа аутентификации
-	// Создаем AuthHandler
-
+	// Роутеры авторизации
 	authHandler := NewAuthHandler(h.authUC)
 	authGroup := r.Group("/auth")
 	{
 		authGroup.POST("/login", gin.WrapF(authHandler.LoginDoctor))
 	}
 
+	// Основной маршрут
 	baseRouter := r.Group("/api/v1")
 
+	// Роутеры доктора
 	doctorGroup := baseRouter.Group("/doctor")
 	doctorGroup.POST("/", h.CreateDoctor)
 	doctorGroup.GET("/:id", h.GetDoctorByID)
+	doctorGroup.GET("/patients/:doc_id", h.GetPatientsByDoctorID)
 
+	// Роутеры медкарты
 	medCardGroup := baseRouter.Group("/medcard")
 	medCardGroup.GET("/:id", h.GetMedCardByPatientID)
 	medCardGroup.PUT("/:id", h.UpdateMedCard)
 
-	// Группа маршрутов для patients
+	receptionHospital := baseRouter.Group("/recepHospital")
+	receptionHospital.GET("/:pat_id", h.GetReceptionsHospitalByPatientID)
+
+	// Роутеры пациентов
 	patientGroup := baseRouter.Group("/patients")
 	patientGroup.POST("/", h.CreatePatient)
 	patientGroup.GET("/:pat_id", h.GetPatientByID)
 	patientGroup.DELETE("/:pat_id", h.DeletePatient)
 	patientGroup.PATCH("/:pat_id", h.UpdatePatient)
 
+	// Роутеры СМП
 	// emergencyGroup := baseRouter.Group("/emergency-group")
 	// emergencyGroup.GET("/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
 	r.GET("/emergency/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
@@ -91,18 +97,6 @@ func ProvideRouter(h *Handler) http.Handler {
 	contactInfoGroup := baseRouter.Group("/contact_info")
 	contactInfoGroup.POST("/:pat_id", h.CreateContactInfo)
 	contactInfoGroup.GET("/:pat_id", h.GetContactInfoByPatientID)
-	/*
-		contactInfoGroup.GET("/:pat_id", h.GetContactInfoByPatientID)
-		contactInfoGroup.DELETE("/:pat_id", h.DeleteContactInfoByPatientID)
-		contactInfoGroup.PATCH("/:pat_id", h.UpdateContactInfoByPatientID)
 
-		// Группа маршрутов для patientPersonalInfo
-		personalInfoGroup := baseRouter.Group("/pers_info")
-		personalInfoGroup.POST("/", h.CreatePersonalInfo)
-		personalInfoGroup.GET("/:pat_id", h.GetPersonalInfoByPatientID)
-		personalInfoGroup.DELETE("/:pat_id", h.DeletePersonalInfoByPatientID)
-		personalInfoGroup.PATCH("/:pat_id", h.UpdatePersonalInfoByPatientID)
-
-	*/
 	return r
 }

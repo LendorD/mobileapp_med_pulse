@@ -1,5 +1,12 @@
 package handlers
 
+import (
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+)
+
 // import (
 // 	"net/http"
 // 	"strconv"
@@ -75,33 +82,49 @@ package handlers
 // 	h.ResultResponse(c, "Success reception status update", apiresp.Object, reception)
 // }
 
-// // GetReceptionByID godoc
-// // @Summary Получить приём по ID
-// // @Description Возвращает информацию о приёме
-// // @Tags Reception
-// // @Accept json
-// // @Produce json
-// // @Param id path uint true "ID приёма"
-// // @Success 200 {object} entities.Reception "Информация о приёме"
-// // @Failure 400 {object} ResultError "Некорректный ID"
-// // @Failure 404 {object} ResultError "Приём не найден"
-// // @Failure 500 {object} ResultError "Внутренняя ошибка"
-// // @Router /reception/{id} [get]
-// func (h *Handler) GetReceptionByID(c *gin.Context) {
-// 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
-// 	if err != nil {
-// 		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'id' must be an integer", false)
-// 		return
-// 	}
+// GetReceptionByID godoc
+// @Summary Получить приём по ID
+// @Description Возвращает информацию о приёме
+// @Tags Reception
+// @Accept json
+// @Produce json
+// @Param id path uint true "ID приёма"
+// @Success 200 {object} entities.Reception "Информация о приёме"
+// @Failure 400 {object} ResultError "Некорректный ID"
+// @Failure 404 {object} ResultError "Приём не найден"
+// @Failure 500 {object} ResultError "Внутренняя ошибка"
+// @Router /reception/{id} [get]
+func (h *Handler) GetReceptionsHospitalByPatientID(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("pat_id"), 10, 64)
+	if err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'id' must be an integer", false)
+		return
+	}
 
-// 	reception, eerr := h.usecase.Reception.GetByID(uint(id))
-// 	if eerr != nil {
-// 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
-// 		return
-// 	}
+	reception, eerr := h.usecase.GetReceptionsHospitalByPatientID(uint(id))
+	if eerr != nil {
+		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
+		return
+	}
 
-// 	h.ResultResponse(c, "Success reception get", apiresp.Object, reception)
-// }
+	h.ResultResponse(c, "Success receptios get", Array, reception)
+}
+
+func (h *Handler) GetPatientsByDoctorID(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("doc_id"), 10, 64)
+	if err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'id' must be an integer", false)
+		return
+	}
+
+	reception, eerr := h.usecase.GetPatientsByDoctorID(uint(id))
+	if eerr != nil {
+		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
+		return
+	}
+
+	h.ResultResponse(c, "Success receptios get", Array, reception)
+}
 
 // GetReceptionsByDoctorAndDate godoc
 // @Summary Get receptions by doctor and date
