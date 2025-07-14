@@ -64,6 +64,8 @@ type PatientUsecase interface {
 	GetPatientByID(id uint) (entities.Patient, *errors.AppError)
 	UpdatePatient(input *models.UpdatePatientRequest) (entities.Patient, *errors.AppError)
 	DeletePatient(id uint) *errors.AppError
+
+	GetAllPatients(limit, offset int, filters map[string]interface{}) ([]entities.Patient, *errors.AppError)
 }
 
 type PersonalInfoUsecase interface{}

@@ -90,3 +90,16 @@ func (u *PatientUsecase) DeletePatient(id uint) *errors.AppError {
 	}
 	return nil
 }
+
+func (u *PatientUsecase) GetAllPatients(limit, offset int, filters map[string]interface{}) ([]entities.Patient, *errors.AppError) {
+	patients, err := u.repo.GetAllPatients(limit, offset, filters)
+	if err != nil {
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get patients",
+			err,
+			true,
+		)
+	}
+	return patients, nil
+}
