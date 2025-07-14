@@ -95,7 +95,8 @@ type ReceptionHospitalRepository interface {
 	GetReceptionHospitalByPatientID(patientID uint) ([]entities.ReceptionHospital, error)
 	GetReceptionsHospitalByDateRange(start, end time.Time) ([]entities.ReceptionHospital, error)
 	GetReceptionsHospitalByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.ReceptionShortResponse, error)
-	GetPatientsByDoctorID(doctorID uint) ([]entities.Patient, *errors.AppError)
+
+	GetPatientsByDoctorID(doctorID uint, limit, offset int) ([]entities.Patient, *errors.AppError)
 }
 
 // updated to match the new structure
@@ -104,7 +105,7 @@ type PatientRepository interface {
 	UpdatePatient(id uint, updateMap map[string]interface{}) (uint, error)
 	DeletePatient(id uint) error
 	GetPatientByID(id uint) (entities.Patient, error)
-	GetAllPatients() ([]entities.Patient, error)
+	GetAllPatients(limit, offset int) ([]entities.Patient, error)
 	GetPatientsByFullName(name string) ([]entities.Patient, error)
 	GetPatientAllergiesByID(id uint) ([]entities.Allergy, error)
 }

@@ -163,7 +163,7 @@ func (r *ReceptionHospitalRepositoryImpl) GetReceptionsHospitalByDoctorAndDate(d
 	return result, err
 }
 
-func (r *ReceptionHospitalRepositoryImpl) GetPatientsByDoctorID(doctorID uint) ([]entities.Patient, *errors.AppError) {
+func (r *ReceptionHospitalRepositoryImpl) GetPatientsByDoctorID(doctorID uint, limit, offset int) ([]entities.Patient, *errors.AppError) {
 	op := "repo.ReceptionHospital.GetPatientsByDoctorID"
 
 	var receptions []entities.ReceptionHospital
@@ -172,6 +172,8 @@ func (r *ReceptionHospitalRepositoryImpl) GetPatientsByDoctorID(doctorID uint) (
 	err := r.db.
 		Preload("Patient").
 		Where("doctor_id = ?", doctorID).
+		Limit(limit).
+		Offset(offset).
 		Find(&receptions).Error
 	if err != nil {
 		return nil, errors.NewDBError(op, err)

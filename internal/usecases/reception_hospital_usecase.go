@@ -43,8 +43,8 @@ func (u *ReceptionHospitalUsecase) GetReceptionsHospitalByPatientID(patientId ui
 	return receptions, nil
 }
 
-func (u *ReceptionHospitalUsecase) GetPatientsByDoctorID(doc_id uint) ([]entities.Patient, *errors.AppError) {
-	if doc_id == 0 {
+func (u *ReceptionHospitalUsecase) GetPatientsByDoctorID(doctorID uint, limit, offset int) ([]entities.Patient, *errors.AppError) {
+	if doctorID == 0 {
 		return nil, errors.NewAppError(
 			errors.InternalServerErrorCode,
 			"failed to get patient",
@@ -53,7 +53,7 @@ func (u *ReceptionHospitalUsecase) GetPatientsByDoctorID(doc_id uint) ([]entitie
 		)
 	}
 
-	patients, err := u.repo.GetPatientsByDoctorID(doc_id)
+	patients, err := u.repo.GetPatientsByDoctorID(doctorID, limit, offset)
 	if err != nil {
 		return nil, errors.NewAppError(
 			errors.InternalServerErrorCode,
