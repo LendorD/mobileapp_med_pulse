@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -98,22 +97,22 @@ func (h *Handler) GetPatientsByDoctorID(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /receptions/doctor/{doctor_id} [get]
-func (h *Handler) UpdateReceptionHospitalByReceptionID(c *gin.Context) {
-	var input models.UpdateReceptionHospitalRequest
-	if err := c.ShouldBindJSON(&input); err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "Error create ReceptionHospitalRequest", true)
-		return
-	}
+// func (h *Handler) UpdateReceptionHospitalByReceptionID(c *gin.Context) {
+// 	var input models.UpdateReceptionHospitalRequest
+// 	if err := c.ShouldBindJSON(&input); err != nil {
+// 		h.ErrorResponse(c, err, http.StatusBadRequest, "Error create ReceptionHospitalRequest", true)
+// 		return
+// 	}
 
-	if err := validate.Struct(input); err != nil {
-		h.ErrorResponse(c, err, 422, "Error validate ReceptionHospitalRequest", true)
-		return
-	}
+// 	if err := validate.Struct(input); err != nil {
+// 		h.ErrorResponse(c, err, 422, "Error validate ReceptionHospitalRequest", true)
+// 		return
+// 	}
 
-	doctor, eerr := h.usecase.UpdateReceptionHospital(&input)
-	if eerr != nil {
-		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
-		return
-	}
-	h.ResultResponse(c, "Success reception hospital update", Object, doctor)
-}
+// 	doctor, eerr := h.usecase.UpdateReceptionHospital(&input)
+// 	if eerr != nil {
+// 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
+// 		return
+// 	}
+// 	h.ResultResponse(c, "Success reception hospital update", Object, doctor)
+// }
