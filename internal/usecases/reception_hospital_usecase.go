@@ -42,3 +42,30 @@ func (u *ReceptionHospitalUsecase) GetReceptionsHospitalByPatientID(patientId ui
 
 	return receptions, nil
 }
+
+func (u *ReceptionHospitalUsecase) GetPatientsByDoctorID(doc_id uint) ([]entities.Patient, *errors.AppError) {
+	if doc_id == 0 {
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get patient",
+			errors.ErrEmptyData,
+			true,
+		)
+	}
+
+	patients, err := u.repo.GetPatientsByDoctorID(doc_id)
+	if err != nil {
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get receptions",
+			errors.ErrEmptyData,
+			true,
+		)
+	}
+
+	if patients == nil {
+		return []entities.Patient{}, nil
+	}
+
+	return patients, nil
+}
