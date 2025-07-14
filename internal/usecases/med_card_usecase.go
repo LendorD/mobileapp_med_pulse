@@ -28,81 +28,48 @@ func NewMedCardUsecase(
 }
 
 func (u *MedCardUsecase) GetMedCardByPatientID(id uint) (models.MedCardResponse, *errors.AppError) {
-	// Создаем каналы для асинхронного получения данных
-	patientChan := make(chan entities.Patient)
-	personalInfoChan := make(chan entities.PersonalInfo)
-	contactInfoChan := make(chan entities.ContactInfo)
-	allergyChan := make(chan []entities.Allergy)
-	errChan := make(chan error)
-
-	// Запускаем горутины для параллельного получения данных
-	go func() {
-		patient, err := u.patientRepo.GetPatientByID(id)
-		if err != nil {
-			errChan <- err
-			return
-		}
-		patientChan <- patient
-	}()
-
-	go func() {
-		personalInfo, err := u.personalInfoRepo.GetPersonalInfoByPatientID(id)
-		if err != nil {
-			errChan <- err
-			return
-		}
-		personalInfoChan <- personalInfo
-	}()
-
-	go func() {
-		contactInfo, err := u.contactInfoRepo.GetContactInfoByPatientID(id)
-		if err != nil {
-			errChan <- err
-			return
-		}
-		contactInfoChan <- contactInfo
-	}()
-
-	go func() {
-		allergies, err := u.patientRepo.GetPatientAllergiesByID(id)
-		if err != nil {
-			errChan <- err
-			return
-		}
-		allergyChan <- allergies
-	}()
-
-	// Собираем результаты
-	var patient entities.Patient
-	var personalInfo entities.PersonalInfo
-	var contactInfo entities.ContactInfo
-	var allergies []entities.Allergy
-	var appErr error
-
-	// Ожидаем получения всех данных или первой ошибки
-	for i := 0; i < 4; i++ {
-		select {
-		case p := <-patientChan:
-			patient = p
-		case pi := <-personalInfoChan:
-			personalInfo = pi
-		case ci := <-contactInfoChan:
-			contactInfo = ci
-		case a := <-allergyChan:
-			allergies = a
-		case err := <-errChan:
-			if appErr == nil { // Сохраняем только первую ошибку
-				appErr = err
-			}
-		}
+	// Получаем данные последовательно
+	patient, err := u.patientRepo.GetPatientByID(id)
+	if err != nil {
+		return models.MedCardResponse{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get patient",
+			err,
+			true,
+		)
 	}
 
-	// Если была ошибка, возвращаем ее
-	if appErr != nil {
-		return models.MedCardResponse{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to get medCard", appErr, true)
+	personalInfo, err := u.personalInfoRepo.GetPersonalInfoByPatientID(id)
+	if err != nil {
+		return models.MedCardResponse{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get personal info",
+			err,
+			true,
+		)
 	}
 
-	// Преобразуем сущности в response-модели
+	contactInfo, err := u.contactInfoRepo.GetContactInfoByPatientID(id)
+	if err != nil {
+		return models.MedCardResponse{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get contact info",
+			err,
+			true,
+		)
+	}
+
+	allergies, err := u.patientRepo.GetPatientAllergiesByID(id)
+	if err != nil {
+		return models.MedCardResponse{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get allergies",
+			err,
+			true,
+		)
+	}
+
+	// Формируем ответ
 	medCard := models.MedCardResponse{
 		Patient: models.ShortPatientResponse{
 			ID:        patient.Model.ID,
@@ -123,35 +90,198 @@ func (u *MedCardUsecase) GetMedCardByPatientID(id uint) (models.MedCardResponse,
 		Allergy: make([]models.AllergyResponse, len(allergies)),
 	}
 
-	// Преобразуем аллергии
 	for i, allergy := range allergies {
-		medCard.Allergy[i] = models.AllergyResponse{
-			Name: allergy.Name,
-		}
+		medCard.Allergy[i] = models.AllergyResponse{Name: allergy.Name}
 	}
 
 	return medCard, nil
 }
 
-func (u *MedCardUsecase) UpdateMedCard(input *models.UpdateDoctorRequest) (models.MedCardResponse, *errors.AppError) {
+func (u *MedCardUsecase) UpdateMedCard(input *models.UpdateMedCardRequest) (models.MedCardResponse, *errors.AppError) {
 
-	// updateMap := map[string]interface{}{
-	// 	"full_name":      input.FullName,
-	// 	"login":          input.Login,
-	// 	"email":          input.Email,
-	// 	"password":       input.Password,
-	// 	"specialization": input.Specialization,
-	// 	"updated_at":     time.Now(),
-	// }
+	// 1. Обновляем Patient
+	patientUpdate := map[string]interface{}{
+		"full_name":  input.Patient.FullName,
+		"birth_date": input.Patient.BirthDate,
+		"is_male":    input.Patient.IsMale,
+	}
+	if _, err := u.patientRepo.UpdatePatient(input.Patient.ID, patientUpdate); err != nil {
+		return models.MedCardResponse{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to update patient data",
+			err,
+			true,
+		)
+	}
 
-	// updatedDoctorID, err := u.repo.UpdateDoctor(input.ID, updateMap)
-	// if err != nil {
-	// 	return models.MedCardResponse{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to update doctor", err, true)
-	// }
-	// updatedDoctor, err := u.repo.GetDoctorByID(updatedDoctorID)
-	// if err != nil {
-	// 	return models.MedCardResponse{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to get doctor", err, true)
-	// }
+	// 2. Обновляем PersonalInfo
+	personalInfoUpdate := map[string]interface{}{
+		"passport_series": input.PersonalInfo.PassportSeries,
+		"snils":           input.PersonalInfo.SNILS,
+		"oms":             input.PersonalInfo.OMS,
+	}
+	if _, err := u.personalInfoRepo.UpdatePersonalInfoByPatientID(input.Patient.ID, personalInfoUpdate); err != nil {
+		return models.MedCardResponse{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to update personal info",
+			err,
+			true,
+		)
+	}
 
-	return models.MedCardResponse{}, nil
+	// 3. Обновляем ContactInfo
+	contactInfoUpdate := map[string]interface{}{
+		"phone":   input.ContactInfo.Phone,
+		"email":   input.ContactInfo.Email,
+		"address": input.ContactInfo.Address,
+	}
+	if _, err := u.contactInfoRepo.UpdateContactInfoByPatientID(input.Patient.ID, contactInfoUpdate); err != nil {
+		return models.MedCardResponse{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to update contact info",
+			err,
+			true,
+		)
+	}
+
+	// 4. Обновляем Allergy (если переданы)
+	// Обновляем аллергии
+	if input.Allergy != nil {
+		// Получаем текущие аллергии пациента
+		currentAllergies, err := u.patientRepo.GetPatientAllergiesByID(input.Patient.ID)
+		if err != nil {
+			return models.MedCardResponse{}, errors.NewAppError(
+				errors.InternalServerErrorCode,
+				"failed to get current allergies",
+				err,
+				true,
+			)
+		}
+
+		// Создаем мапы для сравнения
+		currentAllergyMap := make(map[string]bool)
+		newAllergyMap := make(map[string]bool)
+
+		// Заполняем мапу текущих аллергий
+		for _, allergy := range currentAllergies {
+			currentAllergyMap[allergy.Name] = true
+		}
+
+		// Заполняем мапу новых аллергий
+		var newAllergies []entities.Allergy
+		for _, allergy := range input.Allergy {
+			newAllergyMap[allergy.Name] = true
+
+			// Если аллергии нет в текущих, добавляем в список для создания
+			if !currentAllergyMap[allergy.Name] {
+				newAllergies = append(newAllergies, entities.Allergy{
+					Name: allergy.Name,
+				})
+			}
+		}
+
+		// Находим аллергии для удаления
+		var allergiesToRemove []entities.Allergy
+		for _, allergy := range currentAllergies {
+			if !newAllergyMap[allergy.Name] {
+				allergiesToRemove = append(allergiesToRemove, allergy)
+			}
+		}
+
+		// Удаляем ненужные связи (но не сами аллергии из БД)
+		if len(allergiesToRemove) > 0 {
+			if err := u.allergyRepo.RemovePatientAllergies(input.Patient.ID, allergiesToRemove); err != nil {
+				return models.MedCardResponse{}, errors.NewAppError(
+					errors.InternalServerErrorCode,
+					"failed to remove patient allergies",
+					err,
+					true,
+				)
+			}
+		}
+
+		// Добавляем новые связи
+		if len(newAllergies) > 0 {
+			if err := u.allergyRepo.AddPatientAllergies(input.Patient.ID, newAllergies); err != nil {
+				return models.MedCardResponse{}, errors.NewAppError(
+					errors.InternalServerErrorCode,
+					"failed to add patient allergies",
+					err,
+					true,
+				)
+			}
+		}
+	}
+	// Получаем обновленные данные для формирования ответа
+	patient, err := u.patientRepo.GetPatientByID(input.Patient.ID)
+	if err != nil {
+		return models.MedCardResponse{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get updated patient data",
+			err,
+			true,
+		)
+	}
+
+	personalInfo, err := u.personalInfoRepo.GetPersonalInfoByPatientID(input.Patient.ID)
+	if err != nil {
+		return models.MedCardResponse{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get updated personal info",
+			err,
+			true,
+		)
+	}
+
+	contactInfo, err := u.contactInfoRepo.GetContactInfoByPatientID(input.Patient.ID)
+	if err != nil {
+		return models.MedCardResponse{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get updated contact info",
+			err,
+			true,
+		)
+	}
+
+	allergies, err := u.patientRepo.GetPatientAllergiesByID(input.Patient.ID)
+	if err != nil {
+		return models.MedCardResponse{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get updated allergies",
+			err,
+			true,
+		)
+	}
+
+	// Формируем ответ
+	return models.MedCardResponse{
+		Patient: models.ShortPatientResponse{
+			ID:        patient.Model.ID,
+			FullName:  patient.FullName,
+			BirthDate: patient.BirthDate,
+			IsMale:    patient.IsMale,
+		},
+		PersonalInfo: models.PersonalInfoResponse{
+			PassportSeries: personalInfo.PassportSeries,
+			SNILS:          personalInfo.SNILS,
+			OMS:            personalInfo.OMS,
+		},
+		ContactInfo: models.ContactInfoResponse{
+			Phone:   contactInfo.Phone,
+			Email:   contactInfo.Email,
+			Address: contactInfo.Address,
+		},
+		Allergy: convertAllergiesToResponse(allergies),
+	}, nil
+}
+
+// Вспомогательная функция для преобразования аллергий
+func convertAllergiesToResponse(allergies []entities.Allergy) []models.AllergyResponse {
+	result := make([]models.AllergyResponse, len(allergies))
+	for i, allergy := range allergies {
+		result[i] = models.AllergyResponse{
+			Name: allergy.Name,
+		}
+	}
+	return result
 }
