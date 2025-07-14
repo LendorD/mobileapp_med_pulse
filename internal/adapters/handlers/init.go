@@ -78,6 +78,9 @@ func ProvideRouter(h *Handler) http.Handler {
 	patientGroup.GET("/:doc_id", h.GetPatientsByDoctorID)
 	patientGroup.GET("/recep_hosp/:pat_id", h.GetReceptionsHospitalByPatientID)
 
+	// Временный для получения всех пациентов
+	patientGroup.GET("/", h.GetAllPatients)
+
 	// Роутеры СМП
 	// emergencyGroup := baseRouter.Group("/emergency-group")
 	// emergencyGroup.GET("/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
