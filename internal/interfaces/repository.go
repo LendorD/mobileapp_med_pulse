@@ -42,6 +42,7 @@ type PersonalInfoRepository interface {
 
 	GetPersonalInfoByID(id uint) (entities.PersonalInfo, error)
 	GetPersonalInfoByPatientID(patientID uint) (entities.PersonalInfo, error)
+	UpdatePersonalInfoByPatientID(id uint, updateMap map[string]interface{}) (uint, error)
 }
 
 // updated to match the new structure
@@ -114,6 +115,7 @@ type ContactInfoRepository interface {
 
 	GetContactInfoByID(id uint) (entities.ContactInfo, error)
 	GetContactInfoByPatientID(patientID uint) (entities.ContactInfo, error)
+	UpdateContactInfoByPatientID(id uint, updateMap map[string]interface{}) (uint, error)
 }
 
 // updated to match the new structure
@@ -124,6 +126,10 @@ type AllergyRepository interface {
 	GetAllergyByID(id uint) (entities.Allergy, error)
 	GetAllergyByName(name string) (entities.Allergy, error)
 	GetAllAllergies() ([]entities.Allergy, error)
+
+	GetAllergiesByPatientID(patientID uint) ([]entities.Allergy, error)
+	RemovePatientAllergies(patientID uint, allergies []entities.Allergy) error
+	AddPatientAllergies(patientID uint, allergies []entities.Allergy) error
 }
 
 type AuthRepository interface {
