@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
@@ -20,7 +21,8 @@ func NewReceptionHospitalUsecase(repo interfaces.ReceptionHospitalRepository) in
 	}
 }
 
-func (u *ReceptionHospitalUsecase) GetReceptionsHospitalByPatientID(patientId uint) ([]entities.ReceptionHospital, *errors.AppError) {
+// []models.ReceptionHospitalResponse
+func (u *ReceptionHospitalUsecase) GetReceptionsHospitalByPatientID(patientId uint) ([]models.ReceptionHospitalResponse, *errors.AppError) {
 	if patientId == 0 {
 		return nil, errors.NewAppError(
 			errors.InternalServerErrorCode,
@@ -39,16 +41,37 @@ func (u *ReceptionHospitalUsecase) GetReceptionsHospitalByPatientID(patientId ui
 			true,
 		)
 	}
-
-	if receptions == nil {
-		return []entities.ReceptionHospital{}, nil
+	var responses []models.ReceptionHospitalResponse
+	for _, reception := range receptions {
+		log.Println(reception.Doctor)
+		log.Println(reception.Patient.FullName)
+		response := models.ReceptionHospitalResponse{
+			Doctor: models.DoctorInfoResponse{
+				FullName:       reception.Doctor.FullName,
+				Specialization: reception.Doctor.Specialization,
+			},
+			Patient: models.ShortPatientResponse{
+				ID:        reception.Patient.ID,
+				FullName:  reception.Patient.FullName,
+				BirthDate: reception.Patient.BirthDate,
+				IsMale:    reception.Patient.IsMale,
+			},
+			Diagnosis:       reception.Diagnosis,
+			Recommendations: reception.Recommendations,
+			Date:            reception.Date,
+		}
+		responses = append(responses, response)
 	}
 
-	return receptions, nil
+	if len(responses) == 0 {
+		return []models.ReceptionHospitalResponse{}, nil
+	}
+
+	return responses, nil
 }
 
-func (u *ReceptionHospitalUsecase) GetPatientsByDoctorID(doc_id uint) ([]entities.Patient, *errors.AppError) {
-	if doc_id == 0 {
+func (u *ReceptionHospitalUsecase) GetPatientsByDoctorID(doctorID uint, limit, offset int) ([]entities.Patient, *errors.AppError) {
+	if doctorID == 0 {
 		return nil, errors.NewAppError(
 			errors.InternalServerErrorCode,
 			"failed to get patient",
@@ -57,7 +80,7 @@ func (u *ReceptionHospitalUsecase) GetPatientsByDoctorID(doc_id uint) ([]entitie
 		)
 	}
 
-	patients, err := u.repo.GetPatientsByDoctorID(doc_id)
+	patients, err := u.repo.GetPatientsByDoctorID(doctorID, limit, offset)
 	if err != nil {
 		return nil, errors.NewAppError(
 			errors.InternalServerErrorCode,

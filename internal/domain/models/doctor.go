@@ -20,6 +20,11 @@ type DoctorResponse struct {
 	Specialization string `json:"specialization" example:"Терапевт"`        // Медицинская специализация
 }
 
+type DoctorInfoResponse struct {
+	FullName       string `json:"full_name" example:"Иванов Иван Иванович"` // Полное имя врача
+	Specialization string `json:"specialization" example:"Терапевт"`        // Медицинская специализация
+}
+
 // CreateDoctorRequest - запрос на создание врача
 // @Description Используется для регистрации нового врача в системе
 //

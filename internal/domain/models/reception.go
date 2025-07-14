@@ -33,3 +33,11 @@ type ReceptionShortResponse struct {
 	Status      string `json:"status" example:"Запланирован"`      // Текстовый статус приема
 	PatientName string `json:"patient_name" example:"Иванов Иван"` // ФИО пациента
 }
+
+type ReceptionHospitalResponse struct {
+	Doctor          DoctorInfoResponse   `json:"-"`
+	Patient         ShortPatientResponse `json:"-"`
+	Diagnosis       string               `json:"diagnosis" example:"ОРВИ"`
+	Recommendations string               `json:"recommendations" example:"Постельный режим"`
+	Date            time.Time            `json:"date" example:"2023-10-15T14:30:00Z"`
+}

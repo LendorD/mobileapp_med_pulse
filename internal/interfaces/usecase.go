@@ -22,8 +22,8 @@ type Usecases interface {
 }
 
 type ReceptionHospitalUsecase interface {
-	GetReceptionsHospitalByPatientID(patientId uint) ([]entities.ReceptionHospital, *errors.AppError)
-	GetPatientsByDoctorID(doc_id uint) ([]entities.Patient, *errors.AppError)
+	GetReceptionsHospitalByPatientID(patientId uint) ([]models.ReceptionHospitalResponse, *errors.AppError)
+	GetPatientsByDoctorID(doctorID uint, limit, offset int) ([]entities.Patient, *errors.AppError)
 	GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.ReceptionShortResponse, error)
 }
 
