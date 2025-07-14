@@ -131,6 +131,13 @@ func (h *Handler) DeletePatient(c *gin.Context) {
 	h.ResultResponse(c, "Success patient delete", Empty, nil)
 }
 
+// Пример:
+// Получить всех людей с подстрокой имени
+// LIKE (SQL) содержит подстроку (% для wildcard)
+// filter=birth_date.eq.1988-07-14 - получить человека, у которого др 1988-07-14
+// http://localhost:8080/api/v1/patients?filter=full_name.like - полный запрос
+// filter=full_name.like.Анна - получить человека с подстрокой "Анна" в full_name
+// названия передаваемых столбцов таблицы автоматически подгружаются через json
 func (h *Handler) GetAllPatients(c *gin.Context) {
 	limitStr := c.DefaultQuery("limit", "10")
 	offsetStr := c.DefaultQuery("offset", "0")
@@ -147,13 +154,10 @@ func (h *Handler) GetAllPatients(c *gin.Context) {
 		return
 	}
 
-	// Чтение фильтров
-	filters := make(map[string]interface{})
-	if name := c.Query("full_name"); name != "" {
-		filters["full_name"] = name
-	}
+	// Параметры фильтрации в формате field.operation.value
+	filter := c.Query("filter")
 
-	patients, appErr := h.usecase.GetAllPatients(limit, offset, filters)
+	patients, appErr := h.usecase.GetAllPatients(limit, offset, filter)
 	if appErr != nil {
 		h.ErrorResponse(c, appErr.Err, appErr.Code, appErr.Message, appErr.IsUserFacing)
 		return

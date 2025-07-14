@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
-	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"strings"
 )
 
 func (r *PatientRepositoryImpl) CreatePatient(patient entities.Patient) (uint, error) {
@@ -83,29 +81,16 @@ func (r *PatientRepositoryImpl) GetPatientByID(id uint) (entities.Patient, error
 	return patient, nil
 }
 
-func (r *PatientRepositoryImpl) GetAllPatients(limit, offset int, filters map[string]interface{}) ([]entities.Patient, error) {
-	op := "repo.Patient.GetAllPatients"
+func (r *PatientRepositoryImpl) GetAllPatients(limit, offset int, queryFilter string, parameters []interface{}) ([]entities.Patient, error) {
+	// Создаем базовый запрос
+	query := r.db.Model(&entities.Patient{})
 
-	var patients []entities.Patient
-
-	query := r.db.
-		Preload("PersonalInfo").
-		Preload("ContactInfo")
-
-	for key, val := range filters {
-		filterStr := strings.TrimSpace(fmt.Sprint(val))
-		if filterStr == "" {
-			continue
-		}
-
-		if _, isText := filters[key]; isText {
-			query = query.Where(gorm.Expr("LOWER(?) LIKE LOWER(?)", gorm.Expr(key), "%"+filterStr+"%"))
-		} else {
-			query = query.Where(key+" = ?", filterStr)
-		}
+	// Применяем фильтрацию
+	if queryFilter != "" {
+		query = query.Where(queryFilter, parameters...)
 	}
 
-	// Пагинация
+	// Применяем пагинацию
 	if limit > 0 {
 		query = query.Limit(limit)
 	}
@@ -113,9 +98,11 @@ func (r *PatientRepositoryImpl) GetAllPatients(limit, offset int, filters map[st
 		query = query.Offset(offset)
 	}
 
-	// Выполняем запрос
-	if err := query.Find(&patients).Error; err != nil {
-		return nil, errors.NewDBError(op, err)
+	// Получаем записи
+	var patients []entities.Patient
+	result := query.Find(&patients)
+	if result.Error != nil {
+		return nil, fmt.Errorf("failed to fetch patients: %w", result.Error)
 	}
 
 	return patients, nil

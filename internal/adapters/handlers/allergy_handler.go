@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"net/http"
-
-	// Добавлен этот импорт
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 // AddPatientAllergy godoc
