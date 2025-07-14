@@ -130,3 +130,34 @@ func (h *Handler) DeletePatient(c *gin.Context) {
 
 	h.ResultResponse(c, "Success patient delete", Empty, nil)
 }
+
+func (h *Handler) GetAllPatients(c *gin.Context) {
+	limitStr := c.DefaultQuery("limit", "10")
+	offsetStr := c.DefaultQuery("offset", "0")
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 {
+		h.ErrorResponse(c, err, http.StatusBadRequest, "query parameter 'limit' must be a positive integer", false)
+		return
+	}
+
+	offset, err := strconv.Atoi(offsetStr)
+	if err != nil || offset < 0 {
+		h.ErrorResponse(c, err, http.StatusBadRequest, "query parameter 'offset' must be a non-negative integer", false)
+		return
+	}
+
+	// Чтение фильтров
+	filters := make(map[string]interface{})
+	if name := c.Query("full_name"); name != "" {
+		filters["full_name"] = name
+	}
+
+	patients, appErr := h.usecase.GetAllPatients(limit, offset, filters)
+	if appErr != nil {
+		h.ErrorResponse(c, appErr.Err, appErr.Code, appErr.Message, appErr.IsUserFacing)
+		return
+	}
+
+	h.ResultResponse(c, "Patients retrieved successfully", Array, patients)
+}

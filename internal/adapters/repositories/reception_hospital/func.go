@@ -70,12 +70,8 @@ func (r *ReceptionHospitalRepositoryImpl) GetReceptionHospitalByDoctorID(doctorI
 
 	var receptions []entities.ReceptionHospital
 	if err := r.db.
-		Preload("Patient", func(db *gorm.DB) *gorm.DB {
-			return db.Select("id, full_name, birth_date, is_male")
-		}).
-		Preload("Doctor", func(db *gorm.DB) *gorm.DB {
-			return db.Select("id, full_name, specialization")
-		}).
+		Preload("Patient").
+		Preload("Doctor").
 		Where("doctor_id = ?", doctorID).
 		Find(&receptions).Error; err != nil {
 		return nil, errors.NewDBError(op, err)
@@ -85,12 +81,17 @@ func (r *ReceptionHospitalRepositoryImpl) GetReceptionHospitalByDoctorID(doctorI
 }
 
 func (r *ReceptionHospitalRepositoryImpl) GetReceptionHospitalByPatientID(patientID uint) ([]entities.ReceptionHospital, error) {
-	op := "repo.ReceptionHospital.GetReceptionHospitalByPatientID"
+	op := "repo.ReceptionHospital.GetReceptionHospitalByDoctorID"
 
 	var receptions []entities.ReceptionHospital
-	if err := r.db.Where("patient_id = ?", patientID).Find(&receptions).Error; err != nil {
+	if err := r.db.
+		Preload("Patient").
+		Preload("Doctor").
+		Where("patient_id = ?", patientID).
+		Find(&receptions).Error; err != nil {
 		return nil, errors.NewDBError(op, err)
 	}
+
 	return receptions, nil
 }
 
