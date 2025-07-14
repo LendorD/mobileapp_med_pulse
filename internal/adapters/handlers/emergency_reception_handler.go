@@ -8,6 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+////// TODO: нужно узнать по поводу закомменченных ручек: оставляем  или выкидываем?
+
 // import (
 // 	"net/http"
 // 	"strconv"
@@ -82,7 +84,21 @@ import (
 
 // 	h.ResultResponse(c, "Success doctor assigned to emergency", apiresp.Object, emergency)
 // }
+//////
 
+// GetEmergencyReceptionsByDoctorAndDate godoc
+// @Summary Получить экстренные приёмы врача по дате
+// @Description Возвращает список экстренных приёмов, назначенных врачу на указанную дату, с пагинацией
+// @Tags EmergencyReception
+// @Accept json
+// @Produce json
+// @Param doctor_id path uint true "ID врача"
+// @Param date query string true "Дата в формате YYYY-MM-DD"
+// @Param page query int false "Номер страницы" default(1)
+// @Success 200 {array} entities.EmergencyReception "Список приёмов"
+// @Failure 400 {object} ResultError "Некорректный запрос или параметры"
+// @Failure 500 {object} ResultError "Внутренняя ошибка"
+// @Router /emergency/{doctor_id}/receptions [get]
 func (h *Handler) GetEmergencyReceptionsByDoctorAndDate(c *gin.Context) {
 	// Получаем ID врача
 	doctorID, err := strconv.ParseUint(c.Param("doctor_id"), 10, 32)

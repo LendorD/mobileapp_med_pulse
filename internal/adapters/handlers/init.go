@@ -1,13 +1,16 @@
 package handlers
 
 import (
-	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/usecases"
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 var validate *validator.Validate
@@ -19,35 +22,57 @@ func init() {
 type Handler struct {
 	logger  *logging.Logger
 	usecase interfaces.Usecases
+	authUC  *usecases.AuthUsecase // Добавляем AuthUsecase напрямую
 }
 
-func NewHandler(usecase interfaces.Usecases, parentLogger *logging.Logger) *Handler {
-	handlerLogger := parentLogger.WithPrefix("HANDLER")
+// // NewHandler создает новый экземпляр Handler со всеми зависимостями
+// func NewHandler(usecase interfaces.Usecases) *Handler {
+// 	return &Handler{
+// 		usecase: usecase,
+// 	}
+// }
 
+// NewHandler создает новый экземпляр Handler со всеми зависимостями
+func NewHandler(usecase interfaces.Usecases, parentLogger *logging.Logger, authUC *usecases.AuthUsecase) *Handler {
+	//logger := logging.NewLogger("HANDLER", "GENERAL", parentLogger)
+
+	handlerLogger := parentLogger.WithPrefix("HANDLER")
 	handlerLogger.Info("Handler initialized",
 		"component", "GENERAL",
 	)
-
 	return &Handler{
 		logger:  handlerLogger,
 		usecase: usecase,
+		authUC:  authUC,
 	}
 }
 
+// ProvideRouter создает и настраивает маршруты
 func ProvideRouter(h *Handler) http.Handler {
 	r := gin.Default()
-	r.Use(LoggingMiddleware(h.logger))
-	baseRouter := r.Group("/api/v1")
-	//r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// Группа маршрутов для main
+	// Swagger
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.Use(LoggingMiddleware(h.logger))
+
+	// Группа аутентификации
+	// Создаем AuthHandler
+
+	authHandler := NewAuthHandler(h.authUC)
+	authGroup := r.Group("/auth")
+	{
+		authGroup.POST("/login", gin.WrapF(authHandler.LoginDoctor))
+	}
+
+	baseRouter := r.Group("/api/v1")
+
 	doctorGroup := baseRouter.Group("/doctor")
 	doctorGroup.POST("/", h.CreateDoctor)
 	doctorGroup.GET("/:id", h.GetDoctorByID)
 
-	// Группа маршрутов для smp
-	//smpGroup := baseRouter.Group("/smp")
-	//smpGroup.GET("/:doc_id/")
+	medCardGroup := baseRouter.Group("/medcard")
+	medCardGroup.GET("/:id", h.GetMedCardByPatientID)
+	medCardGroup.PUT("/:id", h.UpdateMedCard)
 
 	// Группа маршрутов для patients
 	patientGroup := baseRouter.Group("/patients")
@@ -60,7 +85,7 @@ func ProvideRouter(h *Handler) http.Handler {
 	// emergencyGroup.GET("/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
 	r.GET("/emergency/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
 
-	r.GET("/receptions/:doctor_id", h.GetReceptionsByDoctorAndDate)
+	// r.GET("/receptions/:doctor_id", h.GetReceptionsByDoctorAndDate)
 
 	// Группа маршрутов для patientContactInfo
 	contactInfoGroup := baseRouter.Group("/contact_info")
