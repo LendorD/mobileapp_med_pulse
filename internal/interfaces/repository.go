@@ -58,7 +58,7 @@ type EmergencyReceptionRepository interface {
 	GetEmergencyReceptionsByPatientID(patientID uint) ([]entities.EmergencyCall, error)
 	GetEmergencyReceptionsByDateRange(start, end time.Time) ([]entities.EmergencyCall, error)
 	GetEmergencyReceptionsPriorityCases() ([]entities.EmergencyCall, error)
-	GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.EmergencyReceptionShortResponse, error)
+	GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.EmergencyCallShortResponse, error)
 }
 
 // updated to match the new structure

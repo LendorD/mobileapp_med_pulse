@@ -55,30 +55,26 @@ func ProvideRouter(h *Handler) http.Handler {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.Use(LoggingMiddleware(h.logger))
 
-	// Роутеры авторизации
+	// Группа аутентификации
+	// Создаем AuthHandler
+
 	authHandler := NewAuthHandler(h.authUC)
 	authGroup := r.Group("/auth")
 	{
 		authGroup.POST("/login", gin.WrapF(authHandler.LoginDoctor))
 	}
 
-	// Основной маршрут
 	baseRouter := r.Group("/api/v1")
 
-	// Роутеры медкарты
 	medCardGroup := baseRouter.Group("/medcard")
 	medCardGroup.GET("/:pat_id", h.GetMedCardByPatientID)
 	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
 
-	receptionHospital := baseRouter.Group("/recepHospital")
-	receptionHospital.GET("/:pat_id", h.GetReceptionsHospitalByPatientID)
-
-	// Роутеры пациентов
+	// Группа маршрутов для patients
 	patientGroup := baseRouter.Group("/patients")
 	patientGroup.GET("/:doc_id", h.GetPatientsByDoctorID)
 	patientGroup.GET("/recep_hosp/:pat_id", h.GetReceptionsHospitalByPatientID)
 
-	// Роутеры СМП
 	// emergencyGroup := baseRouter.Group("/emergency-group")
 	// emergencyGroup.GET("/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
 	r.GET("/emergency/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
