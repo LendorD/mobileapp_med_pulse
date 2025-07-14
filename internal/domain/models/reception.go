@@ -32,5 +32,4 @@ type ReceptionShortResponse struct {
 	Date        string `json:"date" example:"15.10.2023 14:30"`    // Форматированная дата приема
 	Status      string `json:"status" example:"Запланирован"`      // Текстовый статус приема
 	PatientName string `json:"patient_name" example:"Иванов Иван"` // ФИО пациента
-	IsOut       bool   `json:"is_out" example:"true"`              // Флаг выездного приема
 }

@@ -1,10 +1,12 @@
 package emergencyReception
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
@@ -104,49 +106,58 @@ func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionsPriorityCases()
 	return list, nil
 }
 
-func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.EmergencyReceptionShortResponse, error) {
+func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.EmergencyCallShortResponse, error) {
 	var response []struct {
-		Date        time.Time
-		Status      string
-		PatientName string
-		Priority    bool
-		Address     string
+		CreatedAt time.Time `gorm:"column:created_at"`
+		Status    string
+		Phone     string
+		Priority  bool
+		Address   string
 	}
 
 	offset := (page - 1) * perPage
-	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
-	endOfDay := startOfDay.Add(24 * time.Hour)
 
-	err := r.db.Model(&entities.EmergencyCall{}).
+	query := r.db.Model(&entities.EmergencyCall{}).
 		Select(`
-            emergency_receptions.date,
-            emergency_receptions.status,
-            emergency_receptions.priority,
-            emergency_receptions.address,
-            patients.full_name as patient_name
+            emergency_calls.created_at,
+            emergency_calls.status,
+            emergency_calls.phone,
+            emergency_calls.priority,
+            emergency_calls.address
         `).
-		Joins("LEFT JOIN patients ON patients.id = emergency_receptions.patient_id").
-		Where("emergency_receptions.doctor_id = ? AND emergency_receptions.date >= ? AND emergency_receptions.date < ?",
-			doctorID, startOfDay, endOfDay).
+		Where("emergency_calls.doctor_id = ?", doctorID)
+
+	if !date.IsZero() {
+		startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+		endOfDay := startOfDay.Add(24 * time.Hour)
+		query = query.Where("DATE(created_at) BETWEEN ? AND ?",
+			startOfDay.Format("2006-01-02"),
+			endOfDay.Format("2006-01-02"))
+	}
+
+	err := query.
 		Offset(offset).
 		Limit(perPage).
-		Order(getEmergencyOrderByPriorityAndDate()).
+		Order("priority DESC, created_at DESC"). // Простая сортировка по приоритету и дате
 		Find(&response).
 		Error
 
-	// Преобразуем в финальную структуру
-	result := make([]models.EmergencyReceptionShortResponse, len(response))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get emergency receptions: %v", err)
+	}
+
+	result := make([]models.EmergencyCallShortResponse, len(response))
 	for i, item := range response {
-		result[i] = models.EmergencyReceptionShortResponse{
-			Date:        item.Date.Format("2006-01-02 15:04"),
-			Status:      item.Status,
-			PatientName: item.PatientName,
-			Priority:    item.Priority,
-			Address:     item.Address,
+		result[i] = models.EmergencyCallShortResponse{
+			CreatedAt: item.CreatedAt.Format(time.RFC3339),
+			Status:    item.Status,
+			Phone:     item.Phone,
+			Priority:  item.Priority,
+			Address:   item.Address,
 		}
 	}
 
-	return result, err
+	return result, nil
 }
 
 // Вспомогательная функция для сортировки

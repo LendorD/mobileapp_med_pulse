@@ -2,8 +2,9 @@ package interfaces
 
 import (
 	"context"
-	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"time"
+
+	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
@@ -57,7 +58,7 @@ type EmergencyReceptionRepository interface {
 	GetEmergencyReceptionsByPatientID(patientID uint) ([]entities.EmergencyCall, error)
 	GetEmergencyReceptionsByDateRange(start, end time.Time) ([]entities.EmergencyCall, error)
 	GetEmergencyReceptionsPriorityCases() ([]entities.EmergencyCall, error)
-	GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.EmergencyReceptionShortResponse, error)
+	GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.EmergencyCallShortResponse, error)
 }
 
 // updated to match the new structure

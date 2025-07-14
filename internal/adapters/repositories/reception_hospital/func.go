@@ -1,10 +1,11 @@
 package receptionHospital
 
 import (
+	"time"
+
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
@@ -126,7 +127,6 @@ func (r *ReceptionHospitalRepositoryImpl) GetReceptionsHospitalByDoctorAndDate(d
 		Date        time.Time
 		Status      string
 		PatientName string
-		IsOut       bool
 	}
 
 	offset := (page - 1) * perPage
@@ -135,13 +135,12 @@ func (r *ReceptionHospitalRepositoryImpl) GetReceptionsHospitalByDoctorAndDate(d
 
 	err := r.db.Model(&entities.ReceptionHospital{}).
 		Select(`
-            receptions.date,
-            receptions.status,
-            receptions.is_out,
+            reception_hospitals.date,
+            reception_hospitals.status,
             patients.full_name as patient_name
         `).
-		Joins("LEFT JOIN patients ON patients.id = receptions.patient_id").
-		Where("receptions.doctor_id = ? AND receptions.date >= ? AND receptions.date < ?",
+		Joins("LEFT JOIN patients ON patients.id = reception_hospitals.patient_id").
+		Where("reception_hospitals.doctor_id = ? AND reception_hospitals.date >= ? AND reception_hospitals.date < ?",
 			doctorID, startOfDay, endOfDay).
 		Offset(offset).
 		Limit(perPage).
@@ -156,7 +155,6 @@ func (r *ReceptionHospitalRepositoryImpl) GetReceptionsHospitalByDoctorAndDate(d
 			Date:        item.Date.Format("2006-01-02 15:04"),
 			Status:      item.Status,
 			PatientName: item.PatientName,
-			IsOut:       item.IsOut,
 		}
 	}
 
