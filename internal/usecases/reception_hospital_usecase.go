@@ -140,8 +140,7 @@ func (u *ReceptionHospitalUsecase) GetPatientsByDoctorID(doctorID uint, limit, o
 	return patients, nil
 }
 
-func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.ReceptionShortResponse, error) {
-	const perPage = 5
+func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int, perPage int) ([]models.ReceptionShortResponse, error) {
 
 	// Валидация входных параметров
 	if doctorID == 0 {
@@ -157,6 +156,15 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID
 		return nil, errors.NewAppError(
 			errors.InternalServerErrorCode,
 			"page number must be greater than 0",
+			errors.ErrDataNotFound,
+			true,
+		)
+	}
+
+	if perPage < 5 {
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"Perpage number must be greater than 5",
 			errors.ErrDataNotFound,
 			true,
 		)
@@ -188,9 +196,12 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID
 		formattedDate := reception.Date.Format("02.01.2006 15:04") // Формат "15.10.2023 14:30"
 
 		result[i] = models.ReceptionShortResponse{
+			Id:          reception.ID,
 			Date:        formattedDate,
 			Status:      statusText,
 			PatientName: patientName,
+			Diagnosis:   reception.Diagnosis,
+			Address:     reception.Address,
 		}
 	}
 
