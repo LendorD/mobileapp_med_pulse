@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -153,43 +154,43 @@ func (h *Handler) GetPatientsByDoctorID(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /receptions/doctor/{doctor_id} [get]
-// func (h *Handler) GetReceptionsByDoctorAndDate(c *gin.Context) {
-// 	// Получаем doctor_id из URL
-// 	doctorIDStr := c.Param("doctor_id")
-// 	doctorID, err := strconv.ParseUint(doctorIDStr, 10, 32)
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid doctor ID"})
-// 		return
-// 	}
+func (h *Handler) GetReceptionsByDoctorAndDate(c *gin.Context) {
+	// Получаем doctor_id из URL
+	doctorIDStr := c.Param("doctor_id")
+	doctorID, err := strconv.ParseUint(doctorIDStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid doctor ID"})
+		return
+	}
 
-// 	// Получаем дату из query параметров
-// 	dateStr := c.Query("date")
-// 	var date time.Time
-// 	if dateStr != "" {
-// 		date, err = time.Parse("2006-01-02", dateStr)
-// 		if err != nil {
-// 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid date format, use YYYY-MM-DD"})
-// 			return
-// 		}
-// 	} else {
-// 		// Если дата не указана, используем текущую дату
-// 		date = time.Now()
-// 	}
+	// Получаем дату из query параметров
+	dateStr := c.Query("date")
+	var date time.Time
+	if dateStr != "" {
+		date, err = time.Parse("2006-01-02", dateStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid date format, use YYYY-MM-DD"})
+			return
+		}
+	} else {
+		// Если дата не указана, используем текущую дату
+		date = time.Now()
+	}
 
-// 	// Получаем номер страницы из query параметров
-// 	pageStr := c.DefaultQuery("page", "1")
-// 	page, err := strconv.Atoi(pageStr)
-// 	if err != nil || page < 1 {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "page must be a positive integer"})
-// 		return
-// 	}
+	// Получаем номер страницы из query параметров
+	pageStr := c.DefaultQuery("page", "1")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "page must be a positive integer"})
+		return
+	}
 
-// 	// Вызываем usecase
-// 	receptions, err := h.usecase.GetReceptionsByDoctorAndDate(uint(doctorID), date, page)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 		return
-// 	}
+	// Вызываем usecase
+	receptions, err := h.usecase.GetHospitalReceptionsByDoctorAndDate(uint(doctorID), date, page)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-// 	c.JSON(http.StatusOK, receptions)
-// }
+	c.JSON(http.StatusOK, receptions)
+}

@@ -1,7 +1,9 @@
 package usecases
 
 import (
+	"fmt"
 	"log"
+	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
@@ -93,4 +95,27 @@ func (u *ReceptionHospitalUsecase) GetPatientsByDoctorID(doctorID uint, limit, o
 	}
 
 	return patients, nil
+}
+
+func (s *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.ReceptionShortResponse, error) {
+	// // Валидация номера страницы
+	// if page < 1 {
+	// 	return nil, errors.New("page must be greater than 0")
+	// }
+
+	// // Валидация даты (не раньше текущего дня)
+	// if date.Before(time.Now().Truncate(24 * time.Hour)) {
+	// 	return nil, errors.New("date cannot be in the past for emergency receptions")
+	// }
+
+	// Количество записей на странице
+	const perPage = 5 // Можно увеличить для экстренных случаев
+
+	// Получаем данные из репозитория
+	receptions, err := s.repo.GetReceptionsHospitalByDoctorAndDate(doctorID, date, page, perPage)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get emergency receptions: %w", err)
+	}
+
+	return receptions, nil
 }
