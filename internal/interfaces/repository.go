@@ -95,8 +95,7 @@ type ReceptionHospitalRepository interface {
 	GetReceptionHospitalByDoctorID(doctorID uint) ([]entities.ReceptionHospital, error)
 	GetReceptionHospitalByPatientID(patientID uint) ([]entities.ReceptionHospital, error)
 	GetReceptionsHospitalByDateRange(start, end time.Time) ([]entities.ReceptionHospital, error)
-	GetReceptionsHospitalByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.ReceptionShortResponse, error)
-
+	GetReceptionsHospitalByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]entities.ReceptionHospital, error)
 	GetPatientsByDoctorID(doctorID uint, limit, offset int) ([]entities.Patient, *errors.AppError)
 }
 

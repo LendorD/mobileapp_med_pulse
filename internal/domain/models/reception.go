@@ -29,9 +29,12 @@ type Reception struct {
 // ReceptionShortResponse - сокращенная информация о приеме для списков
 // @Description Содержит основные данные приема для отображения в списках
 type ReceptionShortResponse struct {
+	Id          uint   `json:"id"`
 	Date        string `json:"date" example:"15.10.2023 14:30"`    // Форматированная дата приема
 	Status      string `json:"status" example:"Запланирован"`      // Текстовый статус приема
 	PatientName string `json:"patient_name" example:"Иванов Иван"` // ФИО пациента
+	Diagnosis   string `json:"diagnosis" example:"ОРВИ"`
+	Address     string `json:"address" example:"Москва, ул. Ленина, д. 15" rus:"Адрес больницы"`
 }
 
 type ReceptionHospitalResponse struct {
