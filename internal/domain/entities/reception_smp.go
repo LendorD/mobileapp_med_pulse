@@ -11,4 +11,6 @@ type ReceptionSMP struct {
 	Diagnosis       string       `json:"diagnosis" example:"ОРВИ" rus:"Диагноз"`
 	Recommendations string       `json:"recommendations" example:"Постельный режим" rus:"Рекомендации"`
 	MedServices     []MedService `gorm:"many2many:reception_smp_med_services;" json:"med_services" rus:"Медицинские услуги"`
+
+	ReceptionSMPs []ReceptionSMP `gorm:"many2many:emergency_call_reception_smp;" json:"SMPS" rus:"заключения"`
 }

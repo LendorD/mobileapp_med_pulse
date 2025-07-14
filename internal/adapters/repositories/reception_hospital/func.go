@@ -8,7 +8,6 @@ import (
 	"gorm.io/gorm/clause"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
 
 func (r *ReceptionHospitalRepositoryImpl) CreateReceptionHospital(reception entities.ReceptionHospital) error {
@@ -132,43 +131,23 @@ func getOrderByStatusAndDate() string {
     `
 }
 
-func (r *ReceptionHospitalRepositoryImpl) GetReceptionsHospitalByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.ReceptionShortResponse, error) {
-	var response []struct {
-		Date        time.Time
-		Status      string
-		PatientName string
-	}
+func (r *ReceptionHospitalRepositoryImpl) GetReceptionsHospitalByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]entities.ReceptionHospital, error) {
+	var receptions []entities.ReceptionHospital
 
 	offset := (page - 1) * perPage
 	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
 	endOfDay := startOfDay.Add(24 * time.Hour)
 
-	err := r.db.Model(&entities.ReceptionHospital{}).
-		Select(`
-            reception_hospitals.date,
-            reception_hospitals.status,
-            patients.full_name as patient_name
-        `).
-		Joins("LEFT JOIN patients ON patients.id = reception_hospitals.patient_id").
-		Where("reception_hospitals.doctor_id = ? AND reception_hospitals.date >= ? AND reception_hospitals.date < ?",
-			doctorID, startOfDay, endOfDay).
+	err := r.db.
+		Preload("Patient").
+		Where("doctor_id = ? AND date >= ? AND date < ?", doctorID, startOfDay, endOfDay).
 		Offset(offset).
 		Limit(perPage).
 		Order(getOrderByStatusAndDate()).
-		Find(&response).
+		Find(&receptions).
 		Error
 
-	// Преобразуем в финальную структуру с форматированной датой
-	result := make([]models.ReceptionShortResponse, len(response))
-	for i, item := range response {
-		result[i] = models.ReceptionShortResponse{
-			Date:        item.Date.Format("2006-01-02 15:04"),
-			Status:      item.Status,
-			PatientName: item.PatientName,
-		}
-	}
-
-	return result, err
+	return receptions, err
 }
 
 func (r *ReceptionHospitalRepositoryImpl) GetPatientsByDoctorID(doctorID uint, limit, offset int) ([]entities.Patient, *errors.AppError) {

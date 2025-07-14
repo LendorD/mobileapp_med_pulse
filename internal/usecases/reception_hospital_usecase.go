@@ -140,25 +140,74 @@ func (u *ReceptionHospitalUsecase) GetPatientsByDoctorID(doctorID uint, limit, o
 	return patients, nil
 }
 
-func (s *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.ReceptionShortResponse, error) {
-	// // Валидация номера страницы
-	// if page < 1 {
-	// 	return nil, errors.New("page must be greater than 0")
-	// }
+func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.ReceptionShortResponse, error) {
+	const perPage = 5
 
-	// // Валидация даты (не раньше текущего дня)
-	// if date.Before(time.Now().Truncate(24 * time.Hour)) {
-	// 	return nil, errors.New("date cannot be in the past for emergency receptions")
-	// }
-
-	// Количество записей на странице
-	const perPage = 5 // Можно увеличить для экстренных случаев
-
-	// Получаем данные из репозитория
-	receptions, err := s.repo.GetReceptionsHospitalByDoctorAndDate(doctorID, date, page, perPage)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get emergency receptions: %w", err)
+	// Валидация входных параметров
+	if doctorID == 0 {
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get patient",
+			errors.ErrEmptyData,
+			true,
+		)
 	}
 
-	return receptions, nil
+	if page < 1 {
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"page number must be greater than 0",
+			errors.ErrDataNotFound,
+			true,
+		)
+	}
+
+	// Получаем данные из репозитория
+	receptions, err := u.repo.GetReceptionsHospitalByDoctorAndDate(doctorID, date, page, perPage)
+	if err != nil {
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get receptions",
+			errors.ErrEmptyData,
+			true,
+		)
+	}
+
+	result := make([]models.ReceptionShortResponse, len(receptions))
+	for i, reception := range receptions {
+		// Получаем имя пациента (с проверкой что Patient загружен)
+		patientName := ""
+		if reception.Patient.ID != 0 { // Проверка что связь загружена
+			patientName = reception.Patient.FullName
+		}
+
+		// Получаем статус в читаемом формате
+		statusText := getStatusText(reception.Status)
+
+		// Форматируем дату
+		formattedDate := reception.Date.Format("02.01.2006 15:04") // Формат "15.10.2023 14:30"
+
+		result[i] = models.ReceptionShortResponse{
+			Date:        formattedDate,
+			Status:      statusText,
+			PatientName: patientName,
+		}
+	}
+
+	return result, nil
+}
+
+func getStatusText(status entities.ReceptionStatus) string {
+	switch status {
+	case entities.StatusScheduled:
+		return "Запланирован"
+	case entities.StatusCompleted:
+		return "Завершен"
+	case entities.StatusCancelled:
+		return "Отменен"
+	case entities.StatusNoShow:
+		return "Не явился"
+	default:
+		return string(status)
+	}
 }
