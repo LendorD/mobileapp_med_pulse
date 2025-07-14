@@ -19,9 +19,9 @@ const (
 type ReceptionHospital struct {
 	gorm.Model
 	DoctorID        uint            `gorm:"not null;index" json:"doctor_id" example:"1" rus:"ID врача"`
-	Doctor          Doctor          `gorm:"foreignKey:DoctorID" json:"-"`
+	Doctor          Doctor          `gorm:"foreignKey:DoctorID" json:"doctor"`
 	PatientID       uint            `gorm:"not null;index" json:"patient_id" example:"1" rus:"ID пациента"`
-	Patient         Patient         `gorm:"foreignKey:PatientID" json:"-"`
+	Patient         Patient         `gorm:"foreignKey:PatientID" json:"patient"`
 	Diagnosis       string          `json:"diagnosis" example:"ОРВИ" rus:"Диагноз"`
 	Recommendations string          `json:"recommendations" example:"Постельный режим" rus:"Рекомендации"`
 	Address         string          `gorm:"not null" json:"address" example:"Москва, ул. Ленина, д. 15" rus:"Адрес больницы"`
