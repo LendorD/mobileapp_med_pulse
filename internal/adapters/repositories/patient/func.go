@@ -81,20 +81,33 @@ func (r *PatientRepositoryImpl) GetPatientByID(id uint) (entities.Patient, error
 	return patient, nil
 }
 
-func (r *PatientRepositoryImpl) GetAllPatients() ([]entities.Patient, error) {
+func (r *PatientRepositoryImpl) GetAllPatients(limit, offset int) ([]entities.Patient, error) {
 	op := "repo.Patient.GetAllPatients"
 
 	var patients []entities.Patient
-	if err := r.db.
-		Preload("PersonalInfo").
-		Preload("ContactInfo").
-		Find(&patients).Error; err != nil {
 
-		return nil, errors.NewDBError(op, err)
+	query := r.db.
+		Preload("PersonalInfo").
+		Preload("ContactInfo")
+
+	/* Применяем фильтры (если есть)
+	for key, value := range filters {
+		query = query.Where(fmt.Sprintf("%s = ?", key), value)
 	}
 
-	if len(patients) == 0 {
-		return nil, errors.NewDBError(op, errors.NewDBError(op, nil))
+	*/
+
+	// Пагинация
+	if limit > 0 {
+		query = query.Limit(limit)
+	}
+	if offset >= 0 {
+		query = query.Offset(offset)
+	}
+
+	// Выполняем запрос
+	if err := query.Find(&patients).Error; err != nil {
+		return nil, errors.NewDBError(op, err)
 	}
 
 	return patients, nil

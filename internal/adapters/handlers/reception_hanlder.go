@@ -112,12 +112,26 @@ func (h *Handler) GetReceptionsHospitalByPatientID(c *gin.Context) {
 
 func (h *Handler) GetPatientsByDoctorID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("doc_id"), 10, 64)
+
 	if err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'id' must be an integer", false)
 		return
 	}
+	limitStr := c.DefaultQuery("limit", "10")
+	offsetStr := c.DefaultQuery("offset", "0")
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 {
+		h.ErrorResponse(c, err, http.StatusBadRequest, "query parameter 'limit' must be a positive integer", false)
+		return
+	}
 
-	reception, eerr := h.usecase.GetPatientsByDoctorID(uint(id))
+	offset, err := strconv.Atoi(offsetStr)
+	if err != nil || offset < 0 {
+		h.ErrorResponse(c, err, http.StatusBadRequest, "query parameter 'offset' must be a non-negative integer", false)
+		return
+	}
+
+	reception, eerr := h.usecase.GetPatientsByDoctorID(uint(id), limit, offset)
 	if eerr != nil {
 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
 		return
