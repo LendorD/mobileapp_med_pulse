@@ -92,7 +92,6 @@ func autoMigrate(db *gorm.DB) error {
 	// Удаляем таблицы в правильном порядке зависимостей
 	tables := []string{
 		"reception_smp_med_services",
-		"emergency_call_patients",
 		"patient_allergy",
 		"receptions_smp_patient",
 		"reception_hospitals",
@@ -292,35 +291,6 @@ func seedTestData(db *gorm.DB) error {
 		}
 	}
 
-	// 7. Создаем приемы СМП с услугами
-	for i := 0; i < 50; i++ {
-		date := dates[i%len(dates)]
-		hour := 9 + i%8
-		minute := 30 * (i % 2)
-		date = date.Add(time.Hour*time.Duration(hour) + time.Minute*time.Duration(minute))
-
-		reception := &entities.ReceptionSMP{
-			DoctorID:        doctors[i%len(doctors)].ID,
-			PatientID:       patients[i%len(patients)].ID,
-			Diagnosis:       "ОРВИ",
-			Recommendations: "Постельный режим",
-		}
-
-		if err := db.Create(reception).Error; err != nil {
-			return fmt.Errorf("failed to create SMP reception %d: %w", i, err)
-		}
-
-		// Добавляем услуги
-		servicesToAdd := []*entities.MedService{
-			services[i%len(services)],
-			services[(i+1)%len(services)],
-		}
-
-		if err := db.Model(reception).Association("MedServices").Append(servicesToAdd); err != nil {
-			return fmt.Errorf("failed to add services to SMP reception %d: %w", i, err)
-		}
-	}
-
 	// 8. Создаем экстренные вызовы
 	statusesE := []entities.EmergencyStatus{
 		entities.EmergencyStatusScheduled,
@@ -337,7 +307,7 @@ func seedTestData(db *gorm.DB) error {
 		minute := 30 * (i % 2)
 		date = date.Add(time.Hour*time.Duration(hour) + time.Minute*time.Duration(minute))
 
-		emergencyCall := &entities.EmergencyCall{
+		emergencyCall := entities.EmergencyCall{
 			DoctorID: doctors[i%len(doctors)].ID,
 			Status:   statusesE[i%len(statusesE)],
 			Priority: i%2 == 0,
@@ -345,23 +315,50 @@ func seedTestData(db *gorm.DB) error {
 			Phone:    fmt.Sprintf("+7915%07d", 2000000+i),
 		}
 
-		if err := db.Create(emergencyCall).Error; err != nil {
+		if err := db.Create(&emergencyCall).Error; err != nil {
 			return fmt.Errorf("failed to create emergency call %d: %w", i, err)
 		}
 
-		// Добавляем пациентов к вызову
-		patientsToAdd := []*entities.Patient{
-			patients[i%len(patients)],
-			patients[(i+1)%len(patients)],
+		// Создаем связанные ReceptionSMP и добавляем к ним услуги
+		receptions := []*entities.ReceptionSMP{
+			{
+				DoctorID:        emergencyCall.DoctorID,
+				PatientID:       patients[i%len(patients)].ID,
+				Diagnosis:       "ОРВИ",
+				Recommendations: "Постельный режим",
+			},
+			{
+				DoctorID:        emergencyCall.DoctorID,
+				PatientID:       patients[(i+1)%len(patients)].ID,
+				Diagnosis:       "Грипп",
+				Recommendations: "Жаропонижающее",
+			},
 		}
 
-		if err := db.Model(emergencyCall).Association("Patients").Append(patientsToAdd); err != nil {
-			return fmt.Errorf("failed to add patients to emergency call %d: %w", i, err)
+		// Добавляем услуги
+		servicesToAdd := []*entities.MedService{
+			services[i%len(services)],
+			services[(i+1)%len(services)],
+		}
+
+		for j := range receptions {
+			reception := receptions[j]
+			reception.EmergencyCallID = emergencyCall.ID
+
+			if err := db.Create(reception).Error; err != nil {
+				return fmt.Errorf("failed to create SMP reception %d: %w", i, err)
+			}
+
+			// Добавляем медуслуги
+			if err := db.Model(reception).Association("MedServices").Append(servicesToAdd); err != nil {
+				return fmt.Errorf("failed to add services to SMP reception %d: %w", i, err)
+			}
 		}
 	}
 
 	return nil
 }
+
 func parseDate(dateStr string) time.Time {
 	t, err := time.Parse("2006-01-02", dateStr)
 	if err != nil {

@@ -26,5 +26,5 @@ type EmergencyCall struct {
 	Address  string          `gorm:"not null" json:"address" example:"Москва, ул. Ленина, д. 15" rus:"Адрес вызова"`
 	Phone    string          `gorm:"not null" json:"phone" example:"+79991234567" rus:"Телефон для связи"`
 
-	ReceptionSMPs []ReceptionSMP `gorm:"many2many:emergency_call_reception_smp;" json:"SMPS" rus:"заключения"`
+	ReceptionSMPs []ReceptionSMP `gorm:"foreignKey:EmergencyCallID" json:"receptions" rus:"заключения"`
 }
