@@ -21,7 +21,7 @@ import (
 // @Failure 500 {object} ResultError "Внутренняя ошибка"
 // @Router /medcard/{id} [get]
 func (h *Handler) GetMedCardByPatientID(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(c.Param("pat_id"), 10, 64)
 	if err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'id' must be an integer", false)
 		return

@@ -65,38 +65,23 @@ func ProvideRouter(h *Handler) http.Handler {
 	// Основной маршрут
 	baseRouter := r.Group("/api/v1")
 
-	// Роутеры доктора
-	doctorGroup := baseRouter.Group("/doctor")
-	doctorGroup.POST("/", h.CreateDoctor)
-	doctorGroup.GET("/:id", h.GetDoctorByID)
-	doctorGroup.GET("/patients/:doc_id", h.GetPatientsByDoctorID)
-
 	// Роутеры медкарты
 	medCardGroup := baseRouter.Group("/medcard")
-	medCardGroup.GET("/:id", h.GetMedCardByPatientID)
-	medCardGroup.PUT("/:id", h.UpdateMedCard)
+	medCardGroup.GET("/:pat_id", h.GetMedCardByPatientID)
+	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
 
 	receptionHospital := baseRouter.Group("/recepHospital")
 	receptionHospital.GET("/:pat_id", h.GetReceptionsHospitalByPatientID)
 
 	// Роутеры пациентов
 	patientGroup := baseRouter.Group("/patients")
-	patientGroup.POST("/", h.CreatePatient)
-	patientGroup.GET("/:pat_id", h.GetPatientByID)
-	patientGroup.DELETE("/:pat_id", h.DeletePatient)
-	patientGroup.PATCH("/:pat_id", h.UpdatePatient)
+	patientGroup.GET("/:doc_id", h.GetPatientsByDoctorID)
+	patientGroup.GET("/recep_hosp/:pat_id", h.GetReceptionsHospitalByPatientID)
 
 	// Роутеры СМП
 	// emergencyGroup := baseRouter.Group("/emergency-group")
 	// emergencyGroup.GET("/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
 	r.GET("/emergency/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
-
-	// r.GET("/receptions/:doctor_id", h.GetReceptionsByDoctorAndDate)
-
-	// Группа маршрутов для patientContactInfo
-	contactInfoGroup := baseRouter.Group("/contact_info")
-	contactInfoGroup.POST("/:pat_id", h.CreateContactInfo)
-	contactInfoGroup.GET("/:pat_id", h.GetContactInfoByPatientID)
 
 	return r
 }
