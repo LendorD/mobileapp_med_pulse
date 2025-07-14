@@ -1,7 +1,7 @@
 package usecases
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
@@ -31,6 +31,7 @@ func (u *ReceptionHospitalUsecase) GetReceptionsHospitalByPatientID(patientId ui
 	}
 
 	receptions, err := u.repo.GetReceptionHospitalByPatientID(patientId)
+	// receptionsSMP, err := u.repo.GetReceptionHospitalByPatientID(patientId)
 	if err != nil {
 		return nil, errors.NewAppError(
 			errors.InternalServerErrorCode,
@@ -41,8 +42,8 @@ func (u *ReceptionHospitalUsecase) GetReceptionsHospitalByPatientID(patientId ui
 	}
 	var responses []models.ReceptionHospitalResponse
 	for _, reception := range receptions {
-		log.Println(reception.Doctor)
-		log.Println(reception.Patient.FullName)
+		fmt.Printf("Doctor: %+v\n", reception.Doctor)
+		fmt.Printf("Patient: %+v\n", reception.Patient)
 		response := models.ReceptionHospitalResponse{
 			Doctor: models.DoctorInfoResponse{
 				FullName:       reception.Doctor.FullName,
@@ -66,6 +67,48 @@ func (u *ReceptionHospitalUsecase) GetReceptionsHospitalByPatientID(patientId ui
 	}
 
 	return responses, nil
+}
+func (u *ReceptionHospitalUsecase) UpdateReceptionHospital(input *models.UpdateReceptionHospitalRequest) (models.ReceptionHospitalResponse, *errors.AppError) {
+	recepHospUpdate := map[string]interface{}{
+		"id":              input.ID,
+		"diagnosis":       input.Diagnosis,
+		"recommendations": input.Recommendations,
+		"status":          input.Status,
+	}
+
+	if _, err := u.repo.UpdateReceptionHospital(input.ID, recepHospUpdate); err != nil {
+		return models.ReceptionHospitalResponse{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to update reception hospital data",
+			err,
+			true,
+		)
+	}
+
+	recepHospResponse, err := u.repo.GetReceptionHospitalByID(input.ID)
+	if err != nil {
+		return models.ReceptionHospitalResponse{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get updated reception hospital data",
+			err,
+			true,
+		)
+	}
+	return models.ReceptionHospitalResponse{
+		Doctor: models.DoctorInfoResponse{
+			FullName:       recepHospResponse.Doctor.FullName,
+			Specialization: recepHospResponse.Doctor.Specialization,
+		},
+		Patient: models.ShortPatientResponse{
+			ID:        recepHospResponse.Patient.ID,
+			FullName:  recepHospResponse.Patient.FullName,
+			BirthDate: recepHospResponse.Patient.BirthDate,
+			IsMale:    recepHospResponse.Patient.IsMale,
+		},
+		Diagnosis:       recepHospResponse.Diagnosis,
+		Recommendations: recepHospResponse.Recommendations,
+		Date:            recepHospResponse.Date,
+	}, nil
 }
 
 func (u *ReceptionHospitalUsecase) GetPatientsByDoctorID(doctorID uint, limit, offset int) ([]entities.Patient, *errors.AppError) {
