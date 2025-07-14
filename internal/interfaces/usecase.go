@@ -22,7 +22,7 @@ type Usecases interface {
 }
 
 type ReceptionHospitalUsecase interface {
-	GetReceptionsHospitalByPatientID(patientId uint) ([]entities.ReceptionHospital, *errors.AppError)
+	GetReceptionsHospitalByPatientID(patientId uint) ([]models.ReceptionHospitalResponse, *errors.AppError)
 	GetPatientsByDoctorID(doc_id uint) ([]entities.Patient, *errors.AppError)
 }
 

@@ -1,10 +1,11 @@
 package receptionHospital
 
 import (
+	"time"
+
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
@@ -69,9 +70,18 @@ func (r *ReceptionHospitalRepositoryImpl) GetReceptionHospitalByDoctorID(doctorI
 	op := "repo.ReceptionHospital.GetReceptionHospitalByDoctorID"
 
 	var receptions []entities.ReceptionHospital
-	if err := r.db.Where("doctor_id = ?", doctorID).Find(&receptions).Error; err != nil {
+	if err := r.db.
+		Preload("Patient", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id, full_name, birth_date, is_male")
+		}).
+		Preload("Doctor", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id, full_name, specialization")
+		}).
+		Where("doctor_id = ?", doctorID).
+		Find(&receptions).Error; err != nil {
 		return nil, errors.NewDBError(op, err)
 	}
+
 	return receptions, nil
 }
 

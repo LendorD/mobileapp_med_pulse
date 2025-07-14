@@ -2,8 +2,9 @@ package interfaces
 
 import (
 	"context"
-	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"time"
+
+	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
@@ -98,7 +99,7 @@ type ReceptionHospitalRepository interface {
 	GetPatientsByDoctorID(doctorID uint) ([]entities.Patient, *errors.AppError)
 }
 
-// updated to match the new structure
+// updated to match the new structured
 type PatientRepository interface {
 	CreatePatient(patient entities.Patient) (uint, error)
 	UpdatePatient(id uint, updateMap map[string]interface{}) (uint, error)
