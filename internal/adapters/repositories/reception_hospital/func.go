@@ -162,3 +162,33 @@ func (r *ReceptionHospitalRepositoryImpl) GetReceptionsHospitalByDoctorAndDate(d
 
 	return result, err
 }
+
+func (r *ReceptionHospitalRepositoryImpl) GetPatientsByDoctorID(doctorID uint) ([]entities.Patient, *errors.AppError) {
+	op := "repo.ReceptionHospital.GetPatientsByDoctorID"
+
+	var receptions []entities.ReceptionHospital
+
+	// Загружаем приемы по doctorID с подгрузкой связанных пациентов
+	err := r.db.
+		Preload("Patient").
+		Where("doctor_id = ?", doctorID).
+		Find(&receptions).Error
+	if err != nil {
+		return nil, errors.NewDBError(op, err)
+	}
+
+	// Собираем уникальных пациентов
+	uniquePatients := make(map[uint]entities.Patient)
+	for _, reception := range receptions {
+		p := reception.Patient
+		uniquePatients[p.ID] = p
+	}
+
+	// Преобразуем map в slice
+	patients := make([]entities.Patient, 0, len(uniquePatients))
+	for _, p := range uniquePatients {
+		patients = append(patients, p)
+	}
+
+	return patients, nil
+}

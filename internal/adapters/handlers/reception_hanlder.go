@@ -110,6 +110,22 @@ func (h *Handler) GetReceptionsHospitalByPatientID(c *gin.Context) {
 	h.ResultResponse(c, "Success receptios get", Array, reception)
 }
 
+func (h *Handler) GetPatientsByDoctorID(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("doc_id"), 10, 64)
+	if err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'id' must be an integer", false)
+		return
+	}
+
+	reception, eerr := h.usecase.GetPatientsByDoctorID(uint(id))
+	if eerr != nil {
+		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
+		return
+	}
+
+	h.ResultResponse(c, "Success receptios get", Array, reception)
+}
+
 // GetReceptionsByDoctorAndDate godoc
 // @Summary Get receptions by doctor and date
 // @Description Get paginated list of receptions for specific doctor and date

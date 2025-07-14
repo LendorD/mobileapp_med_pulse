@@ -69,6 +69,7 @@ func ProvideRouter(h *Handler) http.Handler {
 	doctorGroup := baseRouter.Group("/doctor")
 	doctorGroup.POST("/", h.CreateDoctor)
 	doctorGroup.GET("/:id", h.GetDoctorByID)
+	doctorGroup.GET("/patients/:doc_id", h.GetPatientsByDoctorID)
 
 	// Роутеры медкарты
 	medCardGroup := baseRouter.Group("/medcard")
@@ -77,7 +78,6 @@ func ProvideRouter(h *Handler) http.Handler {
 
 	receptionHospital := baseRouter.Group("/recepHospital")
 	receptionHospital.GET("/:pat_id", h.GetReceptionsHospitalByPatientID)
-
 
 	// Роутеры пациентов
 	patientGroup := baseRouter.Group("/patients")
