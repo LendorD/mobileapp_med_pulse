@@ -3,7 +3,9 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -97,22 +99,63 @@ func (h *Handler) GetPatientsByDoctorID(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /receptions/doctor/{doctor_id} [get]
-// func (h *Handler) UpdateReceptionHospitalByReceptionID(c *gin.Context) {
-// 	var input models.UpdateReceptionHospitalRequest
-// 	if err := c.ShouldBindJSON(&input); err != nil {
-// 		h.ErrorResponse(c, err, http.StatusBadRequest, "Error create ReceptionHospitalRequest", true)
-// 		return
-// 	}
+func (h *Handler) UpdateReceptionHospitalByReceptionID(c *gin.Context) {
+	var input models.UpdateReceptionHospitalRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, "Error create ReceptionHospitalRequest", true)
+		return
+	}
 
-// 	if err := validate.Struct(input); err != nil {
-// 		h.ErrorResponse(c, err, 422, "Error validate ReceptionHospitalRequest", true)
-// 		return
-// 	}
+	if err := validate.Struct(input); err != nil {
+		h.ErrorResponse(c, err, 422, "Error validate ReceptionHospitalRequest", true)
+		return
+	}
 
-// 	doctor, eerr := h.usecase.UpdateReceptionHospital(&input)
-// 	if eerr != nil {
-// 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
-// 		return
-// 	}
-// 	h.ResultResponse(c, "Success reception hospital update", Object, doctor)
-// }
+	doctor, eerr := h.usecase.UpdateReceptionHospital(&input)
+	if eerr != nil {
+		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
+		return
+	}
+	h.ResultResponse(c, "Success reception hospital update", Object, doctor)
+}
+
+func (h *Handler) GetReceptionsByDoctorAndDate(c *gin.Context) {
+	// Получаем doctor_id из URL
+	doctorIDStr := c.Param("doctor_id")
+	doctorID, err := strconv.ParseUint(doctorIDStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid doctor ID"})
+		return
+	}
+
+	// Получаем дату из query параметров
+	dateStr := c.Query("date")
+	var date time.Time
+	if dateStr != "" {
+		date, err = time.Parse("2006-01-02", dateStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid date format, use YYYY-MM-DD"})
+			return
+		}
+	} else {
+		// Если дата не указана, используем текущую дату
+		date = time.Now()
+	}
+
+	// Получаем номер страницы из query параметров
+	pageStr := c.DefaultQuery("page", "1")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "page must be a positive integer"})
+		return
+	}
+
+	// Вызываем usecase
+	receptions, err := h.usecase.GetHospitalReceptionsByDoctorAndDate(uint(doctorID), date, page)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, receptions)
+}

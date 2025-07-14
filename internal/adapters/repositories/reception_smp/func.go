@@ -1,10 +1,11 @@
 package receptionSmp
 
 import (
+	"time"
+
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
@@ -125,7 +126,6 @@ func (r *ReceptionSmpRepositoryImpl) GetReceptionsSmpByDoctorAndDate(doctorID ui
 		Date        time.Time
 		Status      string
 		PatientName string
-		IsOut       bool
 	}
 
 	offset := (page - 1) * perPage
@@ -136,7 +136,6 @@ func (r *ReceptionSmpRepositoryImpl) GetReceptionsSmpByDoctorAndDate(doctorID ui
 		Select(`
             receptions.date,
             receptions.status,
-            receptions.is_out,
             patients.full_name as patient_name
         `).
 		Joins("LEFT JOIN patients ON patients.id = receptions.patient_id").
@@ -155,7 +154,6 @@ func (r *ReceptionSmpRepositoryImpl) GetReceptionsSmpByDoctorAndDate(doctorID ui
 			Date:        item.Date.Format("2006-01-02 15:04"),
 			Status:      item.Status,
 			PatientName: item.PatientName,
-			IsOut:       item.IsOut,
 		}
 	}
 

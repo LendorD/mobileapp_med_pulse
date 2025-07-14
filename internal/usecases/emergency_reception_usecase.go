@@ -53,7 +53,7 @@ func NewEmergencyReceptionUsecase(repo interfaces.EmergencyReceptionRepository) 
 // 	return *updatedEmergency, nil
 // }
 
-func (s *EmergencyReceptionUsecase) GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.EmergencyReceptionShortResponse, error) {
+func (s *EmergencyReceptionUsecase) GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.EmergencyCallShortResponse, error) {
 	// Валидация номера страницы
 	if page < 1 {
 		return nil, errors.New("page must be greater than 0")

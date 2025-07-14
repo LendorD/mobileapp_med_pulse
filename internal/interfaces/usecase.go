@@ -23,8 +23,9 @@ type Usecases interface {
 
 type ReceptionHospitalUsecase interface {
 	GetReceptionsHospitalByPatientID(patientId uint) ([]models.ReceptionHospitalResponse, *errors.AppError)
-	GetPatientsByDoctorID(doc_id uint, limit, offset int) ([]entities.Patient, *errors.AppError)
 	UpdateReceptionHospital(input *models.UpdateReceptionHospitalRequest) (models.ReceptionHospitalResponse, *errors.AppError)
+	GetPatientsByDoctorID(doctorID uint, limit, offset int) ([]entities.Patient, *errors.AppError)
+	GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.ReceptionShortResponse, error)
 }
 
 type ReceptionSmpUsecase interface {
@@ -54,7 +55,7 @@ type DoctorUsecase interface {
 }
 
 type EmergencyReceptionUsecase interface {
-	GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.EmergencyReceptionShortResponse, error)
+	GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.EmergencyCallShortResponse, error)
 }
 
 type MedServiceUsecase interface{}
@@ -64,6 +65,8 @@ type PatientUsecase interface {
 	GetPatientByID(id uint) (entities.Patient, *errors.AppError)
 	UpdatePatient(input *models.UpdatePatientRequest) (entities.Patient, *errors.AppError)
 	DeletePatient(id uint) *errors.AppError
+
+	GetAllPatients(limit, offset int, filters map[string]interface{}) ([]entities.Patient, *errors.AppError)
 }
 
 type PersonalInfoUsecase interface{}

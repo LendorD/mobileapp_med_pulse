@@ -58,7 +58,7 @@ type EmergencyReceptionRepository interface {
 	GetEmergencyReceptionsByPatientID(patientID uint) ([]entities.EmergencyCall, error)
 	GetEmergencyReceptionsByDateRange(start, end time.Time) ([]entities.EmergencyCall, error)
 	GetEmergencyReceptionsPriorityCases() ([]entities.EmergencyCall, error)
-	GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.EmergencyReceptionShortResponse, error)
+	GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.EmergencyCallShortResponse, error)
 }
 
 // updated to match the new structure
@@ -106,7 +106,7 @@ type PatientRepository interface {
 	UpdatePatient(id uint, updateMap map[string]interface{}) (uint, error)
 	DeletePatient(id uint) error
 	GetPatientByID(id uint) (entities.Patient, error)
-	GetAllPatients(limit, offset int) ([]entities.Patient, error)
+	GetAllPatients(limit, offset int, filters map[string]interface{}) ([]entities.Patient, error)
 	GetPatientsByFullName(name string) ([]entities.Patient, error)
 	GetPatientAllergiesByID(id uint) ([]entities.Allergy, error)
 }
