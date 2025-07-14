@@ -22,6 +22,7 @@ type Usecases interface {
 }
 
 type ReceptionHospitalUsecase interface {
+	GetReceptionsHospitalByPatientID(patientId uint) ([]entities.ReceptionHospital, *errors.AppError)
 }
 
 type ReceptionSmpUsecase interface {
