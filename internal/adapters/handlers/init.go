@@ -70,7 +70,7 @@ func ProvideRouter(h *Handler) http.Handler {
 	medCardGroup.GET("/:pat_id", h.GetMedCardByPatientID)
 	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
 
-	// Группа маршрутов для patients
+	// Группа маршрутов для заключений
 	receptionHospital := baseRouter.Group("/recepHospital")
 	receptionHospital.GET("/:pat_id", h.GetReceptionsHospitalByPatientID)
 	receptionHospital.PUT("/:recep_id", h.UpdateReceptionHospitalByReceptionID)

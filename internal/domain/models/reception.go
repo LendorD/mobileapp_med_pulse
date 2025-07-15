@@ -38,8 +38,8 @@ type ReceptionShortResponse struct {
 }
 
 type ReceptionHospitalResponse struct {
-	Doctor          DoctorInfoResponse   `json:"-"`
-	Patient         ShortPatientResponse `json:"-"`
+	Doctor          DoctorInfoResponse   `json:"doctor"`
+	Patient         ShortPatientResponse `json:"patient"`
 	Diagnosis       string               `json:"diagnosis" example:"ОРВИ"`
 	Recommendations string               `json:"recommendations" example:"Постельный режим"`
 	Date            time.Time            `json:"date" example:"2023-10-15T14:30:00Z"`
