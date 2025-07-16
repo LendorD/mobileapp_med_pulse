@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"github.com/gin-gonic/gin"
@@ -130,13 +133,19 @@ func (h *Handler) DeletePatient(c *gin.Context) {
 	h.ResultResponse(c, "Success patient delete", Empty, nil)
 }
 
-// Пример:
-// Получить всех людей с подстрокой имени
-// LIKE (SQL) содержит подстроку (% для wildcard)
-// filter=birth_date.eq.1988-07-14 - получить человека, у которого др 1988-07-14
-// http://localhost:8080/api/v1/patients?filter=full_name.like - полный запрос
-// filter=full_name.like.Анна - получить человека с подстрокой "Анна" в full_name
-// названия передаваемых столбцов таблицы автоматически подгружаются через json
+// GetAllPatients godoc
+// @Summary Получить список пациентов
+// @Description Возвращает список пациентов с возможностью пагинации и фильтрации
+// @Tags Patient
+// @Accept json
+// @Produce json
+// @Param page query int false "Номер страницы (по умолчанию 1)"
+// @Param count query int false "Количество записей на странице (по умолчанию 0 — без ограничения)"
+// @Param filter query string false "Фильтр в формате field.operation.value. Примеры: full_name.like.Анна, birth_date.eq.1988-07-14"
+// @Success 200 {object} ResultResponse "Список пациентов"
+// @Failure 400 {object} ResultError "Некорректные параметры запроса"
+// @Failure 500 {object} ResultError "Внутренняя ошибка сервера"
+// @Router /patients [get]
 func (h *Handler) GetAllPatients(c *gin.Context) {
 	// Получаем и валидируем параметр page
 	page, err := h.service.ParseIntString(c.DefaultQuery("page", "1"))

@@ -65,7 +65,6 @@ func (u *DoctorUsecase) UpdateDoctor(input *models.UpdateDoctorRequest) (entitie
 	updateMap := map[string]interface{}{
 		"full_name":      input.FullName,
 		"login":          input.Login,
-		"email":          input.Email,
 		"password":       input.Password,
 		"specialization": input.Specialization,
 		"updated_at":     time.Now(),

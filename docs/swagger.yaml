@@ -289,22 +289,6 @@ definitions:
         example: ok
         type: string
     type: object
-  models.AddAllergyRequest:
-    description: Запрос для добавления аллергии пациенту
-    properties:
-      allergy_id:
-        description: ID аллергии
-        example: 5
-        type: integer
-      description:
-        description: Описание аллергии
-        example: Аллергия на пыльцу
-        type: string
-      patient_id:
-        description: ID пациента
-        example: 1
-        type: integer
-    type: object
   models.AllergyResponse:
     description: Ответ с названием аллергии
     properties:
@@ -328,36 +312,6 @@ definitions:
         description: Номер телефона
         example: "+79991234567"
         type: string
-    type: object
-  models.CreateDoctorRequest:
-    description: Используется для регистрации нового врача в системе
-    properties:
-      email:
-        description: Email (обязательное)
-        example: doctor@example.com
-        type: string
-      full_name:
-        description: ФИО врача (обязательное)
-        example: Иванов Иван Иванович
-        type: string
-      login:
-        description: Логин (обязательное)
-        example: "+79123456789"
-        type: string
-      password:
-        description: Пароль (обязательное)
-        example: qwerty123
-        type: string
-      specialization:
-        description: Специализация (обязательное)
-        example: Терапевт
-        type: string
-    required:
-    - email
-    - full_name
-    - login
-    - password
-    - specialization
     type: object
   models.CreatePatientRequest:
     description: Данные для создания нового пациента
@@ -473,10 +427,6 @@ definitions:
   models.UpdateDoctorRequest:
     description: Используется для изменения информации о враче
     properties:
-      email:
-        description: Новый email
-        example: doctor@example.com
-        type: string
       full_name:
         description: Новое ФИО
         example: Иванов Иван Иванович
@@ -527,27 +477,6 @@ info:
   title: ClinicHub API
   version: 1.0.0
 paths:
-  /api/v1/patient/allergy:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Данные аллергии
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/models.AddAllergyRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Добавленная аллергия
-          schema:
-            $ref: '#/definitions/models.AllergyResponse'
-      summary: Добавить аллергию пациенту
-      tags:
-      - allergy
   /auth/login:
     post:
       consumes:
@@ -585,39 +514,6 @@ paths:
       tags:
       - auth
   /doctor:
-    post:
-      consumes:
-      - application/json
-      description: Создает нового врача с указанными данными
-      parameters:
-      - description: Данные врача
-        in: body
-        name: info
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreateDoctorRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Созданный врач
-          schema:
-            $ref: '#/definitions/entities.Doctor'
-        "400":
-          description: Некорректный запрос
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "422":
-          description: Ошибка валидации
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "500":
-          description: Внутренняя ошибка
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-      summary: Создать нового врача
-      tags:
-      - Doctor
     put:
       consumes:
       - application/json
@@ -656,38 +552,6 @@ paths:
       tags:
       - Doctor
   /doctor/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Удаляет врача по ID
-      parameters:
-      - description: ID врача
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Успешное удаление
-          schema:
-            $ref: '#/definitions/handlers.ResultResponse'
-        "400":
-          description: Некорректный ID
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "404":
-          description: Врач не найден
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "500":
-          description: Внутренняя ошибка
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-      summary: Удалить врача
-      tags:
-      - Doctor
     get:
       consumes:
       - application/json
@@ -761,7 +625,7 @@ paths:
             $ref: '#/definitions/handlers.ResultError'
       summary: Получить экстренные приёмы врача по дате
       tags:
-      - EmergencyReception
+      - EmergencyCall
   /medcard:
     put:
       consumes:
@@ -969,74 +833,43 @@ paths:
       summary: Получить пациента по ID
       tags:
       - Patient
-  /patient/{patient_id}/allergies:
+  /patients:
     get:
       consumes:
       - application/json
-      description: Возвращает список аллергий пациента
+      description: Возвращает список пациентов с возможностью пагинации и фильтрации
       parameters:
-      - description: ID пациента
-        in: path
-        name: patient_id
-        required: true
+      - description: Номер страницы (по умолчанию 1)
+        in: query
+        name: page
         type: integer
+      - description: Количество записей на странице (по умолчанию 0 — без ограничения)
+        in: query
+        name: count
+        type: integer
+      - description: 'Фильтр в формате field.operation.value. Примеры: full_name.like.Анна,
+          birth_date.eq.1988-07-14'
+        in: query
+        name: filter
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: Список аллергий
+          description: Список пациентов
           schema:
-            items:
-              $ref: '#/definitions/models.AllergyResponse'
-            type: array
+            $ref: '#/definitions/handlers.ResultResponse'
         "400":
-          description: Некорректный ID
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "404":
-          description: Пациент не найден
+          description: Некорректные параметры запроса
           schema:
             $ref: '#/definitions/handlers.ResultError'
         "500":
-          description: Внутренняя ошибка
+          description: Внутренняя ошибка сервера
           schema:
             $ref: '#/definitions/handlers.ResultError'
-      summary: Получить аллергии пациента
+      summary: Получить список пациентов
       tags:
-      - Allergy
-  /patient/{patient_id}/contact-info:
-    get:
-      consumes:
-      - application/json
-      description: Возвращает контактные данные пациента по ID пациента
-      parameters:
-      - description: ID пациента
-        in: path
-        name: patient_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Контактные данные
-          schema:
-            $ref: '#/definitions/entities.ContactInfo'
-        "400":
-          description: Некорректный ID пациента
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "404":
-          description: Данные не найдены
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "500":
-          description: Внутренняя ошибка
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-      summary: Получить контактные данные пациента
-      tags:
-      - ContactInfo
+      - Patient
   /reception/{id}:
     get:
       consumes:

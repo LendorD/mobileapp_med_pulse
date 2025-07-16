@@ -5,8 +5,10 @@ import (
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 
+	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/usecases"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	swaggerFiles "github.com/swaggo/files"
@@ -41,8 +43,17 @@ func NewHandler(usecase interfaces.Usecases, parentLogger *logging.Logger, servi
 }
 
 // ProvideRouter создает и настраивает маршруты
-func ProvideRouter(h *Handler) http.Handler {
+func ProvideRouter(h *Handler, cfg *config.Config) http.Handler {
 	r := gin.Default()
+
+	// В ProvideRouter:
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     cfg.Server.AllowedOrigins,
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
 	// Swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
