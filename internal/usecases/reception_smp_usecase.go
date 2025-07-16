@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"math"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
@@ -118,4 +119,121 @@ func (u *ReceptionSmpUsecase) CreateReceptionSMP(input *models.CreateEmergencyRe
 	}
 
 	return fullReception, nil
+}
+
+func (u *ReceptionSmpUsecase) GetSMPReceptionsByEmergencyCall(
+	emergencyCallID uint,
+	page int,
+	perPage int,
+) (*models.FilterResponse[[]models.ReceptionSMPShortResponse], error) {
+	// Валидация параметров
+	if emergencyCallID == 0 {
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get call",
+			errors.ErrEmptyData,
+			true,
+		)
+	}
+
+	if page < 1 {
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"page number must be greater than 0",
+			errors.ErrDataNotFound,
+			true,
+		)
+	}
+
+	if perPage < 5 {
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"Perpage number must be greater than 5",
+			errors.ErrDataNotFound,
+			true,
+		)
+	}
+
+	// Получение данных из репозитория
+	receptions, total, err := u.recepSmpRepo.GetWithPatientsByEmergencyCallID(emergencyCallID, page, perPage)
+	if err != nil {
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"GetWithPatientsByEmergencyCallID failed to get from repo",
+			errors.ErrDataNotFound,
+			true,
+		)
+	}
+
+	// Преобразование в DTO
+	result := make([]models.ReceptionSMPShortResponse, len(receptions))
+	for i, reception := range receptions {
+		result[i] = models.ReceptionSMPShortResponse{
+			Id:          reception.ID,
+			PatientName: reception.Patient.FullName, // Предполагается что Patient предзагружен
+			Diagnosis:   reception.Diagnosis,
+		}
+	}
+
+	// Расчет пагинации
+	totalPages := int(math.Ceil(float64(total) / float64(perPage)))
+
+	return &models.FilterResponse[[]models.ReceptionSMPShortResponse]{
+		Hits:        result,
+		CurrentPage: page,
+		TotalPages:  totalPages,
+		TotalHits:   int(total),
+		HitsPerPage: perPage,
+	}, nil
+}
+
+func (u *ReceptionSmpUsecase) GetReceptionWithMedServicesByID(id uint) (*models.ReceptionSMPResponse, error) {
+	// Валидация
+	if id == 0 {
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get SMP",
+			errors.ErrEmptyData,
+			true,
+		)
+	}
+
+	// Получение данных
+	reception, err := u.recepSmpRepo.GetReceptionWithMedServicesByID(id)
+	if err != nil {
+		if errors.Is(err, errors.ErrDataNotFound) {
+			return nil, errors.NewAppError(
+				errors.InternalServerErrorCode,
+				"GetReceptionWithMedServicesByID failed to get SMP from repo",
+				errors.ErrDataNotFound,
+				true,
+			)
+		}
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"GetReceptionWithMedServicesByID failed to get Med_Services from repo",
+			errors.ErrDataNotFound,
+			true,
+		)
+	}
+
+	// Преобразование в DTO
+	return &models.ReceptionSMPResponse{
+		Id:              reception.ID,
+		PatientName:     reception.Patient.FullName,
+		Diagnosis:       reception.Diagnosis,
+		Recommendations: reception.Recommendations,
+		MedServices:     convertMedServicesToResponse(reception.MedServices),
+	}, nil
+}
+
+func convertMedServicesToResponse(services []entities.MedService) []models.MedServicesResponse {
+	result := make([]models.MedServicesResponse, len(services))
+	for i, svc := range services {
+		result[i] = models.MedServicesResponse{
+			Name:  svc.Name,
+			Price: svc.Price,
+		}
+	}
+	return result
 }

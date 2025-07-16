@@ -8,7 +8,6 @@ import (
 	"gorm.io/gorm/clause"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
 
 func (r *ReceptionSmpRepositoryImpl) CreateReceptionSmp(reception entities.ReceptionSMP) (uint, error) {
@@ -120,41 +119,57 @@ func getOrderByStatusAndDate() string {
     `
 }
 
-func (r *ReceptionSmpRepositoryImpl) GetReceptionsSmpByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.ReceptionShortResponse, error) {
-	var response []struct {
-		Date        time.Time
-		Status      string
-		PatientName string
+// Repository
+func (r *ReceptionSmpRepositoryImpl) GetWithPatientsByEmergencyCallID(
+	emergencyCallID uint,
+	page, perPage int,
+) ([]entities.ReceptionSMP, int64, error) {
+	op := "repo.ReceptionSmp.GetReceptionSmpByPatientID"
+	var receptions []entities.ReceptionSMP
+	var total int64
+
+	// Базовый запрос с условием
+	baseQuery := r.db.Model(&entities.ReceptionSMP{}).
+		Where("emergency_call_id = ?", emergencyCallID)
+
+	// Считаем общее количество записей
+	if err := baseQuery.Count(&total).Error; err != nil {
+		return nil, 0, errors.NewDBError(op, err)
 	}
 
+	// Получаем данные с пагинацией
 	offset := (page - 1) * perPage
-	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
-	endOfDay := startOfDay.Add(24 * time.Hour)
-
-	err := r.db.Model(&entities.ReceptionSMP{}).
-		Select(`
-            receptions.date,
-            receptions.status,
-            patients.full_name as patient_name
-        `).
-		Joins("LEFT JOIN patients ON patients.id = receptions.patient_id").
-		Where("receptions.doctor_id = ? AND receptions.date >= ? AND receptions.date < ?",
-			doctorID, startOfDay, endOfDay).
+	err := baseQuery.
+		Preload("Patient").
+		Preload("Patient.PersonalInfo").
+		Preload("Patient.ContactInfo").
+		Order("created_at DESC").
 		Offset(offset).
 		Limit(perPage).
-		Order(getOrderByStatusAndDate()).
-		Find(&response).
+		Find(&receptions).
 		Error
 
-	// Преобразуем в финальную структуру с форматированной датой
-	result := make([]models.ReceptionShortResponse, len(response))
-	for i, item := range response {
-		result[i] = models.ReceptionShortResponse{
-			Date:        item.Date.Format("2006-01-02 15:04"),
-			Status:      item.Status,
-			PatientName: item.PatientName,
+	if err != nil {
+		return nil, 0, errors.NewDBError(op, err)
+	}
+
+	return receptions, total, nil
+}
+
+func (r *ReceptionSmpRepositoryImpl) GetReceptionWithMedServicesByID(id uint) (entities.ReceptionSMP, error) {
+	var reception entities.ReceptionSMP
+	op := "repo.ReceptionSmp.DeleteReceptionSmp"
+	err := r.db.
+		Preload("Patient").
+		Preload("MedServices").
+		First(&reception, id).
+		Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return entities.ReceptionSMP{}, errors.NewDBError(op, err)
 		}
 	}
 
-	return result, err
+	return reception, nil
 }

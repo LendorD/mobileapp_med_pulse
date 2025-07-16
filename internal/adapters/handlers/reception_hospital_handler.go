@@ -119,7 +119,7 @@ func (h *Handler) UpdateReceptionHospitalByReceptionID(c *gin.Context) {
 	h.ResultResponse(c, "Success reception hospital update", Object, doctor)
 }
 
-func (h *Handler) GetReceptionsByDoctorAndDate(c *gin.Context) {
+func (h *Handler) GetReceptionsHospitalByDoctorAndDate(c *gin.Context) {
 	// Получаем doctor_id из URL
 	doctorIDStr := c.Param("doc_id")
 	doctorID, err := strconv.ParseUint(doctorIDStr, 10, 32)
