@@ -36,6 +36,7 @@ type MedCardUsecase interface {
 	GetMedCardByPatientID(id uint) (models.MedCardResponse, *errors.AppError)
 	UpdateMedCard(input *models.UpdateMedCardRequest) (models.MedCardResponse, *errors.AppError)
 }
+
 type AllergyUsecase interface {
 	AddAllergyToPatient(patientID, allergyID uint, description string) (entities.Allergy, *errors.AppError)
 	GetAllergyByPatientID(patientID uint) ([]entities.Allergy, *errors.AppError)

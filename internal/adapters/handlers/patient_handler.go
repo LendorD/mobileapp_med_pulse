@@ -1,9 +1,6 @@
 package handlers
 
 import (
-	"net/http"
-	"strconv"
-
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"github.com/gin-gonic/gin"
