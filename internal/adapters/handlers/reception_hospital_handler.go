@@ -2,19 +2,11 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/gin-gonic/gin"
 )
-
-// import (
-// 	"net/http"
-// 	"strconv"
-
-// 	"github.com/gin-gonic/gin"
-// )
 
 // GetReceptionByID godoc
 // @Summary Получить список приёмов пациента по его ID
@@ -29,13 +21,13 @@ import (
 // @Failure 500 {object} ResultError "Внутренняя ошибка"
 // @Router /reception/{id} [get]
 func (h *Handler) GetReceptionsHospitalByPatientID(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("pat_id"), 10, 64)
+	id, err := h.service.ParseUintString(c.Param("pat_id"))
 	if err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'id' must be an integer", false)
 		return
 	}
 
-	reception, eerr := h.usecase.GetReceptionsHospitalByPatientID(uint(id))
+	reception, eerr := h.usecase.GetReceptionsHospitalByPatientID(id)
 	if eerr != nil {
 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
 		return
@@ -57,7 +49,7 @@ func (h *Handler) GetReceptionsHospitalByPatientID(c *gin.Context) {
 // @Failure 500 {object} ResultError "Внутренняя ошибка"
 // @Router /reception/{id} [get]
 func (h *Handler) GetPatientsByDoctorID(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("doc_id"), 10, 64)
+	id, err := h.service.ParseUintString(c.Param("doc_id"))
 
 	if err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'id' must be an integer", false)
@@ -65,19 +57,19 @@ func (h *Handler) GetPatientsByDoctorID(c *gin.Context) {
 	}
 	limitStr := c.DefaultQuery("limit", "10")
 	offsetStr := c.DefaultQuery("offset", "0")
-	limit, err := strconv.Atoi(limitStr)
+	limit, err := h.service.ParseIntString(limitStr)
 	if err != nil || limit <= 0 {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "query parameter 'limit' must be a positive integer", false)
 		return
 	}
 
-	offset, err := strconv.Atoi(offsetStr)
+	offset, err := h.service.ParseIntString(offsetStr)
 	if err != nil || offset < 0 {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "query parameter 'offset' must be a non-negative integer", false)
 		return
 	}
 
-	reception, eerr := h.usecase.GetPatientsByDoctorID(uint(id), limit, offset)
+	reception, eerr := h.usecase.GetPatientsByDoctorID(id, limit, offset)
 	if eerr != nil {
 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
 		return
@@ -121,8 +113,7 @@ func (h *Handler) UpdateReceptionHospitalByReceptionID(c *gin.Context) {
 
 func (h *Handler) GetReceptionsByDoctorAndDate(c *gin.Context) {
 	// Получаем doctor_id из URL
-	doctorIDStr := c.Param("doc_id")
-	doctorID, err := strconv.ParseUint(doctorIDStr, 10, 32)
+	doctorID, err := h.service.ParseUintString(c.Param("doc_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid doctor ID"})
 		return
@@ -132,7 +123,7 @@ func (h *Handler) GetReceptionsByDoctorAndDate(c *gin.Context) {
 	dateStr := c.Query("date")
 	var date time.Time
 	if dateStr != "" {
-		date, err = time.Parse("2006-01-02", dateStr)
+		date, err = h.service.ParseDateString(dateStr)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid date format, use YYYY-MM-DD"})
 			return
@@ -144,7 +135,7 @@ func (h *Handler) GetReceptionsByDoctorAndDate(c *gin.Context) {
 
 	// Получаем номер страницы из query параметров
 	pageStr := c.DefaultQuery("page", "1")
-	page, err := strconv.Atoi(pageStr)
+	page, err := h.service.ParseIntString(pageStr)
 	if err != nil || page < 1 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "page must be a positive integer"})
 		return
@@ -152,7 +143,7 @@ func (h *Handler) GetReceptionsByDoctorAndDate(c *gin.Context) {
 
 	// Получаем номер страницы из query параметров
 	perPageStr := c.DefaultQuery("perPage", "5")
-	perPage, err := strconv.Atoi(perPageStr)
+	perPage, err := h.service.ParseIntString(perPageStr)
 	if err != nil || perPage < 5 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "perPage must be a positive integer > 5"})
 		return

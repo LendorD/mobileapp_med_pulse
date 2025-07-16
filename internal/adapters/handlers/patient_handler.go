@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
@@ -50,13 +49,13 @@ func (h *Handler) CreatePatient(c *gin.Context) {
 // @Failure 500 {object} ResultError "Внутренняя ошибка"
 // @Router /patient/{id} [get]
 func (h *Handler) GetPatientByID(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("pat_id"), 10, 64)
+	id, err := h.service.ParseUintString(c.Param("pat_id"))
 	if err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'id' must be an integer", false)
 		return
 	}
 
-	patient, eerr := h.usecase.GetPatientByID(uint(id))
+	patient, eerr := h.usecase.GetPatientByID(id)
 	if eerr != nil {
 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
 		return
@@ -80,12 +79,12 @@ func (h *Handler) GetPatientByID(c *gin.Context) {
 // @Router /patient [put]
 func (h *Handler) UpdatePatient(c *gin.Context) {
 	var input models.UpdatePatientRequest
-	id, err := strconv.ParseUint(c.Param("pat_id"), 10, 64)
+	id, err := h.service.ParseUintString(c.Param("pat_id"))
 	if err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'id' must be an integer", false)
 		return
 	}
-	input.ID = uint(id)
+	input.ID = id
 	if err := c.ShouldBindJSON(&input); err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
 		return
@@ -118,13 +117,13 @@ func (h *Handler) UpdatePatient(c *gin.Context) {
 // @Failure 500 {object} ResultError "Внутренняя ошибка"
 // @Router /patient/{id} [delete]
 func (h *Handler) DeletePatient(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("pat_id"), 10, 64)
+	id, err := h.service.ParseUintString(c.Param("pat_id"))
 	if err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'id' must be an integer", false)
 		return
 	}
 
-	if eerr := h.usecase.DeletePatient(uint(id)); eerr != nil {
+	if eerr := h.usecase.DeletePatient(id); eerr != nil {
 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
 		return
 	}
@@ -147,7 +146,7 @@ func (h *Handler) DeletePatient(c *gin.Context) {
 // @Router /patients [get]
 func (h *Handler) GetAllPatients(c *gin.Context) {
 	// Получаем и валидируем параметр page
-	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	page, err := h.service.ParseIntString(c.DefaultQuery("page", "1"))
 	if err != nil {
 		// Возвращаем ошибку 400, если параметр page не является числом
 		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'page' must be an integer", false)
@@ -155,7 +154,7 @@ func (h *Handler) GetAllPatients(c *gin.Context) {
 	}
 
 	// Получаем и валидируем параметр count
-	count, err := strconv.Atoi(c.DefaultQuery("count", "0"))
+	count, err := h.service.ParseIntString(c.DefaultQuery("count", "0"))
 	if err != nil {
 		// Возвращаем ошибку 400, если параметр count не является числом
 		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'count' must be an integer", false)

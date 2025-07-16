@@ -24,11 +24,12 @@ func init() {
 type Handler struct {
 	logger  *logging.Logger
 	usecase interfaces.Usecases
+	service interfaces.Service
 	authUC  *usecases.AuthUsecase // Добавляем AuthUsecase напрямую
 }
 
 // NewHandler создает новый экземпляр Handler со всеми зависимостями
-func NewHandler(usecase interfaces.Usecases, parentLogger *logging.Logger, authUC *usecases.AuthUsecase) *Handler {
+func NewHandler(usecase interfaces.Usecases, parentLogger *logging.Logger, service interfaces.Service, authUC *usecases.AuthUsecase) *Handler {
 	handlerLogger := parentLogger.WithPrefix("HANDLER")
 	handlerLogger.Info("Handler initialized",
 		"component", "GENERAL",
@@ -36,6 +37,7 @@ func NewHandler(usecase interfaces.Usecases, parentLogger *logging.Logger, authU
 	return &Handler{
 		logger:  handlerLogger,
 		usecase: usecase,
+		service: service,
 		authUC:  authUC,
 	}
 }
@@ -54,8 +56,7 @@ func ProvideRouter(h *Handler, cfg *config.Config) http.Handler {
 	}))
 
 	// Swagger
-	url := ginSwagger.URL("/swagger/doc.json")
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.Use(LoggingMiddleware(h.logger))
 
 	// Группа аутентификации
@@ -71,10 +72,11 @@ func ProvideRouter(h *Handler, cfg *config.Config) http.Handler {
 	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
 	// TODO: Дописать добавление новых аллергий пациента и их изменение
 
+	r.GET("/receps/:doctor_id", h.GetReceptionsByDoctorAndDate)
+
 	// Группа маршрутов для заключений
 	receptionHospital := baseRouter.Group("/recepHospital")
-	receptionHospital.GET("/:doc_id", h.GetReceptionsByDoctorAndDate)
-	receptionHospital.GET("/patients/:pat_id", h.GetReceptionsHospitalByPatientID)
+	receptionHospital.GET("/:pat_id", h.GetReceptionsHospitalByPatientID)
 	receptionHospital.PUT("/:recep_id", h.UpdateReceptionHospitalByReceptionID)
 
 	// Роутеры пациентов
@@ -87,7 +89,7 @@ func ProvideRouter(h *Handler, cfg *config.Config) http.Handler {
 
 	// Роутеры СМП
 	emergencyGroup := baseRouter.Group("/emergencyGroup")
-	emergencyGroup.GET("/:doc_id", h.GetEmergencyCallssByDoctorAndDate)
+	emergencyGroup.GET("/:doc_id", h.GetEmergencyCallsByDoctorAndDate)
 
 	return r
 }

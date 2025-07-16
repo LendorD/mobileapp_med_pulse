@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -21,9 +20,9 @@ import (
 // @Failure 400 {object} ResultError "Некорректный запрос или параметры"
 // @Failure 500 {object} ResultError "Внутренняя ошибка"
 // @Router /emergency/{doctor_id}/receptions [get]
-func (h *Handler) GetEmergencyCallssByDoctorAndDate(c *gin.Context) {
+func (h *Handler) GetEmergencyCallsByDoctorAndDate(c *gin.Context) {
 	// Получаем ID врача
-	doctorID, err := strconv.ParseUint(c.Param("doc_id"), 10, 32)
+	doctorID, err := h.service.ParseUintString(c.Param("doc_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid doctor ID"})
 		return
@@ -33,7 +32,7 @@ func (h *Handler) GetEmergencyCallssByDoctorAndDate(c *gin.Context) {
 	dateStr := c.Query("date")
 	var date time.Time
 	if dateStr != "" {
-		date, err = time.Parse("2006-01-02", dateStr)
+		date, err = h.service.ParseDateString(dateStr)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid date format, use YYYY-MM-DD"})
 			return
@@ -45,21 +44,21 @@ func (h *Handler) GetEmergencyCallssByDoctorAndDate(c *gin.Context) {
 
 	// Получаем номер страницы
 	pageStr := c.DefaultQuery("page", "1")
-	page, err := strconv.Atoi(pageStr)
+	page, err := h.service.ParseIntString(pageStr)
 	if err != nil || page < 1 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Page must be integer greater than 0"})
 		return
 	}
 
 	perPageStr := c.DefaultQuery("perPage", "5")
-	perPage, err := strconv.Atoi(perPageStr)
+	perPage, err := h.service.ParseIntString(perPageStr)
 	if err != nil || perPage < 5 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Page must be integer greater than 0"})
 		return
 	}
 
 	// Вызываем usecase
-	receptions, err := h.usecase.GetEmergencyCallsByDoctorAndDate(uint(doctorID), date, page, perPage)
+	receptions, err := h.usecase.GetEmergencyCallsByDoctorAndDate(doctorID, date, page, perPage)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
