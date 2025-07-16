@@ -77,9 +77,9 @@ func NewSwaggerConfig(cfg *config.Config) *swagger.Config {
 
 var HttpServerModule = fx.Module("http_server_module",
 	fx.Provide(
-		NewSwaggerConfig, // <- Добавили сюда
-		handlers.NewHandler,
-		handlers.ProvideRouter,
+		NewSwaggerConfig,       // <- Добавили сюда
+		handlers.NewHandler,    // зависит от Usecases, AuthUsecase, Logger, Service
+		handlers.ProvideRouter, // зависит от Handler
 	),
 	fx.Invoke(InvokeHttpServer),
 )

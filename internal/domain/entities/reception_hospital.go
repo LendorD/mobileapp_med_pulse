@@ -6,6 +6,7 @@ import (
 
 type ReceptionStatus string
 
+// Статусы приёмов
 const (
 	StatusScheduled ReceptionStatus = "scheduled" // "Запланирован"
 	StatusCompleted ReceptionStatus = "completed" // "Завершен"

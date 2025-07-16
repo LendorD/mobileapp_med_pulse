@@ -5,7 +5,6 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 )
 
 // CreatePatient godoc
@@ -49,13 +48,13 @@ func (h *Handler) CreatePatient(c *gin.Context) {
 // @Failure 500 {object} ResultError "Внутренняя ошибка"
 // @Router /patient/{id} [get]
 func (h *Handler) GetPatientByID(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("pat_id"), 10, 64)
+	id, err := h.service.ParseUintString(c.Param("pat_id"))
 	if err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'id' must be an integer", false)
 		return
 	}
 
-	patient, eerr := h.usecase.GetPatientByID(uint(id))
+	patient, eerr := h.usecase.GetPatientByID(id)
 	if eerr != nil {
 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
 		return
@@ -79,12 +78,12 @@ func (h *Handler) GetPatientByID(c *gin.Context) {
 // @Router /patient [put]
 func (h *Handler) UpdatePatient(c *gin.Context) {
 	var input models.UpdatePatientRequest
-	id, err := strconv.ParseUint(c.Param("pat_id"), 10, 64)
+	id, err := h.service.ParseUintString(c.Param("pat_id"))
 	if err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'id' must be an integer", false)
 		return
 	}
-	input.ID = uint(id)
+	input.ID = id
 	if err := c.ShouldBindJSON(&input); err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
 		return
@@ -117,13 +116,13 @@ func (h *Handler) UpdatePatient(c *gin.Context) {
 // @Failure 500 {object} ResultError "Внутренняя ошибка"
 // @Router /patient/{id} [delete]
 func (h *Handler) DeletePatient(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("pat_id"), 10, 64)
+	id, err := h.service.ParseUintString(c.Param("pat_id"))
 	if err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'id' must be an integer", false)
 		return
 	}
 
-	if eerr := h.usecase.DeletePatient(uint(id)); eerr != nil {
+	if eerr := h.usecase.DeletePatient(id); eerr != nil {
 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
 		return
 	}
@@ -131,33 +130,40 @@ func (h *Handler) DeletePatient(c *gin.Context) {
 	h.ResultResponse(c, "Success patient delete", Empty, nil)
 }
 
-// Пример:
-// Получить всех людей с подстрокой имени
-// LIKE (SQL) содержит подстроку (% для wildcard)
-// filter=birth_date.eq.1988-07-14 - получить человека, у которого др 1988-07-14
-// http://localhost:8080/api/v1/patients?filter=full_name.like - полный запрос
-// filter=full_name.like.Анна - получить человека с подстрокой "Анна" в full_name
-// названия передаваемых столбцов таблицы автоматически подгружаются через json
+// GetAllPatients godoc
+// @Summary Получить список пациентов
+// @Description Возвращает список пациентов с возможностью пагинации и фильтрации
+// @Tags Patient
+// @Accept json
+// @Produce json
+// @Param page query int false "Номер страницы (по умолчанию 1)"
+// @Param count query int false "Количество записей на странице (по умолчанию 0 — без ограничения)"
+// @Param filter query string false "Фильтр в формате field.operation.value. Примеры: full_name.like.Анна, birth_date.eq.1988-07-14"
+// @Success 200 {object} ResultResponse "Список пациентов"
+// @Failure 400 {object} ResultError "Некорректные параметры запроса"
+// @Failure 500 {object} ResultError "Внутренняя ошибка сервера"
+// @Router /patients [get]
 func (h *Handler) GetAllPatients(c *gin.Context) {
-	limitStr := c.DefaultQuery("limit", "10")
-	offsetStr := c.DefaultQuery("offset", "0")
-
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil || limit <= 0 {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "query parameter 'limit' must be a positive integer", false)
+	// Получаем и валидируем параметр page
+	page, err := h.service.ParseIntString(c.DefaultQuery("page", "1"))
+	if err != nil {
+		// Возвращаем ошибку 400, если параметр page не является числом
+		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'page' must be an integer", false)
 		return
 	}
 
-	offset, err := strconv.Atoi(offsetStr)
-	if err != nil || offset < 0 {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "query parameter 'offset' must be a non-negative integer", false)
+	// Получаем и валидируем параметр count
+	count, err := h.service.ParseIntString(c.DefaultQuery("count", "0"))
+	if err != nil {
+		// Возвращаем ошибку 400, если параметр count не является числом
+		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'count' must be an integer", false)
 		return
 	}
 
 	// Параметры фильтрации в формате field.operation.value
 	filter := c.Query("filter")
 
-	patients, appErr := h.usecase.GetAllPatients(limit, offset, filter)
+	patients, appErr := h.usecase.GetAllPatients(page, count, filter)
 	if appErr != nil {
 		h.ErrorResponse(c, appErr.Err, appErr.Code, appErr.Message, appErr.IsUserFacing)
 		return
