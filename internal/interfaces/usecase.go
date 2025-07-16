@@ -61,7 +61,7 @@ type EmergencyCallUsecase interface {
 		date time.Time,
 		page int,
 		perPage int,
-	) (*models.FilterResponse[[]models.EmergencyCallShortResponse], error)
+	) (models.FilterResponse[[]models.EmergencyCallShortResponse], error)
 }
 
 type MedServiceUsecase interface{}

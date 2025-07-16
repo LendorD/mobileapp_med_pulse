@@ -1,12 +1,9 @@
 package handlers
 
 import (
-	"log"
-	"net/http"
-	"strconv"
-
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 // GetDoctorByID godoc
@@ -22,18 +19,16 @@ import (
 // @Failure 500 {object} ResultError "Внутренняя ошибка"
 // @Router /doctor/{id} [get]
 func (h *Handler) GetDoctorByID(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := h.service.ParseUintString(c.Param("id"))
 	if err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'id' must be an integer", false)
 		return
 	}
-	log.Println("before get doc usecase")
-	doctor, eerr := h.usecase.GetDoctorByID(uint(id))
+	doctor, eerr := h.usecase.GetDoctorByID(id)
 	if eerr != nil {
 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
 		return
 	}
-	log.Println("after get doc usecase")
 
 	h.ResultResponse(c, "Success doctor get", Object, doctor)
 }
@@ -64,7 +59,7 @@ func (h *Handler) UpdateDoctor(c *gin.Context) {
 	}
 
 	doctor, eerr := h.usecase.UpdateDoctor(&input)
-	if eerr.Err != nil {
+	if eerr != nil {
 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
 		return
 	}
