@@ -8,12 +8,12 @@ import (
 
 // GetDoctorByID godoc
 // @Summary Получить врача по ID
-// @Description Возвращает информацию о враче по ID
+// @Description Возвращает данные врача по ID
 // @Tags Doctor
 // @Accept json
 // @Produce json
 // @Param id path uint true "ID врача"
-// @Success 200 {object} entities.Doctor "Информация о враче"
+// @Success 200 {object} entities.Doctor "Данные врача"
 // @Failure 400 {object} ResultError "Некорректный ID"
 // @Failure 404 {object} ResultError "Врач не найден"
 // @Failure 500 {object} ResultError "Внутренняя ошибка"

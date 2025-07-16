@@ -448,6 +448,27 @@ definitions:
         example: Хирург
         type: string
     type: object
+  models.UpdateMedCardRequest:
+    description: Содержит всю медицинскую информацию о пациенте
+    properties:
+      allergy:
+        description: Список аллергий
+        items:
+          $ref: '#/definitions/models.AllergyResponse'
+        type: array
+      contact_info:
+        allOf:
+        - $ref: '#/definitions/models.ContactInfoResponse'
+        description: Контактные данные
+      patient:
+        allOf:
+        - $ref: '#/definitions/models.ShortPatientResponse'
+        description: Основные данные пациента
+      personal_info:
+        allOf:
+        - $ref: '#/definitions/models.PersonalInfoResponse'
+        description: Персональная информация
+    type: object
   models.UpdatePatientRequest:
     description: Данные для обновления информации о пациенте
     properties:
@@ -512,7 +533,7 @@ paths:
             type: object
       summary: Вход в систему
       tags:
-      - auth
+      - Auth
   /doctor:
     put:
       consumes:
@@ -555,7 +576,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Возвращает информацию о враче по ID
+      description: Возвращает данные врача по ID
       parameters:
       - description: ID врача
         in: path
@@ -566,7 +587,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Информация о враче
+          description: Данные врача
           schema:
             $ref: '#/definitions/entities.Doctor'
         "400":
@@ -626,64 +647,26 @@ paths:
       summary: Получить экстренные приёмы врача по дате
       tags:
       - EmergencyCall
-  /medcard:
-    put:
-      consumes:
-      - application/json
-      description: Обновляет информацию о враче
-      parameters:
-      - description: Данные для обновления
-        in: body
-        name: info
-        required: true
-        schema:
-          $ref: '#/definitions/models.UpdateDoctorRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Обновленный врач
-          schema:
-            $ref: '#/definitions/entities.Doctor'
-        "400":
-          description: Некорректный запрос
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "404":
-          description: Врач не найден
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "422":
-          description: Ошибка валидации
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "500":
-          description: Внутренняя ошибка
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-      summary: Обновить данные врача
-      tags:
-      - Doctor
-  /medcard/{id}:
+  /medcard/{pat_id}:
     get:
       consumes:
       - application/json
-      description: Возвращает медкарту по ID Пациента
+      description: Возвращает полную информацию из медицинской карты пациента
       parameters:
       - description: ID пациента
         in: path
-        name: id
+        name: pat_id
         required: true
         type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: Медкарта
+          description: Медицинская карта пациента
           schema:
             $ref: '#/definitions/models.MedCardResponse'
         "400":
-          description: Некорректный ID
+          description: Некорректный ID пациента
           schema:
             $ref: '#/definitions/handlers.ResultError'
         "404":
@@ -691,12 +674,54 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ResultError'
         "500":
-          description: Внутренняя ошибка
+          description: Внутренняя ошибка сервера
           schema:
             $ref: '#/definitions/handlers.ResultError'
-      summary: Получить медкарту по ID Пациента
+      summary: Получить медкарту по ID пациента
       tags:
-      - MedCard
+      - Medcard
+    put:
+      consumes:
+      - application/json
+      description: Обновляет информацию в медицинской карте пациента
+      parameters:
+      - description: ID пациента
+        in: path
+        name: pat_id
+        required: true
+        type: integer
+      - description: Данные для обновления медкарты
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateMedCardRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленная медицинская карта
+          schema:
+            $ref: '#/definitions/models.MedCardResponse'
+        "400":
+          description: Некорректный запрос
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "404":
+          description: Медкарта не найдена
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "422":
+          description: Ошибка валидации данных
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Обновить данные медицинской карты
+      tags:
+      - Medcard
   /patient:
     post:
       consumes:
@@ -907,7 +932,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get paginated list of receptions for specific doctor and date
+      description: Возвращает пагинированный список приёмов для конкретных доктора
+        и даты
       parameters:
       - description: Doctor ID
         in: path
@@ -944,7 +970,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Get receptions by doctor and date
+      summary: Получить приём по доктору и дате
       tags:
-      - receptions
+      - Reception
 swagger: "2.0"
