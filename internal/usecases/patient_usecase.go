@@ -11,11 +11,13 @@ import (
 )
 
 type PatientUsecase struct {
-	repo interfaces.PatientRepository
+	repo          interfaces.PatientRepository
+	FilterBuilder interfaces.FilterBuilderService
 }
 
-func NewPatientUsecase(repo interfaces.PatientRepository) interfaces.PatientUsecase {
-	return &PatientUsecase{repo: repo}
+func NewPatientUsecase(repo interfaces.PatientRepository, s interfaces.Service) interfaces.PatientUsecase {
+	return &PatientUsecase{repo: repo,
+		FilterBuilder: s}
 }
 
 func (u *PatientUsecase) CreatePatient(input *models.CreatePatientRequest) (entities.Patient, *errors.AppError) {
@@ -91,8 +93,33 @@ func (u *PatientUsecase) DeletePatient(id uint) *errors.AppError {
 	return nil
 }
 
-func (u *PatientUsecase) GetAllPatients(limit, offset int, filters map[string]interface{}) ([]entities.Patient, *errors.AppError) {
-	patients, err := u.repo.GetAllPatients(limit, offset, filters)
+func (u *PatientUsecase) GetAllPatients(limit, offset int, filter string) ([]entities.Patient, *errors.AppError) {
+	var queryFilter string
+	var parameters []interface{}
+
+	// Статические поля модели (имя таблицы/колонки и их типы)
+	entityFields, err := getFieldTypes(entities.Patient{})
+	if err != nil {
+		return nil, errors.NewAppError(errors.InternalServerErrorCode, errors.InternalServerError, err, false)
+	}
+
+	// Парсим фильтр, если он передан
+	if len(filter) > 0 {
+		subQuery, params, err := u.FilterBuilder.ParseFilterString(filter, entityFields)
+		if err != nil {
+			return nil, errors.NewAppError(
+				errors.InvalidDataCode,
+				fmt.Sprintf("invalid filter syntax: %s", err.Error()),
+				nil,
+				false,
+			)
+		}
+		queryFilter = subQuery
+		parameters = params
+	}
+
+	// Получение пациентов
+	patients, err := u.repo.GetAllPatients(limit, offset, queryFilter, parameters)
 	if err != nil {
 		return nil, errors.NewAppError(
 			errors.InternalServerErrorCode,
@@ -101,5 +128,6 @@ func (u *PatientUsecase) GetAllPatients(limit, offset int, filters map[string]in
 			true,
 		)
 	}
+
 	return patients, nil
 }

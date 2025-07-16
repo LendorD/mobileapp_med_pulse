@@ -69,8 +69,10 @@ func ProvideRouter(h *Handler) http.Handler {
 	medCardGroup := baseRouter.Group("/medcard")
 	medCardGroup.GET("/:pat_id", h.GetMedCardByPatientID)
 	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
+  
+  r.GET("/receps/:doctor_id", h.GetReceptionsByDoctorAndDate)
 
-	// Группа маршрутов для patients
+	// Группа маршрутов для заключений
 	receptionHospital := baseRouter.Group("/recepHospital")
 	receptionHospital.GET("/:pat_id", h.GetReceptionsHospitalByPatientID)
 	receptionHospital.PUT("/:recep_id", h.UpdateReceptionHospitalByReceptionID)
@@ -84,10 +86,13 @@ func ProvideRouter(h *Handler) http.Handler {
 	patientGroup.GET("/", h.GetAllPatients)
 
 	// Роутеры СМП
-	// emergencyGroup := baseRouter.Group("/emergency-group")
-	// emergencyGroup.GET("/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
+	emergencyGroup := baseRouter.Group("/emergencyGroup")
 	r.GET("/emergency/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
-	r.GET("/receps/:doctor_id", h.GetReceptionsByDoctorAndDate)
+
+
+	// emergencyGroup.GET("/:doctor_id", h.GetReceptionsByDoctorAndDate)
+// 	emergencyGroup.GET("/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
+// 	emergencyGroup.POST("/:emergencyCall_id/reception", h.CreateEmergencyReception)
 
 	return r
 }

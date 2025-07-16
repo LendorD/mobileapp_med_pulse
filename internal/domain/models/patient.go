@@ -34,3 +34,11 @@ type ShortPatientResponse struct {
 // @Description Все данные пациента
 type PatientResponse struct {
 }
+
+type PatientData struct {
+	FullName  string `json:"full_name" example:"Иванов Иван Иванович"`
+	BirthDate string `json:"birth_date" example:"1980-05-15T00:00:00Z"`
+	IsMale    bool   `json:"is_male" example:"true"`
+	// Опциональные контактные данные
+	ContactInfo *ContactInfoData `json:"contact_info,omitempty"`
+}

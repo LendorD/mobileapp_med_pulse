@@ -78,7 +78,7 @@ type MedServiceRepository interface {
 
 // updated to match the new structure
 type ReceptionSmpRepository interface {
-	CreateReceptionSmp(reception entities.ReceptionSMP) error
+	CreateReceptionSmp(reception entities.ReceptionSMP) (uint, error)
 	UpdateReceptionSmp(id uint, updateMap map[string]interface{}) (uint, error)
 	DeleteReceptionSmp(id uint) error
 
@@ -109,7 +109,7 @@ type PatientRepository interface {
 	UpdatePatient(id uint, updateMap map[string]interface{}) (uint, error)
 	DeletePatient(id uint) error
 	GetPatientByID(id uint) (entities.Patient, error)
-	GetAllPatients(limit, offset int, filters map[string]interface{}) ([]entities.Patient, error)
+	GetAllPatients(limit, offset int, filterQuery string, filterParams []interface{}) ([]entities.Patient, error)
 	GetPatientsByFullName(name string) ([]entities.Patient, error)
 	GetPatientAllergiesByID(id uint) ([]entities.Allergy, error)
 }

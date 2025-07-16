@@ -11,13 +11,12 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
 
-func (r *ReceptionSmpRepositoryImpl) CreateReceptionSmp(reception entities.ReceptionSMP) error {
+func (r *ReceptionSmpRepositoryImpl) CreateReceptionSmp(reception entities.ReceptionSMP) (uint, error) {
 	op := "repo.ReceptionSmp.CreateReceptionSmp"
-
-	if err := r.db.Create(reception).Error; err != nil {
-		return errors.NewDBError(op, err)
+	if err := r.db.Clauses(clause.Returning{}).Create(&reception).Error; err != nil {
+		return 0, errors.NewDBError(op, err)
 	}
-	return nil
+	return reception.ID, nil
 }
 
 func (r *ReceptionSmpRepositoryImpl) UpdateReceptionSmp(id uint, updateMap map[string]interface{}) (uint, error) {

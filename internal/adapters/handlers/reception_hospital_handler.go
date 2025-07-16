@@ -17,7 +17,7 @@ import (
 // )
 
 // GetReceptionByID godoc
-// @Summary Получить приём по ID
+// @Summary Получить список приёмов пациента по его ID
 // @Description Возвращает информацию о приёме
 // @Tags Reception
 // @Accept json
