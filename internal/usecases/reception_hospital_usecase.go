@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
@@ -140,8 +141,7 @@ func (u *ReceptionHospitalUsecase) GetPatientsByDoctorID(doctorID uint, limit, o
 	return patients, nil
 }
 
-func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.ReceptionShortResponse, error) {
-	const perPage = 5
+func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int, perPage int) (*models.FilterResponse[[]models.ReceptionShortResponse], error) {
 
 	// Валидация входных параметров
 	if doctorID == 0 {
@@ -162,39 +162,55 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID
 		)
 	}
 
-	// Получаем данные из репозитория
-	receptions, err := u.repo.GetReceptionsHospitalByDoctorAndDate(doctorID, date, page, perPage)
-	if err != nil {
+	if perPage < 5 {
 		return nil, errors.NewAppError(
 			errors.InternalServerErrorCode,
-			"failed to get receptions",
-			errors.ErrEmptyData,
+			"Perpage number must be greater than 5",
+			errors.ErrDataNotFound,
 			true,
 		)
 	}
 
+	// Получаем данные из репозитория
+	receptions, total, err := u.repo.GetReceptionsHospitalByDoctorAndDate(doctorID, date, page, perPage)
+	if err != nil {
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"RepoError",
+			errors.ErrDataNotFound,
+			true,
+		)
+	}
+
+	// Преобразование в DTO
 	result := make([]models.ReceptionShortResponse, len(receptions))
 	for i, reception := range receptions {
-		// Получаем имя пациента (с проверкой что Patient загружен)
 		patientName := ""
-		if reception.Patient.ID != 0 { // Проверка что связь загружена
+		if reception.Patient.ID != 0 {
 			patientName = reception.Patient.FullName
 		}
 
-		// Получаем статус в читаемом формате
-		statusText := getStatusText(reception.Status)
-
-		// Форматируем дату
-		formattedDate := reception.Date.Format("02.01.2006 15:04") // Формат "15.10.2023 14:30"
-
 		result[i] = models.ReceptionShortResponse{
-			Date:        formattedDate,
-			Status:      statusText,
+			Id:          reception.ID,
+			Date:        reception.Date.Format("02.01.2006 15:04"),
+			Status:      getStatusText(reception.Status),
 			PatientName: patientName,
+			Diagnosis:   reception.Diagnosis,
+			Address:     reception.Address,
 		}
 	}
 
-	return result, nil
+	// Расчет общего количества страниц
+	totalPages := int(math.Ceil(float64(total) / float64(perPage)))
+
+	// Формируем ответ
+	return &models.FilterResponse[[]models.ReceptionShortResponse]{
+		Hits:        result,
+		CurrentPage: page,
+		TotalPages:  totalPages,
+		TotalHits:   int(total),
+		HitsPerPage: perPage,
+	}, nil
 }
 
 func getStatusText(status entities.ReceptionStatus) string {

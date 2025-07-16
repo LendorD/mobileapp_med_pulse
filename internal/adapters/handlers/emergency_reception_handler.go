@@ -151,8 +151,16 @@ func (h *Handler) GetEmergencyReceptionsByDoctorAndDate(c *gin.Context) {
 		return
 	}
 
+	// Получаем номер страницы из query параметров
+	perPageStr := c.DefaultQuery("perPage", "5")
+	perPage, err := strconv.Atoi(perPageStr)
+	if err != nil || perPage < 5 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "perPage must be a positive integer > 5"})
+		return
+	}
+
 	// Вызываем usecase
-	receptions, err := h.usecase.GetEmergencyReceptionsByDoctorAndDate(uint(doctorID), date, page)
+	receptions, err := h.usecase.GetEmergencyReceptionsByDoctorAndDate(uint(doctorID), date, page, perPage)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

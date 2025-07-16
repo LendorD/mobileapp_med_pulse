@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm/clause"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
 
 func (r *EmergencyReceptionRepositoryImpl) CreateEmergencyReception(er entities.EmergencyCall) error {
@@ -106,58 +105,44 @@ func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionsPriorityCases()
 	return list, nil
 }
 
-func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.EmergencyCallShortResponse, error) {
-	var response []struct {
-		CreatedAt time.Time `gorm:"column:created_at"`
-		Status    string
-		Phone     string
-		Priority  bool
-		Address   string
-	}
+func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionsByDoctorAndDate(
+	doctorID uint,
+	date time.Time,
+	page, perPage int,
+) ([]entities.EmergencyCall, int64, error) {
+	var calls []entities.EmergencyCall
+	var total int64
 
-	offset := (page - 1) * perPage
+	// Базовый запрос
+	baseQuery := r.db.Model(&entities.EmergencyCall{}).
+		Where("doctor_id = ?", doctorID)
 
-	query := r.db.Model(&entities.EmergencyCall{}).
-		Select(`
-            emergency_calls.created_at,
-            emergency_calls.status,
-            emergency_calls.phone,
-            emergency_calls.priority,
-            emergency_calls.address
-        `).
-		Where("emergency_calls.doctor_id = ?", doctorID)
-
+	// Фильтрация по дате
 	if !date.IsZero() {
 		startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
 		endOfDay := startOfDay.Add(24 * time.Hour)
-		query = query.Where("DATE(created_at) BETWEEN ? AND ?",
-			startOfDay.Format("2006-01-02"),
-			endOfDay.Format("2006-01-02"))
+		baseQuery = baseQuery.Where("created_at BETWEEN ? AND ?", startOfDay, endOfDay)
 	}
 
-	err := query.
+	// Получаем общее количество
+	if err := baseQuery.Count(&total).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to count emergency calls: %w", err)
+	}
+
+	// Получаем данные с пагинацией
+	offset := (page - 1) * perPage
+	err := baseQuery.
+		Order("priority DESC, created_at DESC").
 		Offset(offset).
 		Limit(perPage).
-		Order("priority DESC, created_at DESC"). // Простая сортировка по приоритету и дате
-		Find(&response).
+		Find(&calls).
 		Error
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to get emergency receptions: %v", err)
+		return nil, 0, fmt.Errorf("failed to get emergency calls: %w", err)
 	}
 
-	result := make([]models.EmergencyCallShortResponse, len(response))
-	for i, item := range response {
-		result[i] = models.EmergencyCallShortResponse{
-			CreatedAt: item.CreatedAt.Format(time.RFC3339),
-			Status:    item.Status,
-			Phone:     item.Phone,
-			Priority:  item.Priority,
-			Address:   item.Address,
-		}
-	}
-
-	return result, nil
+	return calls, total, nil
 }
 
 // Вспомогательная функция для сортировки
