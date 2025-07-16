@@ -1,4 +1,4 @@
-package emergencyReception
+package EmergencyCall
 
 import (
 	"fmt"
@@ -12,8 +12,8 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
 
-func (r *EmergencyReceptionRepositoryImpl) CreateEmergencyReception(er entities.EmergencyCall) error {
-	op := "repo.EmergencyReception.CreateEmergencyReception"
+func (r *EmergencyCallRepositoryImpl) CreateEmergencyCall(er entities.EmergencyCall) error {
+	op := "repo.EmergencyCall.CreateEmergencyCall"
 
 	if err := r.db.Create(&er).Error; err != nil {
 		return errors.NewDBError(op, err)
@@ -21,8 +21,8 @@ func (r *EmergencyReceptionRepositoryImpl) CreateEmergencyReception(er entities.
 	return nil
 }
 
-func (r *EmergencyReceptionRepositoryImpl) UpdateEmergencyReception(id uint, updateMap map[string]interface{}) (uint, error) {
-	op := "repo.EmergencyReception.UpdateEmergencyReception"
+func (r *EmergencyCallRepositoryImpl) UpdateEmergencyCall(id uint, updateMap map[string]interface{}) (uint, error) {
+	op := "repo.EmergencyCall.UpdateEmergencyCall"
 
 	var updatedER entities.EmergencyCall
 	result := r.db.
@@ -41,8 +41,8 @@ func (r *EmergencyReceptionRepositoryImpl) UpdateEmergencyReception(id uint, upd
 	return updatedER.ID, nil
 }
 
-func (r *EmergencyReceptionRepositoryImpl) DeleteEmergencyReception(id uint) error {
-	op := "repo.EmergencyReception.DeleteEmergencyReception"
+func (r *EmergencyCallRepositoryImpl) DeleteEmergencyCall(id uint) error {
+	op := "repo.EmergencyCall.DeleteEmergencyCall"
 
 	result := r.db.Delete(&entities.EmergencyCall{}, id)
 	if result.Error != nil {
@@ -53,8 +53,8 @@ func (r *EmergencyReceptionRepositoryImpl) DeleteEmergencyReception(id uint) err
 	}
 	return nil
 }
-func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionByID(id uint) (entities.EmergencyCall, error) {
-	op := "repo.EmergencyReception.GetEmergencyReceptionByID"
+func (r *EmergencyCallRepositoryImpl) GetEmergencyCallByID(id uint) (entities.EmergencyCall, error) {
+	op := "repo.EmergencyCall.GetEmergencyCallByID"
 
 	var er entities.EmergencyCall
 	if err := r.db.First(&er, id).Error; err != nil {
@@ -66,8 +66,8 @@ func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionByID(id uint) (e
 	return entities.EmergencyCall{}, nil
 }
 
-func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionsByDoctorID(doctorID uint) ([]entities.EmergencyCall, error) {
-	op := "repo.EmergencyReception.GetEmergencyReceptionByDoctorID"
+func (r *EmergencyCallRepositoryImpl) GetEmergencyCallsByDoctorID(doctorID uint) ([]entities.EmergencyCall, error) {
+	op := "repo.EmergencyCall.GetEmergencyCallByDoctorID"
 
 	var list []entities.EmergencyCall
 	if err := r.db.Where("doctor_id = ?", doctorID).Find(&list).Error; err != nil {
@@ -76,8 +76,8 @@ func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionsByDoctorID(doct
 	return list, nil
 }
 
-func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionsByPatientID(patientID uint) ([]entities.EmergencyCall, error) {
-	op := "repo.EmergencyReception.GetEmergencyReceptionByPatientID"
+func (r *EmergencyCallRepositoryImpl) GetEmergencyCallsByPatientID(patientID uint) ([]entities.EmergencyCall, error) {
+	op := "repo.EmergencyCall.GetEmergencyCallByPatientID"
 
 	var list []entities.EmergencyCall
 	if err := r.db.Where("patient_id = ?", patientID).Find(&list).Error; err != nil {
@@ -86,8 +86,8 @@ func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionsByPatientID(pat
 	return list, nil
 }
 
-func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionsByDateRange(start, end time.Time) ([]entities.EmergencyCall, error) {
-	op := "repo.EmergencyReception.GetEmergencyReceptionByDateRange"
+func (r *EmergencyCallRepositoryImpl) GetEmergencyCallsByDateRange(start, end time.Time) ([]entities.EmergencyCall, error) {
+	op := "repo.EmergencyCall.GetEmergencyCallByDateRange"
 
 	var list []entities.EmergencyCall
 	if err := r.db.Where("date BETWEEN ? AND ?", start, end).Find(&list).Error; err != nil {
@@ -96,8 +96,8 @@ func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionsByDateRange(sta
 	return list, nil
 }
 
-func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionsPriorityCases() ([]entities.EmergencyCall, error) {
-	op := "repo.EmergencyReception.GetEmergencyReceptionPriorityCases"
+func (r *EmergencyCallRepositoryImpl) GetEmergencyCallsPriorityCases() ([]entities.EmergencyCall, error) {
+	op := "repo.EmergencyCall.GetEmergencyCallPriorityCases"
 
 	var list []entities.EmergencyCall
 	if err := r.db.Where("priority = true").Find(&list).Error; err != nil {
@@ -106,7 +106,7 @@ func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionsPriorityCases()
 	return list, nil
 }
 
-func (r *EmergencyReceptionRepositoryImpl) GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.EmergencyCallShortResponse, error) {
+func (r *EmergencyCallRepositoryImpl) GetEmergencyCallsByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.EmergencyCallShortResponse, error) {
 	var response []struct {
 		CreatedAt time.Time `gorm:"column:created_at"`
 		Status    string

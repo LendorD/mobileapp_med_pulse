@@ -1,6 +1,6 @@
 package models
 
-// EmergencyReceptionShortResponse - краткая информация о срочном приеме
+// EmergencyCallShortResponse - краткая информация о срочном приеме
 // @Description Сокращенная информация о срочном приеме пациента
 type EmergencyCallShortResponse struct {
 	CreatedAt string `json:"created_at" example:"2023-05-15T14:30:00Z"`  // Дата и время создания

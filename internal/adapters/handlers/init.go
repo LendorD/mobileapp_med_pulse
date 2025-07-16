@@ -25,17 +25,8 @@ type Handler struct {
 	authUC  *usecases.AuthUsecase // Добавляем AuthUsecase напрямую
 }
 
-// // NewHandler создает новый экземпляр Handler со всеми зависимостями
-// func NewHandler(usecase interfaces.Usecases) *Handler {
-// 	return &Handler{
-// 		usecase: usecase,
-// 	}
-// }
-
 // NewHandler создает новый экземпляр Handler со всеми зависимостями
 func NewHandler(usecase interfaces.Usecases, parentLogger *logging.Logger, authUC *usecases.AuthUsecase) *Handler {
-	//logger := logging.NewLogger("HANDLER", "GENERAL", parentLogger)
-
 	handlerLogger := parentLogger.WithPrefix("HANDLER")
 	handlerLogger.Info("Handler initialized",
 		"component", "GENERAL",
@@ -56,19 +47,17 @@ func ProvideRouter(h *Handler) http.Handler {
 	r.Use(LoggingMiddleware(h.logger))
 
 	// Группа аутентификации
-	// Создаем AuthHandler
-
 	authHandler := NewAuthHandler(h.authUC)
 	authGroup := r.Group("/auth")
-	{
-		authGroup.POST("/login", gin.WrapF(authHandler.LoginDoctor))
-	}
+	authGroup.POST("/login", gin.WrapF(authHandler.LoginDoctor))
 
 	baseRouter := r.Group("/api/v1")
 
+	// Группа медкарты пациента
 	medCardGroup := baseRouter.Group("/medcard")
 	medCardGroup.GET("/:pat_id", h.GetMedCardByPatientID)
 	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
+	// TODO: Дописать добавление новых аллергий пациента и их изменение
 
 	// Группа маршрутов для заключений
 	receptionHospital := baseRouter.Group("/recepHospital")
@@ -85,8 +74,8 @@ func ProvideRouter(h *Handler) http.Handler {
 
 	// Роутеры СМП
 	// emergencyGroup := baseRouter.Group("/emergency-group")
-	// emergencyGroup.GET("/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
-	r.GET("/emergency/:doctor_id", h.GetEmergencyReceptionsByDoctorAndDate)
+	// emergencyGroup.GET("/:doctor_id", h.GetEmergencyCallsByDoctorAndDate)
+	r.GET("/emergency/:doctor_id", h.GetEmergencyCallssByDoctorAndDate)
 
 	return r
 }

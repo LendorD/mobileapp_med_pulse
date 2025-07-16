@@ -12,14 +12,6 @@ type AppError struct {
 	IsUserFacing bool   `json:"-"`       // Внутреннее поле
 }
 
-// // Реализация интерфейса error
-// func (e *AppError) Error() string {
-// 	if e.Err != nil {
-// 		return e.Message + ": " + e.Err.Error()
-// 	}
-// 	return e.Message
-// }
-
 func (a *AppError) Error() string {
 	if a == nil {
 		return ""
