@@ -29,6 +29,7 @@ type ReceptionHospitalUsecase interface {
 }
 
 type ReceptionSmpUsecase interface {
+	CreateReceptionSMP(input *models.CreateEmergencyRequest) (entities.ReceptionSMP, *errors.AppError)
 }
 
 type MedCardUsecase interface {

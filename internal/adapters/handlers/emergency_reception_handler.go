@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
+	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,38 +19,59 @@ import (
 // 	"github.com/gin-gonic/gin"
 // )
 
-// // CreateEmergencyReception godoc
-// // @Summary Создать экстренный приём
-// // @Description Создаёт запись об экстренном приёме
-// // @Tags EmergencyReception
-// // @Accept json
-// // @Produce json
-// // @Param info body models.CreateEmergencyRequest true "Данные экстренного приёма"
-// // @Success 200 {object} entities.EmergencyReception "Созданный экстренный приём"
-// // @Failure 400 {object} ResultError "Некорректный запрос"
-// // @Failure 422 {object} ResultError "Ошибка валидации"
-// // @Failure 500 {object} ResultError "Внутренняя ошибка"
-// // @Router /emergency [post]
-// func (h *Handler) CreateEmergencyReception(c *gin.Context) {
-// 	var input models.CreateEmergencyRequest
-// 	if err := c.ShouldBindJSON(&input); err != nil {
-// 		h.ErrorResponse(c, err, http.StatusBadRequest, BadRequest, true)
-// 		return
-// 	}
+// CreateEmergencyReception godoc
+// @Summary Создать экстренный приём
+// @Description Создаёт запись об экстренном приёме
+// @Tags EmergencyReception
+// @Accept json
+// @Produce json
+// @Param info body models.CreateEmergencyRequest true "Данные экстренного приёма"
+// @Success 200 {object} entities.EmergencyReception "Созданный экстренный приём"
+// @Failure 400 {object} ResultError "Некорректный запрос"
+// @Failure 422 {object} ResultError "Ошибка валидации"
+// @Failure 500 {object} ResultError "Внутренняя ошибка"
+// @Router /emergency [post]
 
-// 	if err := validate.Struct(input); err != nil {
-// 		h.ErrorResponse(c, err, http.StatusBadRequest, BadRequest, true)
-// 		return
-// 	}
+// Примеры JSON
+// Создание нового пациента на вызове
+//
+//	{
+//	  "emergency_call_id": 123,
+//	  "doctor_id": 1,
+//	  "patient": {
+//	    "full_name": "Иванов Иван Иванович",
+//	    "birth_date": "1980-05-15",
+//	    "is_male": true
+//	  }
+//	}
+//
+// Добавление существуещего пользователя
+//
+//	{
+//	  "emergency_call_id": 124,
+//	  "doctor_id": 2,
+//	  "patient_id": 42
+//	}
+func (h *Handler) CreateEmergencyReception(c *gin.Context) {
+	var input models.CreateEmergencyRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
+		return
+	}
 
-// 	emergency, eerr := h.usecase.Emergency.Create(input)
-// 	if eerr != nil {
-// 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
-// 		return
-// 	}
+	if err := validate.Struct(input); err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
+		return
+	}
 
-// 	h.ResultResponse(c, "Success emergency reception create", apiresp.Object, emergency)
-// }
+	emergency, eerr := h.usecase.CreateReceptionSMP(&input)
+	if eerr != nil {
+		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
+		return
+	}
+
+	h.ResultResponse(c, "Success emergency reception create", Object, emergency)
+}
 
 // // AssignDoctorToEmergency godoc
 // // @Summary Назначить врача на экстренный приём

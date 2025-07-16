@@ -2,12 +2,13 @@ package usecases
 
 import (
 	"fmt"
+	"reflect"
+	"strings"
+
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
 	_ "github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	_ "github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
-	"reflect"
-	"strings"
 )
 
 type UseCases struct {
@@ -34,7 +35,7 @@ func NewUsecases(r interfaces.Repository, s interfaces.Service, conf *config.Con
 		NewPatientUsecase(r, s),
 		NewPersonalInfoUsecase(r),
 		NewReceptionHospitalUsecase(r),
-		NewReceptionSmpUsecase(r),
+		NewReceptionSmpUsecase(r, r),
 		NewMedCardUsecase(r, r, r, r),
 	}
 
