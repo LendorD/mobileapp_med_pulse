@@ -15,7 +15,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param id path uint true "ID пациента"
-// @Success 200 {object} models.MedCard "Медкарта"
+// @Success 200 {object} models.MedCardResponse "Медкарта"
 // @Failure 400 {object} ResultError "Некорректный ID"
 // @Failure 404 {object} ResultError "Медкарта не найдена"
 // @Failure 500 {object} ResultError "Внутренняя ошибка"

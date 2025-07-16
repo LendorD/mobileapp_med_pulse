@@ -72,7 +72,7 @@ func (u *MedCardUsecase) GetMedCardByPatientID(id uint) (models.MedCardResponse,
 	// Формируем ответ
 	medCard := models.MedCardResponse{
 		Patient: models.ShortPatientResponse{
-			ID:        patient.Model.ID,
+			ID:        patient.ID,
 			FullName:  patient.FullName,
 			BirthDate: patient.BirthDate,
 			IsMale:    patient.IsMale,
@@ -256,7 +256,7 @@ func (u *MedCardUsecase) UpdateMedCard(input *models.UpdateMedCardRequest) (mode
 	// Формируем ответ
 	return models.MedCardResponse{
 		Patient: models.ShortPatientResponse{
-			ID:        patient.Model.ID,
+			ID:        patient.ID,
 			FullName:  patient.FullName,
 			BirthDate: patient.BirthDate,
 			IsMale:    patient.IsMale,

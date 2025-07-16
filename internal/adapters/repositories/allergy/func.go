@@ -5,7 +5,6 @@ import (
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
-	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -94,20 +93,20 @@ func (r *AllergyRepositoryImpl) GetAllAllergies() ([]entities.Allergy, error) {
 
 func (r *AllergyRepositoryImpl) GetAllergiesByPatientID(patientID uint) ([]entities.Allergy, error) {
 	var allergies []entities.Allergy
-	err := r.db.Model(&entities.Patient{Model: gorm.Model{ID: patientID}}).
+	err := r.db.Model(&entities.Patient{ID: patientID}).
 		Association("Allergy").
 		Find(&allergies)
 	return allergies, err
 }
 
 func (r *AllergyRepositoryImpl) RemovePatientAllergies(patientID uint, allergies []entities.Allergy) error {
-	return r.db.Model(&entities.Patient{Model: gorm.Model{ID: patientID}}).
+	return r.db.Model(&entities.Patient{ID: patientID}).
 		Association("Allergy").
 		Delete(allergies)
 }
 
 func (r *AllergyRepositoryImpl) AddPatientAllergies(patientID uint, allergies []entities.Allergy) error {
-	return r.db.Model(&entities.Patient{Model: gorm.Model{ID: patientID}}).
+	return r.db.Model(&entities.Patient{ID: patientID}).
 		Association("Allergy").
 		Append(allergies)
 }

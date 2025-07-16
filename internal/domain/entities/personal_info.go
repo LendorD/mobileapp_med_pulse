@@ -1,9 +1,14 @@
 package entities
 
-import "gorm.io/gorm"
+import (
+	"time"
+)
 
+// PersonalInfo представляет персональную информацию
 type PersonalInfo struct {
-	gorm.Model
+	ID        uint      `gorm:"primarykey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 
 	PatientID      uint   `gorm:"not null;uniqueIndex" json:"patient_id" example:"1" rus:"ID пациента"`
 	PassportSeries string `gorm:"not null" json:"passport_series" example:"4510 123456" rus:"Серия и номер паспорта"`

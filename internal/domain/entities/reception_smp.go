@@ -1,9 +1,14 @@
 package entities
 
-import "gorm.io/gorm"
+import (
+	"time"
+)
 
+// ReceptionSMP представляет приёмы скорой помощи
 type ReceptionSMP struct {
-	gorm.Model
+	ID        uint      `gorm:"primarykey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 
 	EmergencyCallID uint `gorm:"not null;index" json:"emergency_call_id" example:"1" rus:"ID вызова скорой"`
 

@@ -9,6 +9,8 @@
 package main
 
 import (
+	_ "github.com/AlexanderMorozov1919/mobileapp/docs"
+	_ "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/handlers"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/app"
 )
 

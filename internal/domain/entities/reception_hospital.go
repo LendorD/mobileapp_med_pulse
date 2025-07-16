@@ -2,8 +2,6 @@ package entities
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type ReceptionStatus string
@@ -15,9 +13,12 @@ const (
 	StatusNoShow    ReceptionStatus = "no_show"   // "Не явился"
 )
 
-// Заключение для больницы - ХРАНИТЬ В БД
+// ReceptionHospital представляет приёмы стационара и выезда
 type ReceptionHospital struct {
-	gorm.Model
+	ID        uint      `gorm:"primarykey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+
 	DoctorID        uint            `gorm:"not null;index" json:"doctor_id" example:"1" rus:"ID врача"`
 	Doctor          Doctor          `gorm:"foreignKey:DoctorID" json:"doctor"`
 	PatientID       uint            `gorm:"not null;index" json:"patient_id" example:"1" rus:"ID пациента"`

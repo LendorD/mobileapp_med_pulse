@@ -23,7 +23,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param id path uint true "ID приёма"
-// @Success 200 {object} entities.Reception "Информация о приёме"
+// @Success 200 {object} entities.ReceptionHospital "Информация о приёме"
 // @Failure 400 {object} ResultError "Некорректный ID"
 // @Failure 404 {object} ResultError "Приём не найден"
 // @Failure 500 {object} ResultError "Внутренняя ошибка"
@@ -51,7 +51,7 @@ func (h *Handler) GetReceptionsHospitalByPatientID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path uint true "ID приёма"
-// @Success 200 {object} entities.Reception "Информация о приёме"
+// @Success 200 {object} entities.ReceptionHospital "Информация о приёме"
 // @Failure 400 {object} ResultError "Некорректный ID"
 // @Failure 404 {object} ResultError "Приём не найден"
 // @Failure 500 {object} ResultError "Внутренняя ошибка"
@@ -121,7 +121,7 @@ func (h *Handler) UpdateReceptionHospitalByReceptionID(c *gin.Context) {
 
 func (h *Handler) GetReceptionsByDoctorAndDate(c *gin.Context) {
 	// Получаем doctor_id из URL
-	doctorIDStr := c.Param("doctor_id")
+	doctorIDStr := c.Param("doc_id")
 	doctorID, err := strconv.ParseUint(doctorIDStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid doctor ID"})
