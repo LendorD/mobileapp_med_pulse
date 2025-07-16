@@ -59,11 +59,10 @@ func ProvideRouter(h *Handler) http.Handler {
 	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
 	// TODO: Дописать добавление новых аллергий пациента и их изменение
 
-	r.GET("/receps/:doctor_id", h.GetReceptionsByDoctorAndDate)
-
 	// Группа маршрутов для заключений
 	receptionHospital := baseRouter.Group("/recepHospital")
-	receptionHospital.GET("/:pat_id", h.GetReceptionsHospitalByPatientID)
+	receptionHospital.GET("/:doc_id", h.GetReceptionsByDoctorAndDate)
+	receptionHospital.GET("/patients/:pat_id", h.GetReceptionsHospitalByPatientID)
 	receptionHospital.PUT("/:recep_id", h.UpdateReceptionHospitalByReceptionID)
 
 	// Роутеры пациентов
