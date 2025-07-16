@@ -18,10 +18,10 @@ func NewContactInfoUsecase(repo interfaces.ContactInfoRepository) interfaces.Con
 
 func (u ContactInfoUsecase) CreateContactInfo(input *models.CreateContactInfoRequest) (entities.ContactInfo, *errors.AppError) {
 	contact_info := entities.ContactInfo{
-		PatientID: input.PatientID,
-		Phone:     input.Phone,
-		Email:     input.Email,
-		Address:   input.Address,
+		ID:      input.PatientID,
+		Phone:   input.Phone,
+		Email:   input.Email,
+		Address: input.Address,
 	}
 
 	createdContactInfoId, err := u.repo.CreateContactInfo(contact_info)

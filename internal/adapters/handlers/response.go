@@ -22,15 +22,6 @@ type Response interface {
 }
 
 // ErrorResponse - возвращает стандартизированный ответ с ошибкой
-// @Summary Ответ с ошибкой
-// @Description Возвращает JSON с деталями ошибки
-// @Param c body context.Context true "Контекст Gin"
-// @Param err error true "Объект ошибки"
-// @Param statusCode int true "HTTP статус код"
-// @Param message string true "Сообщение об ошибке"
-// @Param showError bool true "Показывать ли детали ошибки"
-// @Failure 400 {object} map[string]interface{} "Неверный запрос"
-// @Failure 500 {object} map[string]interface{} "Ошибка сервера"
 func (h *Handler) ErrorResponse(c *gin.Context, err error, statusCode int, message string, showError bool) {
 	errorMessage := message
 	if showError && err != nil {
@@ -46,14 +37,7 @@ func (h *Handler) ErrorResponse(c *gin.Context, err error, statusCode int, messa
 	})
 }
 
-// ResultResponse - возвращает стандартизированный успешный ответ
-// @Summary Успешный ответ
-// @Description Возвращает JSON с данными
-// @Param c body context.Context true "Контекст Gin"
-// @Param message string true "Сообщение для клиента"
-// @Param dataType string true "Тип данных (object/array/empty)"
-// @Param data interface{} false "Данные для возврата"
-// @Success 200 {object} map[string]interface{} "Успешный ответ"
+// ResultResponse - возвращает JSON с данными
 func (h *Handler) ResultResponse(c *gin.Context, message string, dataType string, data interface{}) {
 	response := gin.H{
 		"status":  "success",
@@ -69,22 +53,16 @@ func (h *Handler) ResultResponse(c *gin.Context, message string, dataType string
 }
 
 // BadRequest - возвращает ошибку 400
-// @Summary Неверный запрос
-// @Description Возвращает ошибку 400 Bad Request
 func (h *Handler) BadRequest(c *gin.Context, err error) {
 	h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
 }
 
 // InternalError - возвращает ошибку 500
-// @Summary Ошибка сервера
-// @Description Возвращает ошибку 500 Internal Server Error
 func (h *Handler) InternalError(c *gin.Context, err error) {
 	h.ErrorResponse(c, err, http.StatusInternalServerError, errors.InternalServerError, false)
 }
 
 // NotFound - возвращает ошибку 404
-// @Summary Не найдено
-// @Description Возвращает ошибку 404 Not Found
 func (h *Handler) NotFound(c *gin.Context, err error) {
 	h.ErrorResponse(c, err, http.StatusNotFound, errors.NotFound, true)
 }
@@ -101,4 +79,23 @@ func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	w.Write(response)
+}
+
+// ResultResponse структура успешного ответа
+type ResultResponse struct {
+	Status   string `json:"status" example:"ok"` // ok
+	Response struct {
+		Message string      `json:"message" example:"Success operation"`
+		Type    string      `json:"type" example:"object"` // [AVALIABLE]: object, array, empty
+		Data    interface{} `json:"data,omitempty"`        // [AVALIABLE]: object, array of objects, empty
+	} `json:"response"`
+}
+
+// ResultError структура ошибки
+type ResultError struct {
+	Status   string `json:"status" example:"error"` // error
+	Response struct {
+		Code    int    `json:"code" example:"400"` // [RULE]: must be one of codes from table (Check DEV.PAGE)
+		Message string `json:"message" example:"Bad request"`
+	} `json:"response"`
 }

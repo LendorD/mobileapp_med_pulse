@@ -215,10 +215,10 @@ func seedTestData(db *gorm.DB) error {
 	// 5. Создаем контактную информацию и персональные данные для пациентов
 	for i, patient := range patients {
 		contactInfo := entities.ContactInfo{
-			PatientID: patient.ID,
-			Phone:     fmt.Sprintf("+7915%07d", 1000000+i),
-			Email:     fmt.Sprintf("patient%d@example.com", i+1),
-			Address:   fmt.Sprintf("Москва, ул. Тестовая, д. %d", i+1),
+			ID:      patient.ID,
+			Phone:   fmt.Sprintf("+7915%07d", 1000000+i),
+			Email:   fmt.Sprintf("patient%d@example.com", i+1),
+			Address: fmt.Sprintf("Москва, ул. Тестовая, д. %d", i+1),
 		}
 
 		if err := db.Create(&contactInfo).Error; err != nil {

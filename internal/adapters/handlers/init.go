@@ -43,7 +43,8 @@ func ProvideRouter(h *Handler) http.Handler {
 	r := gin.Default()
 
 	// Swagger
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	url := ginSwagger.URL("/swagger/doc.json")
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 	r.Use(LoggingMiddleware(h.logger))
 
 	// Группа аутентификации

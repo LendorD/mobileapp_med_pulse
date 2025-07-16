@@ -1,12 +1,16 @@
 package entities
 
-import "gorm.io/gorm"
+import (
+	"time"
+)
 
+// ContactInfo представляет контактную информацию пациента
 type ContactInfo struct {
-	gorm.Model
+	ID        uint      `gorm:"primarykey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 
-	PatientID uint   `gorm:"not null;uniqueIndex" json:"patient_id" example:"1" rus:"ID пациента"`
-	Phone     string `gorm:"not null" json:"phone" example:"+79991234567" rus:"Телефон"`
-	Email     string `gorm:"not null" json:"email" example:"patient@example.com" rus:"Email"`
-	Address   string `gorm:"not null" json:"address" example:"Москва, ул. Пушкина, д. 10" rus:"Адрес"`
+	Phone   string `json:"phone"`
+	Email   string `json:"email"`
+	Address string `json:"address"`
 }
