@@ -1,12 +1,12 @@
 package usecases
 
 import (
-	"errors"
-	"fmt"
+	"math"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
+	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 )
 
 type EmergencyReceptionUsecase struct {
@@ -53,25 +53,72 @@ func NewEmergencyReceptionUsecase(repo interfaces.EmergencyReceptionRepository) 
 // 	return *updatedEmergency, nil
 // }
 
-func (s *EmergencyReceptionUsecase) GetEmergencyReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.EmergencyCallShortResponse, error) {
-	// Валидация номера страницы
+func (s *EmergencyReceptionUsecase) GetEmergencyReceptionsByDoctorAndDate(
+	doctorID uint,
+	date time.Time,
+	page int,
+	perPage int,
+) (*models.FilterResponse[[]models.EmergencyCallShortResponse], error) {
+	// Валидация входных параметров
+	if doctorID <= 0 {
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get doctor",
+			errors.ErrEmptyData,
+			true,
+		)
+	}
+
 	if page < 1 {
-		return nil, errors.New("page must be greater than 0")
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"page number must be greater than 0",
+			errors.ErrDataNotFound,
+			true,
+		)
 	}
 
-	// Валидация даты (не раньше текущего дня)
-	if date.Before(time.Now().Truncate(24 * time.Hour)) {
-		return nil, errors.New("date cannot be in the past for emergency receptions")
+	if perPage < 5 {
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"Perpage number must be greater than 5",
+			errors.ErrDataNotFound,
+			true,
+		)
 	}
 
-	// Количество записей на странице
-	const perPage = 5 // Можно увеличить для экстренных случаев
-
-	// Получаем данные из репозитория
-	receptions, err := s.repo.GetEmergencyReceptionsByDoctorAndDate(doctorID, date, page, perPage)
+	// Получаем данные
+	calls, total, err := s.repo.GetEmergencyReceptionsByDoctorAndDate(doctorID, date, page, perPage)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get emergency receptions: %w", err)
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get receptions",
+			errors.ErrEmptyData,
+			true,
+		)
 	}
 
-	return receptions, nil
+	// Преобразуем в DTO
+	result := make([]models.EmergencyCallShortResponse, len(calls))
+	for i, call := range calls {
+		result[i] = models.EmergencyCallShortResponse{
+			Id:        call.ID,
+			CreatedAt: call.CreatedAt.Format(time.RFC3339),
+			Status:    string(call.Status),
+			Phone:     call.Phone,
+			Priority:  call.Priority,
+			Address:   call.Address,
+		}
+	}
+
+	// Рассчитываем общее количество страниц
+	totalPages := int(math.Ceil(float64(total) / float64(perPage)))
+
+	return &models.FilterResponse[[]models.EmergencyCallShortResponse]{
+		Hits:        result,
+		CurrentPage: page,
+		TotalPages:  totalPages,
+		TotalHits:   int(total),
+		HitsPerPage: perPage,
+	}, nil
 }
