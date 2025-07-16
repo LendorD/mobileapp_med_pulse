@@ -140,11 +140,12 @@ func (u *ReceptionHospitalUsecase) GetPatientsByDoctorID(doctorID uint, limit, o
 	return patients, nil
 }
 
-func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int, perPage int) (*models.FilterResponse[[]models.ReceptionShortResponse], error) {
-
+func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int, perPage int) (models.FilterResponse[[]models.ReceptionShortResponse], error) {
+	empty := models.FilterResponse[[]models.ReceptionShortResponse]{}
+	
 	// Валидация входных параметров
 	if doctorID <= 0 {
-		return nil, errors.NewAppError(
+		return empty, errors.NewAppError(
 			errors.InternalServerErrorCode,
 			"failed to get doctor",
 			errors.ErrEmptyData,
@@ -153,7 +154,7 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID
 	}
 
 	if page < 1 {
-		return nil, errors.NewAppError(
+		return empty, errors.NewAppError(
 			errors.InternalServerErrorCode,
 			"page number must be greater than 0",
 			errors.ErrDataNotFound,
@@ -162,7 +163,7 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID
 	}
 
 	if perPage < 5 {
-		return nil, errors.NewAppError(
+		return empty, errors.NewAppError(
 			errors.InternalServerErrorCode,
 			"Perpage number must be greater than 5",
 			errors.ErrDataNotFound,
@@ -173,7 +174,7 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID
 	// Получаем данные из репозитория
 	receptions, total, err := u.repo.GetReceptionsHospitalByDoctorAndDate(doctorID, date, page, perPage)
 	if err != nil {
-		return nil, errors.NewAppError(
+		return empty, errors.NewAppError(
 			errors.InternalServerErrorCode,
 			"RepoError",
 			errors.ErrDataNotFound,
@@ -203,7 +204,7 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID
 	totalPages := int(math.Ceil(float64(total) / float64(perPage)))
 
 	// Формируем ответ
-	return &models.FilterResponse[[]models.ReceptionShortResponse]{
+	return models.FilterResponse[[]models.ReceptionShortResponse]{
 		Hits:        result,
 		CurrentPage: page,
 		TotalPages:  totalPages,
