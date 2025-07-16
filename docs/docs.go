@@ -18,39 +18,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/patient/allergy": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "allergy"
-                ],
-                "summary": "Добавить аллергию пациенту",
-                "parameters": [
-                    {
-                        "description": "Данные аллергии",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.AddAllergyRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Добавленная аллергия",
-                        "schema": {
-                            "$ref": "#/definitions/models.AllergyResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/auth/login": {
             "post": {
                 "description": "Аутентифицирует врача по номеру телефона и паролю",
@@ -162,56 +129,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
-                "description": "Создает нового врача с указанными данными",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Doctor"
-                ],
-                "summary": "Создать нового врача",
-                "parameters": [
-                    {
-                        "description": "Данные врача",
-                        "name": "info",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.CreateDoctorRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Созданный врач",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Doctor"
-                        }
-                    },
-                    "400": {
-                        "description": "Некорректный запрос",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    },
-                    "422": {
-                        "description": "Ошибка валидации",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    },
-                    "500": {
-                        "description": "Внутренняя ошибка",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    }
-                }
             }
         },
         "/doctor/{id}": {
@@ -262,54 +179,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "delete": {
-                "description": "Удаляет врача по ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Doctor"
-                ],
-                "summary": "Удалить врача",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID врача",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Успешное удаление",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Некорректный ID",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    },
-                    "404": {
-                        "description": "Врач не найден",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    },
-                    "500": {
-                        "description": "Внутренняя ошибка",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    }
-                }
             }
         },
         "/emergency/{doctor_id}/receptions": {
@@ -322,7 +191,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "EmergencyReception"
+                    "EmergencyCall"
                 ],
                 "summary": "Получить экстренные приёмы врача по дате",
                 "parameters": [
@@ -687,9 +556,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/patient/{patient_id}/allergies": {
+        "/patients": {
             "get": {
-                "description": "Возвращает список аллергий пациента",
+                "description": "Возвращает список пациентов с возможностью пагинации и фильтрации",
                 "consumes": [
                     "application/json"
                 ],
@@ -697,92 +566,44 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Allergy"
+                    "Patient"
                 ],
-                "summary": "Получить аллергии пациента",
+                "summary": "Получить список пациентов",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "ID пациента",
-                        "name": "patient_id",
-                        "in": "path",
-                        "required": true
+                        "description": "Номер страницы (по умолчанию 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Количество записей на странице (по умолчанию 0 — без ограничения)",
+                        "name": "count",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фильтр в формате field.operation.value. Примеры: full_name.like.Анна, birth_date.eq.1988-07-14",
+                        "name": "filter",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Список аллергий",
+                        "description": "Список пациентов",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.AllergyResponse"
-                            }
+                            "$ref": "#/definitions/handlers.ResultResponse"
                         }
                     },
                     "400": {
-                        "description": "Некорректный ID",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    },
-                    "404": {
-                        "description": "Пациент не найден",
+                        "description": "Некорректные параметры запроса",
                         "schema": {
                             "$ref": "#/definitions/handlers.ResultError"
                         }
                     },
                     "500": {
-                        "description": "Внутренняя ошибка",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    }
-                }
-            }
-        },
-        "/patient/{patient_id}/contact-info": {
-            "get": {
-                "description": "Возвращает контактные данные пациента по ID пациента",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "ContactInfo"
-                ],
-                "summary": "Получить контактные данные пациента",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID пациента",
-                        "name": "patient_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Контактные данные",
-                        "schema": {
-                            "$ref": "#/definitions/entities.ContactInfo"
-                        }
-                    },
-                    "400": {
-                        "description": "Некорректный ID пациента",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    },
-                    "404": {
-                        "description": "Данные не найдены",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    },
-                    "500": {
-                        "description": "Внутренняя ошибка",
+                        "description": "Внутренняя ошибка сервера",
                         "schema": {
                             "$ref": "#/definitions/handlers.ResultError"
                         }
@@ -1324,27 +1145,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.AddAllergyRequest": {
-            "description": "Запрос для добавления аллергии пациенту",
-            "type": "object",
-            "properties": {
-                "allergy_id": {
-                    "description": "ID аллергии",
-                    "type": "integer",
-                    "example": 5
-                },
-                "description": {
-                    "description": "Описание аллергии",
-                    "type": "string",
-                    "example": "Аллергия на пыльцу"
-                },
-                "patient_id": {
-                    "description": "ID пациента",
-                    "type": "integer",
-                    "example": 1
-                }
-            }
-        },
         "models.AllergyResponse": {
             "description": "Ответ с названием аллергии",
             "type": "object",
@@ -1374,44 +1174,6 @@ const docTemplate = `{
                     "description": "Номер телефона",
                     "type": "string",
                     "example": "+79991234567"
-                }
-            }
-        },
-        "models.CreateDoctorRequest": {
-            "description": "Используется для регистрации нового врача в системе",
-            "type": "object",
-            "required": [
-                "email",
-                "full_name",
-                "login",
-                "password",
-                "specialization"
-            ],
-            "properties": {
-                "email": {
-                    "description": "Email (обязательное)",
-                    "type": "string",
-                    "example": "doctor@example.com"
-                },
-                "full_name": {
-                    "description": "ФИО врача (обязательное)",
-                    "type": "string",
-                    "example": "Иванов Иван Иванович"
-                },
-                "login": {
-                    "description": "Логин (обязательное)",
-                    "type": "string",
-                    "example": "+79123456789"
-                },
-                "password": {
-                    "description": "Пароль (обязательное)",
-                    "type": "string",
-                    "example": "qwerty123"
-                },
-                "specialization": {
-                    "description": "Специализация (обязательное)",
-                    "type": "string",
-                    "example": "Терапевт"
                 }
             }
         },
@@ -1575,11 +1337,6 @@ const docTemplate = `{
             "description": "Используется для изменения информации о враче",
             "type": "object",
             "properties": {
-                "email": {
-                    "description": "Новый email",
-                    "type": "string",
-                    "example": "doctor@example.com"
-                },
                 "full_name": {
                     "description": "Новое ФИО",
                     "type": "string",

@@ -6,6 +6,7 @@ import (
 
 type EmergencyStatus string
 
+// Статусы приёмов скорой помощи
 const (
 	EmergencyStatusScheduled EmergencyStatus = "scheduled"
 	EmergencyStatusAccepted  EmergencyStatus = "accepted"
