@@ -24,6 +24,8 @@ type ReceptionHospital struct {
 	Doctor          Doctor          `gorm:"foreignKey:DoctorID" json:"doctor"`
 	PatientID       uint            `gorm:"not null;index" json:"patient_id" example:"1" rus:"ID пациента"`
 	Patient         Patient         `gorm:"foreignKey:PatientID" json:"patient"`
+	// JSONB где будут диагноз рекомендации и тд
+
 	Diagnosis       string          `json:"diagnosis" example:"ОРВИ" rus:"Диагноз"`
 	Recommendations string          `json:"recommendations" example:"Постельный режим" rus:"Рекомендации"`
 	Address         string          `gorm:"not null" json:"address" example:"Москва, ул. Ленина, д. 15" rus:"Адрес больницы"`

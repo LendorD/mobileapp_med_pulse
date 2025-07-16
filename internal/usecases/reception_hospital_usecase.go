@@ -176,7 +176,7 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID
 	if err != nil {
 		return empty, errors.NewAppError(
 			errors.InternalServerErrorCode,
-			"RepoError",
+			"Hospital_Use_Case failed to get from repo",
 			errors.ErrDataNotFound,
 			true,
 		)

@@ -7,7 +7,6 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
 
 type Repository interface {
@@ -82,11 +81,12 @@ type ReceptionSmpRepository interface {
 	UpdateReceptionSmp(id uint, updateMap map[string]interface{}) (uint, error)
 	DeleteReceptionSmp(id uint) error
 
+	GetReceptionWithMedServicesByID(id uint) (entities.ReceptionSMP, error)
 	GetReceptionSmpByID(id uint) (entities.ReceptionSMP, error)
 	GetReceptionSmpByDoctorID(doctorID uint) ([]entities.ReceptionSMP, error)
 	GetReceptionSmpByPatientID(patientID uint) ([]entities.ReceptionSMP, error)
 	GetReceptionSmpByDateRange(start, end time.Time) ([]entities.ReceptionSMP, error)
-	GetReceptionsSmpByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]models.ReceptionShortResponse, error)
+	GetWithPatientsByEmergencyCallID(emergencyCallID uint, page, perPage int) ([]entities.ReceptionSMP, int64, error)
 }
 
 // updated to match the new structure

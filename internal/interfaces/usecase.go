@@ -30,6 +30,8 @@ type ReceptionHospitalUsecase interface {
 
 type ReceptionSmpUsecase interface {
 	CreateReceptionSMP(input *models.CreateEmergencyRequest) (entities.ReceptionSMP, *errors.AppError)
+	GetSMPReceptionsByEmergencyCall(emergencyCallID uint, page int, perPage int) (*models.FilterResponse[[]models.ReceptionSMPShortResponse], error)
+	GetReceptionWithMedServicesByID(id uint) (*models.ReceptionSMPResponse, error)
 }
 
 type MedCardUsecase interface {
