@@ -143,10 +143,10 @@ func (u *ReceptionHospitalUsecase) GetPatientsByDoctorID(doctorID uint, limit, o
 func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int, perPage int) (*models.FilterResponse[[]models.ReceptionShortResponse], error) {
 
 	// Валидация входных параметров
-	if doctorID == 0 {
+	if doctorID <= 0 {
 		return nil, errors.NewAppError(
 			errors.InternalServerErrorCode,
-			"failed to get patient",
+			"failed to get doctor",
 			errors.ErrEmptyData,
 			true,
 		)

@@ -121,7 +121,7 @@ func (h *Handler) UpdateReceptionHospitalByReceptionID(c *gin.Context) {
 
 func (h *Handler) GetReceptionsByDoctorAndDate(c *gin.Context) {
 	// Получаем doctor_id из URL
-	doctorIDStr := c.Param("doctor_id")
+	doctorIDStr := c.Param("doc_id")
 	doctorID, err := strconv.ParseUint(doctorIDStr, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid doctor ID"})

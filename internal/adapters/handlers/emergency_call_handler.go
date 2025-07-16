@@ -31,15 +31,16 @@ func (h *Handler) GetEmergencyCallssByDoctorAndDate(c *gin.Context) {
 
 	// Получаем дату из query параметров
 	dateStr := c.Query("date")
-	if dateStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Date parameter is required"})
-		return
-	}
-
-	date, err := time.Parse("2006-01-02", dateStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format, use YYYY-MM-DD"})
-		return
+	var date time.Time
+	if dateStr != "" {
+		date, err = time.Parse("2006-01-02", dateStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid date format, use YYYY-MM-DD"})
+			return
+		}
+	} else {
+		// Если дата не указана, используем текущую дату
+		date = time.Now()
 	}
 
 	// Получаем номер страницы
@@ -50,7 +51,7 @@ func (h *Handler) GetEmergencyCallssByDoctorAndDate(c *gin.Context) {
 		return
 	}
 
-	perPageStr := c.DefaultQuery("page", "1")
+	perPageStr := c.DefaultQuery("perPage", "5")
 	perPage, err := strconv.Atoi(perPageStr)
 	if err != nil || perPage < 5 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Page must be integer greater than 0"})
