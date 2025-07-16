@@ -16,3 +16,9 @@ type ContactInfoResponse struct {
 	Email   string `json:"email" example:"patient@example.com"`          // Электронная почта
 	Address string `json:"address" example:"Москва, ул. Пушкина, д. 10"` // Физический адрес
 }
+
+type ContactInfoData struct {
+	Phone   string `json:"phone" example:"+79991234567"`
+	Email   string `json:"email,omitempty" example:"user@example.com"`
+	Address string `json:"address,omitempty" example:"г. Москва, ул. Ленина, д. 10"`
+}

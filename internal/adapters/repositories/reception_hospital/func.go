@@ -1,6 +1,7 @@
 package receptionHospital
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
@@ -131,23 +132,43 @@ func getOrderByStatusAndDate() string {
     `
 }
 
-func (r *ReceptionHospitalRepositoryImpl) GetReceptionsHospitalByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]entities.ReceptionHospital, error) {
+func (r *ReceptionHospitalRepositoryImpl) GetReceptionsHospitalByDoctorAndDate(
+	doctorID uint,
+	date time.Time,
+	page, perPage int,
+) ([]entities.ReceptionHospital, int64, error) {
 	var receptions []entities.ReceptionHospital
+	var total int64
 
-	offset := (page - 1) * perPage
+	// Рассчитываем временной диапазон
 	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
 	endOfDay := startOfDay.Add(24 * time.Hour)
 
-	err := r.db.
+	// Создаем базовый запрос с условиями фильтрации
+	baseQuery := r.db.
+		Model(&entities.ReceptionHospital{}).
+		Where("doctor_id = ? AND date >= ? AND date < ?", doctorID, startOfDay, endOfDay)
+
+	// Получаем общее количество записей
+	if err := baseQuery.Count(&total).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to count receptions: %w", err)
+	}
+
+	// Получаем данные с пагинацией
+	offset := (page - 1) * perPage
+	err := baseQuery.
 		Preload("Patient").
-		Where("doctor_id = ? AND date >= ? AND date < ?", doctorID, startOfDay, endOfDay).
 		Offset(offset).
 		Limit(perPage).
 		Order(getOrderByStatusAndDate()).
 		Find(&receptions).
 		Error
 
-	return receptions, err
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to get receptions: %w", err)
+	}
+
+	return receptions, total, nil
 }
 
 func (r *ReceptionHospitalRepositoryImpl) GetPatientsByDoctorID(doctorID uint, limit, offset int) ([]entities.Patient, *errors.AppError) {
