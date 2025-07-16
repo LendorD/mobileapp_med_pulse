@@ -31,6 +31,27 @@ import (
 // @Failure 422 {object} ResultError "Ошибка валидации"
 // @Failure 500 {object} ResultError "Внутренняя ошибка"
 // @Router /emergency [post]
+
+// Примеры JSON
+// Создание нового пациента на вызове
+//
+//	{
+//	  "emergency_call_id": 123,
+//	  "doctor_id": 1,
+//	  "patient": {
+//	    "full_name": "Иванов Иван Иванович",
+//	    "birth_date": "1980-05-15",
+//	    "is_male": true
+//	  }
+//	}
+//
+// Добавление существуещего пользователя
+//
+//	{
+//	  "emergency_call_id": 124,
+//	  "doctor_id": 2,
+//	  "patient_id": 42
+//	}
 func (h *Handler) CreateEmergencyReception(c *gin.Context) {
 	var input models.CreateEmergencyRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
