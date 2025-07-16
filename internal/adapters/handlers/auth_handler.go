@@ -29,6 +29,7 @@ func NewAuthHandler(authUC *usecases.AuthUsecase) *AuthHandler {
 // @Router /auth/login [post]
 func (h *AuthHandler) LoginDoctor(w http.ResponseWriter, r *http.Request) {
 	var req models.DoctorLoginRequest
+
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
