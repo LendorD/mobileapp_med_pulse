@@ -87,9 +87,9 @@ func (h *Handler) GetPatientsByDoctorID(c *gin.Context) {
 }
 
 // GetReceptionsByDoctorAndDate godoc
-// @Summary Get receptions by doctor and date
-// @Description Get paginated list of receptions for specific doctor and date
-// @Tags receptions
+// @Summary Получить приём по доктору и дате
+// @Description Возвращает пагинированный список приёмов для конкретных доктора и даты
+// @Tags Reception
 // @Accept json
 // @Produce json
 // @Param doctor_id path int true "Doctor ID"

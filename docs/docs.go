@@ -28,7 +28,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Auth"
                 ],
                 "summary": "Вход в систему",
                 "parameters": [
@@ -133,7 +133,7 @@ const docTemplate = `{
         },
         "/doctor/{id}": {
             "get": {
-                "description": "Возвращает информацию о враче по ID",
+                "description": "Возвращает данные врача по ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -155,7 +155,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Информация о враче",
+                        "description": "Данные врача",
                         "schema": {
                             "$ref": "#/definitions/entities.Doctor"
                         }
@@ -242,67 +242,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/medcard": {
-            "put": {
-                "description": "Обновляет информацию о враче",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Doctor"
-                ],
-                "summary": "Обновить данные врача",
-                "parameters": [
-                    {
-                        "description": "Данные для обновления",
-                        "name": "info",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.UpdateDoctorRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Обновленный врач",
-                        "schema": {
-                            "$ref": "#/definitions/entities.Doctor"
-                        }
-                    },
-                    "400": {
-                        "description": "Некорректный запрос",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    },
-                    "404": {
-                        "description": "Врач не найден",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    },
-                    "422": {
-                        "description": "Ошибка валидации",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    },
-                    "500": {
-                        "description": "Внутренняя ошибка",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    }
-                }
-            }
-        },
-        "/medcard/{id}": {
+        "/medcard/{pat_id}": {
             "get": {
-                "description": "Возвращает медкарту по ID Пациента",
+                "description": "Возвращает полную информацию из медицинской карты пациента",
                 "consumes": [
                     "application/json"
                 ],
@@ -310,27 +252,27 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "MedCard"
+                    "Medcard"
                 ],
-                "summary": "Получить медкарту по ID Пациента",
+                "summary": "Получить медкарту по ID пациента",
                 "parameters": [
                     {
                         "type": "integer",
                         "description": "ID пациента",
-                        "name": "id",
+                        "name": "pat_id",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Медкарта",
+                        "description": "Медицинская карта пациента",
                         "schema": {
                             "$ref": "#/definitions/models.MedCardResponse"
                         }
                     },
                     "400": {
-                        "description": "Некорректный ID",
+                        "description": "Некорректный ID пациента",
                         "schema": {
                             "$ref": "#/definitions/handlers.ResultError"
                         }
@@ -342,7 +284,70 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Внутренняя ошибка",
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Обновляет информацию в медицинской карте пациента",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Medcard"
+                ],
+                "summary": "Обновить данные медицинской карты",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID пациента",
+                        "name": "pat_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные для обновления медкарты",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateMedCardRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Обновленная медицинская карта",
+                        "schema": {
+                            "$ref": "#/definitions/models.MedCardResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "404": {
+                        "description": "Медкарта не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка валидации данных",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
                         "schema": {
                             "$ref": "#/definitions/handlers.ResultError"
                         }
@@ -663,7 +668,7 @@ const docTemplate = `{
         },
         "/receptions/doctor/{doctor_id}": {
             "get": {
-                "description": "Get paginated list of receptions for specific doctor and date",
+                "description": "Возвращает пагинированный список приёмов для конкретных доктора и даты",
                 "consumes": [
                     "application/json"
                 ],
@@ -671,9 +676,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "receptions"
+                    "Reception"
                 ],
-                "summary": "Get receptions by doctor and date",
+                "summary": "Получить приём по доктору и дате",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1361,6 +1366,43 @@ const docTemplate = `{
                     "description": "Новая специализация",
                     "type": "string",
                     "example": "Хирург"
+                }
+            }
+        },
+        "models.UpdateMedCardRequest": {
+            "description": "Содержит всю медицинскую информацию о пациенте",
+            "type": "object",
+            "properties": {
+                "allergy": {
+                    "description": "Список аллергий",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.AllergyResponse"
+                    }
+                },
+                "contact_info": {
+                    "description": "Контактные данные",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.ContactInfoResponse"
+                        }
+                    ]
+                },
+                "patient": {
+                    "description": "Основные данные пациента",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.ShortPatientResponse"
+                        }
+                    ]
+                },
+                "personal_info": {
+                    "description": "Персональная информация",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.PersonalInfoResponse"
+                        }
+                    ]
                 }
             }
         },

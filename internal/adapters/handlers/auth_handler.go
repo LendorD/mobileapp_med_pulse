@@ -19,9 +19,9 @@ func NewAuthHandler(authUC *usecases.AuthUsecase) *AuthHandler {
 // LoginDoctor аутентифицирует врача
 // @Summary Вход в систему
 // @Description Аутентифицирует врача по номеру телефона и паролю
-// @Tags auth
-// @Accept  json
-// @Produce  json
+// @Tags Auth
+// @Accept json
+// @Produce json
 // @Param input body models.DoctorLoginRequest true "Данные для входа"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
