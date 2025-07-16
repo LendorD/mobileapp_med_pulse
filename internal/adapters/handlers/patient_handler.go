@@ -139,25 +139,26 @@ func (h *Handler) DeletePatient(c *gin.Context) {
 // filter=full_name.like.Анна - получить человека с подстрокой "Анна" в full_name
 // названия передаваемых столбцов таблицы автоматически подгружаются через json
 func (h *Handler) GetAllPatients(c *gin.Context) {
-	limitStr := c.DefaultQuery("limit", "10")
-	offsetStr := c.DefaultQuery("offset", "0")
-
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil || limit <= 0 {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "query parameter 'limit' must be a positive integer", false)
+	// Получаем и валидируем параметр page
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil {
+		// Возвращаем ошибку 400, если параметр page не является числом
+		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'page' must be an integer", false)
 		return
 	}
 
-	offset, err := strconv.Atoi(offsetStr)
-	if err != nil || offset < 0 {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "query parameter 'offset' must be a non-negative integer", false)
+	// Получаем и валидируем параметр count
+	count, err := strconv.Atoi(c.DefaultQuery("count", "0"))
+	if err != nil {
+		// Возвращаем ошибку 400, если параметр count не является числом
+		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'count' must be an integer", false)
 		return
 	}
 
 	// Параметры фильтрации в формате field.operation.value
 	filter := c.Query("filter")
 
-	patients, appErr := h.usecase.GetAllPatients(limit, offset, filter)
+	patients, appErr := h.usecase.GetAllPatients(page, count, filter)
 	if appErr != nil {
 		h.ErrorResponse(c, appErr.Err, appErr.Code, appErr.Message, appErr.IsUserFacing)
 		return
