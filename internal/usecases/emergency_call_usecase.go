@@ -1,8 +1,7 @@
 package usecases
 
 import (
-	"errors"
-	"fmt"
+	"math"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
@@ -54,7 +53,7 @@ func NewEmergencyCallUsecase(repo interfaces.EmergencyCallRepository) interfaces
 // 	return *updatedEmergency, nil
 // }
 
-func (s *EmergencyReceptionUsecase) GetEmergencyCallsByDoctorAndDate(
+func (u *EmergencyCallUsecase) GetEmergencyCallsByDoctorAndDate(
 	doctorID uint,
 	date time.Time,
 	page int,
@@ -88,11 +87,8 @@ func (s *EmergencyReceptionUsecase) GetEmergencyCallsByDoctorAndDate(
 		)
 	}
 
-	// Количество записей на странице
-	const perPage = 5 // Можно увеличить для экстренных случаев
-
 	// Получаем данные из репозитория
-	calls, total, err := s.repo.GetEmergencyCallsByDoctorAndDate(doctorID, date, page, perPage)
+	calls, total, err := u.repo.GetEmergencyReceptionsByDoctorAndDate(doctorID, date, page, perPage)
 	if err != nil {
 		return nil, errors.NewAppError(
 			errors.InternalServerErrorCode,

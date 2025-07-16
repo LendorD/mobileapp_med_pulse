@@ -1,4 +1,4 @@
-package emergencyReception
+package EmergencyCall
 
 import (
 	"fmt"

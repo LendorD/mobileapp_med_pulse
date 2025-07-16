@@ -23,7 +23,7 @@ import (
 // @Router /emergency/{doctor_id}/receptions [get]
 func (h *Handler) GetEmergencyCallssByDoctorAndDate(c *gin.Context) {
 	// Получаем ID врача
-	doctorID, err := strconv.ParseUint(c.Param("doctor_id"), 10, 32)
+	doctorID, err := strconv.ParseUint(c.Param("doc_id"), 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid doctor ID"})
 		return
@@ -50,8 +50,15 @@ func (h *Handler) GetEmergencyCallssByDoctorAndDate(c *gin.Context) {
 		return
 	}
 
+	perPageStr := c.DefaultQuery("page", "1")
+	perPage, err := strconv.Atoi(perPageStr)
+	if err != nil || perPage < 5 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Page must be integer greater than 0"})
+		return
+	}
+
 	// Вызываем usecase
-	receptions, err := h.usecase.GetEmergencyCallsByDoctorAndDate(uint(doctorID), date, page)
+	receptions, err := h.usecase.GetEmergencyCallsByDoctorAndDate(uint(doctorID), date, page, perPage)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
