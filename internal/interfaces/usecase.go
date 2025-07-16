@@ -12,7 +12,7 @@ type Usecases interface {
 	AllergyUsecase
 	ContactInfoUsecase
 	DoctorUsecase
-	EmergencyReceptionUsecase
+	EmergencyCallUsecase
 	MedServiceUsecase
 	PatientUsecase
 	PersonalInfoUsecase
@@ -55,8 +55,8 @@ type DoctorUsecase interface {
 	DeleteDoctor(doctorId uint) *errors.AppError
 }
 
-type EmergencyReceptionUsecase interface {
-	GetEmergencyReceptionsByDoctorAndDate(
+type EmergencyCallUsecase interface {
+	GetEmergencyCallsByDoctorAndDate(
 		doctorID uint,
 		date time.Time,
 		page int,

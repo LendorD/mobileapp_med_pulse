@@ -9,9 +9,7 @@
 package main
 
 import (
-	_ "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/handlers"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/app"
-	_ "github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
 
 func main() {

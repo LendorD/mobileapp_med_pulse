@@ -112,6 +112,7 @@ var AuthModule = fx.Module("auth_module",
 	),
 )
 
+// TODO: Может быть вынести в services
 func IntToUint(c int) uint {
 	if c < 0 {
 		panic([2]any{"a negative number", c})

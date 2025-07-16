@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/contactInfo"
-	emergencyReception "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emergency_reception"
+	EmergencyCall "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emergency_call"
 	medService "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/med_service"
 	personalInfo "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/personal_info"
 	receptionHospital "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/reception_hospital"
@@ -32,7 +32,7 @@ type Repository struct {
 	interfaces.MedServiceRepository
 	interfaces.PatientRepository
 	interfaces.ContactInfoRepository
-	interfaces.EmergencyReceptionRepository
+	interfaces.EmergencyCallRepository
 	interfaces.PersonalInfoRepository
 	interfaces.ReceptionHospitalRepository
 	interfaces.ReceptionSmpRepository
@@ -78,7 +78,7 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 		medService.NewMedServiceRepository(db),
 		patient.NewPatientRepository(db),
 		contactInfo.NewContactInfoRepository(db),
-		emergencyReception.NewEmergencyReceptionRepository(db),
+		EmergencyCall.NewEmergencyCallRepository(db),
 		personalInfo.NewPersonalInfoRepository(db),
 		receptionHospital.NewReceptionRepository(db),
 		receptionSmp.NewReceptionSmpRepository(db),
@@ -366,44 +366,3 @@ func parseDate(dateStr string) time.Time {
 	}
 	return t
 }
-
-// // KONKOV: аналогично, для своих тестов делал, уберите, если не нужно
-// }
-
-// // createTestDoctors создает тестовых врачей при инициализации
-// func createTestDoctors(db *gorm.DB) error {
-// 	testDoctors := []entities.Doctor{
-// 		{
-// 			FullName:       "Иванов Иван Иванович",
-// 			Specialization: "Терапевт",
-// 			Login:          "doctor1",
-// 			PasswordHash:   hashPassword("password1"),
-// 		},
-// 		{
-// 			FullName:       "Петров Петр Петрович",
-// 			Specialization: "Хирург",
-// 			Login:          "doctor2",
-// 			PasswordHash:   hashPassword("password2"),
-// 		},
-// 		{
-// 			FullName:       "Сидорова Анна Владимировна",
-// 			Specialization: "Невролог",
-// 			Login:          "doctor3",
-// 			PasswordHash:   hashPassword("password3"),
-// 		},
-// 	}
-
-// 	for _, doctor := range testDoctors {
-// 		if err := db.FirstOrCreate(&doctor, entities.Doctor{Login: doctor.Login}).Error; err != nil {
-// 			return err
-// 		}
-// 	}
-// 	return nil
-// }
-
-// // hashPassword хэширует пароль для безопасного хранения
-// func hashPassword(password string) string {
-// 	hash, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-// 	return string(hash)
-// }
-// //

@@ -17,7 +17,7 @@ type Repository interface {
 	MedServiceRepository
 	PatientRepository
 	ContactInfoRepository
-	EmergencyReceptionRepository
+	EmergencyCallRepository
 	PersonalInfoRepository
 	ReceptionHospitalRepository
 	ReceptionSmpRepository
@@ -48,16 +48,16 @@ type PersonalInfoRepository interface {
 }
 
 // updated to match the new structure
-type EmergencyReceptionRepository interface {
-	CreateEmergencyReception(er entities.EmergencyCall) error
-	UpdateEmergencyReception(id uint, updateMap map[string]interface{}) (uint, error)
-	DeleteEmergencyReception(id uint) error
+type EmergencyCallRepository interface {
+	CreateEmergencyCall(er entities.EmergencyCall) error
+	UpdateEmergencyCall(id uint, updateMap map[string]interface{}) (uint, error)
+	DeleteEmergencyCall(id uint) error
 
-	GetEmergencyReceptionByID(id uint) (entities.EmergencyCall, error)
-	GetEmergencyReceptionsByDoctorID(doctorID uint) ([]entities.EmergencyCall, error)
-	GetEmergencyReceptionsByPatientID(patientID uint) ([]entities.EmergencyCall, error)
-	GetEmergencyReceptionsByDateRange(start, end time.Time) ([]entities.EmergencyCall, error)
-	GetEmergencyReceptionsPriorityCases() ([]entities.EmergencyCall, error)
+	GetEmergencyCallByID(id uint) (entities.EmergencyCall, error)
+	GetEmergencyCallsByDoctorID(doctorID uint) ([]entities.EmergencyCall, error)
+	GetEmergencyCallsByPatientID(patientID uint) ([]entities.EmergencyCall, error)
+	GetEmergencyCallsByDateRange(start, end time.Time) ([]entities.EmergencyCall, error)
+	GetEmergencyCallsPriorityCases() ([]entities.EmergencyCall, error)
 	GetEmergencyReceptionsByDoctorAndDate(
 		doctorID uint,
 		date time.Time,

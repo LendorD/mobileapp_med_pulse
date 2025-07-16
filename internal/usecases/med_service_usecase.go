@@ -17,15 +17,15 @@ func NewMedServiceUsecase(
 }
 
 /*
-func (u *MedServiceUsecase) AddToEmergency(emergencyID, serviceID uint) (entities.EmergencyReceptionMedServices, *errors.AppError) {
-	service := entities.EmergencyReceptionMedServices{
-		EmergencyReceptionID: emergencyID,
+func (u *MedServiceUsecase) AddToEmergency(emergencyID, serviceID uint) (entities.EmergencyCallMedServices, *errors.AppError) {
+	service := entities.EmergencyCallMedServices{
+		EmergencyCallID: emergencyID,
 		MedServiceID:         serviceID,
 	}
 
 	createdService, err := u.emergencyMedServiceRepo.AddService(&service)
 	if err != nil {
-		return entities.EmergencyReceptionMedServices{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to update doctor", err, true)
+		return entities.EmergencyCallMedServices{}, errors.NewAppError(errors.InternalServerErrorCode, "failed to update doctor", err, true)
 	}
 
 	return *createdService, nil

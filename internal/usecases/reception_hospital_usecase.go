@@ -33,7 +33,6 @@ func (u *ReceptionHospitalUsecase) GetReceptionsHospitalByPatientID(patientId ui
 	}
 
 	receptions, err := u.repo.GetReceptionHospitalByPatientID(patientId)
-	// receptionsSMP, err := u.repo.GetReceptionHospitalByPatientID(patientId)
 	if err != nil {
 		return nil, errors.NewAppError(
 			errors.InternalServerErrorCode,

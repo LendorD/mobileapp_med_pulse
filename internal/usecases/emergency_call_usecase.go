@@ -9,16 +9,16 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 )
 
-type EmergencyReceptionUsecase struct {
-	repo interfaces.EmergencyReceptionRepository
+type EmergencyCallUsecase struct {
+	repo interfaces.EmergencyCallRepository
 }
 
-func NewEmergencyReceptionUsecase(repo interfaces.EmergencyReceptionRepository) interfaces.EmergencyReceptionUsecase {
-	return &EmergencyReceptionUsecase{repo: repo}
+func NewEmergencyCallUsecase(repo interfaces.EmergencyCallRepository) interfaces.EmergencyCallUsecase {
+	return &EmergencyCallUsecase{repo: repo}
 }
 
-// func (u *EmergencyReceptionUsecase) Create(input models.CreateEmergencyRequest) (entities.EmergencyReception, *errors.AppError) {
-// 	emergency := entities.EmergencyReception{
+// func (u *EmergencyCallUsecase) Create(input models.CreateEmergencyRequest) (entities.EmergencyCall, *errors.AppError) {
+// 	emergency := entities.EmergencyCall{
 // 		PatientID:       input.PatientID,
 // 		Status:          entities.EmergencyStatusScheduled,
 // 		Priority:        input.Priority,
@@ -30,16 +30,16 @@ func NewEmergencyReceptionUsecase(repo interfaces.EmergencyReceptionRepository) 
 
 // 	createdEmergency, err := u.repo.Create(&emergency)
 // 	if err != nil {
-// 		return entities.EmergencyReception{}, errors.NewDBError("failed to create emergency reception", err)
+// 		return entities.EmergencyCall{}, errors.NewDBError("failed to create emergency reception", err)
 // 	}
 
 // 	return *createdEmergency, nil
 // }
 
-// func (u *EmergencyReceptionUsecase) AssignDoctor(id, doctorID uint) (entities.EmergencyReception, *errors.AppError) {
+// func (u *EmergencyCallUsecase) AssignDoctor(id, doctorID uint) (entities.EmergencyCall, *errors.AppError) {
 // 	emergency, err := u.repo.GetByID(id)
 // 	if err != nil {
-// 		return entities.EmergencyReception{}, errors.NewDBError("failed to find emergency reception", err)
+// 		return entities.EmergencyCall{}, errors.NewDBError("failed to find emergency reception", err)
 // 	}
 
 // 	emergency.DoctorID = doctorID
@@ -47,13 +47,13 @@ func NewEmergencyReceptionUsecase(repo interfaces.EmergencyReceptionRepository) 
 
 // 	updatedEmergency, err := u.repo.Update(emergency)
 // 	if err != nil {
-// 		return entities.EmergencyReception{}, errors.NewDBError("failed to assign doctor", err)
+// 		return entities.EmergencyCall{}, errors.NewDBError("failed to assign doctor", err)
 // 	}
 
 // 	return *updatedEmergency, nil
 // }
 
-func (s *EmergencyReceptionUsecase) GetEmergencyReceptionsByDoctorAndDate(
+func (u *EmergencyCallUsecase) GetEmergencyCallsByDoctorAndDate(
 	doctorID uint,
 	date time.Time,
 	page int,
@@ -87,8 +87,8 @@ func (s *EmergencyReceptionUsecase) GetEmergencyReceptionsByDoctorAndDate(
 		)
 	}
 
-	// Получаем данные
-	calls, total, err := s.repo.GetEmergencyReceptionsByDoctorAndDate(doctorID, date, page, perPage)
+	// Получаем данные из репозитория
+	calls, total, err := u.repo.GetEmergencyReceptionsByDoctorAndDate(doctorID, date, page, perPage)
 	if err != nil {
 		return nil, errors.NewAppError(
 			errors.InternalServerErrorCode,

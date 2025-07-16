@@ -1,6 +1,6 @@
 package models
 
-// EmergencyReceptionShortResponse - краткая информация о срочном приеме
+// EmergencyCallShortResponse - краткая информация о срочном приеме
 // @Description Сокращенная информация о срочном приеме пациента
 type EmergencyCallShortResponse struct {
 	Id        uint   `json:"id" example:"3"`

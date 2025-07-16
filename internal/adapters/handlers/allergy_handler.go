@@ -36,6 +36,10 @@ func (h *Handler) AddPatientAllergy(c *gin.Context) {
 	h.ResultResponse(c, "Success allergy added", Object, allergy)
 }
 
+// TODO: Дописать обновление аллергий
+
+// TODO: Дописать удаление аллергий
+
 // GetPatientAllergies godoc
 // @Summary Получить аллергии пациента
 // @Description Возвращает список аллергий пациента

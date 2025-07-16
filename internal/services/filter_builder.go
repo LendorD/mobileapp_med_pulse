@@ -117,7 +117,7 @@ func (s *FilterBuilder) buildCondition(key, value, compare, fieldType string) (s
 			t, err := time.Parse(TIME_LAYOUT, value)
 			if err != nil {
 				return "", nil, fmt.Errorf("invalid time: %v", err)
-				
+
 			}
 			if compare != "eq" {
 				return "", nil, fmt.Errorf("only 'eq' supported for time, got: %s", compare)

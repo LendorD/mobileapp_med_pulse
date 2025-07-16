@@ -15,7 +15,7 @@ type UseCases struct {
 	interfaces.AllergyUsecase
 	interfaces.ContactInfoUsecase
 	interfaces.DoctorUsecase
-	interfaces.EmergencyReceptionUsecase
+	interfaces.EmergencyCallUsecase
 	interfaces.MedServiceUsecase
 	interfaces.PatientUsecase
 	interfaces.PersonalInfoUsecase
@@ -30,7 +30,7 @@ func NewUsecases(r interfaces.Repository, s interfaces.Service, conf *config.Con
 		NewAllergyUsecase(r, r),
 		NewContactInfoUsecase(r),
 		NewDoctorUsecase(r),
-		NewEmergencyReceptionUsecase(r),
+		NewEmergencyCallUsecase(r),
 		NewMedServiceUsecase(r),
 		NewPatientUsecase(r, s),
 		NewPersonalInfoUsecase(r),
