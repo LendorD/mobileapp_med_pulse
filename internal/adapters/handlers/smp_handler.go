@@ -20,12 +20,13 @@ import (
 // @Failure 400 {object} ResultError "Некорректные параметры запроса"
 // @Failure 500 {object} ResultError "Внутренняя ошибка сервера"
 // @Router /smp/{doctor_id}/receptions [get]
-func (h *Handler) GetReceptionsSMPByDoctorAndDate(c *gin.Context) {
+func (h *Handler) GetReceptionsSMPByCallId(c *gin.Context) {
+
 	// Получаем doctor_id из URL
-	doctorIDStr := c.Param("doc_id")
-	doctorID, err := strconv.ParseUint(doctorIDStr, 10, 32)
+	callIDStr := c.Param("call_id")
+	callID, err := strconv.ParseUint(callIDStr, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid doctor ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid call ID"})
 		return
 	}
 
@@ -46,7 +47,7 @@ func (h *Handler) GetReceptionsSMPByDoctorAndDate(c *gin.Context) {
 	}
 
 	// Вызываем usecase
-	receptions, err := h.usecase.GetReceptionsSMPByEmergencyCall(uint(doctorID), page, perPage)
+	receptions, err := h.usecase.GetReceptionsSMPByEmergencyCall(uint(callID), page, perPage)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
