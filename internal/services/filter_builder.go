@@ -1,11 +1,16 @@
+// TODO:
+// Сейчас номер страницы работает как их кол-во (3, то выведутся записи 1-3)
+// Количество записей как offset (если 3, то выводим с 4-й записи и далее)
+// Фильтр вроде норм работает
 package services
 
 import (
 	"errors"
 	"fmt"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"strings"
 	"time"
+
+	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 )
 
 // FilterBuilder отвечает за построение SQL-фильтров по строкам фильтра

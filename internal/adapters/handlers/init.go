@@ -72,7 +72,7 @@ func ProvideRouter(h *Handler, cfg *config.Config) http.Handler {
 	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
 	// TODO: Дописать добавление новых аллергий пациента и их изменение
 
-	r.GET("/receps/:doctor_id", h.GetReceptionsByDoctorAndDate)
+	r.GET("/receps/:doctor_id", h.GetReceptionsSMPByDoctorAndDate)
 
 	// Группа маршрутов для заключений
 	receptionHospital := baseRouter.Group("/recepHospital")
@@ -91,10 +91,9 @@ func ProvideRouter(h *Handler, cfg *config.Config) http.Handler {
 	// Роутеры СМП
 	emergencyGroup := baseRouter.Group("/emergencyGroup")
 
-	emergencyGroup.GET("/:doc_id", h.GetEmergencyCallssByDoctorAndDate)
+	emergencyGroup.GET("/:doc_id", h.GetEmergencyCallsByDoctorAndDate)
 	emergencyGroup.GET("/:doc_id/smps", h.GetReceptionsSMPByDoctorAndDate)
 	emergencyGroup.GET("/:doc_id/smps/:smp_id", h.GetReceptionWithMedServices)
-
 
 	return r
 }

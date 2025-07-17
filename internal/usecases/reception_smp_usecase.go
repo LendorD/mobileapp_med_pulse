@@ -121,7 +121,7 @@ func (u *ReceptionSmpUsecase) CreateReceptionSMP(input *models.CreateEmergencyRe
 	return fullReception, nil
 }
 
-func (u *ReceptionSmpUsecase) GetSMPReceptionsByEmergencyCall(
+func (u *ReceptionSmpUsecase) GetReceptionsSMPByEmergencyCall(
 	emergencyCallID uint,
 	page int,
 	perPage int,

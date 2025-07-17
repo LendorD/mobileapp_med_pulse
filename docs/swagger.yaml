@@ -381,30 +381,6 @@ definitions:
         example: 123-456-789 00
         type: string
     type: object
-  models.ReceptionShortResponse:
-    description: Содержит основные данные приема для отображения в списках
-    properties:
-      address:
-        example: Москва, ул. Ленина, д. 15
-        type: string
-      date:
-        description: Форматированная дата приема
-        example: 15.10.2023 14:30
-        type: string
-      diagnosis:
-        example: ОРВИ
-        type: string
-      id:
-        type: integer
-      patient_name:
-        description: ФИО пациента
-        example: Иванов Иван
-        type: string
-      status:
-        description: Текстовый статус приема
-        example: Запланирован
-        type: string
-    type: object
   models.ShortPatientResponse:
     description: Сокращенные данные пациента
     properties:
@@ -956,7 +932,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.ReceptionShortResponse'
+              $ref: '#/definitions/entities.ReceptionHospital'
             type: array
         "400":
           description: Bad Request
@@ -973,4 +949,84 @@ paths:
       summary: Получить приём по доктору и дате
       tags:
       - Reception
+  /smp/{doctor_id}/receptions:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список приёмов скорой медицинской помощи для указанного
+        врача с пагинацией
+      parameters:
+      - description: ID врача
+        in: path
+        name: doctor_id
+        required: true
+        type: integer
+      - default: 1
+        description: Номер страницы
+        in: query
+        name: page
+        type: integer
+      - default: 5
+        description: Количество записей на страницу
+        in: query
+        name: perPage
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о приёме скорой помощи
+          schema:
+            items:
+              $ref: '#/definitions/entities.ReceptionSMP'
+            type: array
+        "400":
+          description: Некорректные параметры запроса
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Получить СМП приёмы врача по дате
+      tags:
+      - SMP
+  /smp/{smp_id}:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о приёме скорой медицинской помощи вместе
+        со списком медицинских услуг
+      parameters:
+      - description: ID приёма СМП
+        in: path
+        name: smp_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о приёме и медуслугах
+          schema:
+            $ref: '#/definitions/entities.MedService'
+        "400":
+          description: Некорректный ID
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "404":
+          description: Приём не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить приём СМП с медуслугами по ID
+      tags:
+      - SMP
 swagger: "2.0"

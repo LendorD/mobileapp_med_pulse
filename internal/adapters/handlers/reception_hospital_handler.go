@@ -87,7 +87,7 @@ func (h *Handler) GetPatientsByDoctorID(c *gin.Context) {
 // @Param doctor_id path int true "Doctor ID"
 // @Param date query string false "Date in YYYY-MM-DD format"
 // @Param page query int false "Page number" default(1)
-// @Success 200 {array} models.ReceptionShortResponse
+// @Success 200 {array} entities.ReceptionHospital
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /receptions/doctor/{doctor_id} [get]

@@ -701,7 +701,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.ReceptionShortResponse"
+                                "$ref": "#/definitions/entities.ReceptionHospital"
                             }
                         }
                     },
@@ -716,6 +716,123 @@
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/smp/{doctor_id}/receptions": {
+            "get": {
+                "description": "Возвращает список приёмов скорой медицинской помощи для указанного врача с пагинацией",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SMP"
+                ],
+                "summary": "Получить СМП приёмы врача по дате",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID врача",
+                        "name": "doctor_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Номер страницы",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 5,
+                        "description": "Количество записей на страницу",
+                        "name": "perPage",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Информация о приёме скорой помощи",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entities.ReceptionSMP"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные параметры запроса",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    }
+                }
+            }
+        },
+        "/smp/{smp_id}": {
+            "get": {
+                "description": "Возвращает информацию о приёме скорой медицинской помощи вместе со списком медицинских услуг",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SMP"
+                ],
+                "summary": "Получить приём СМП с медуслугами по ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID приёма СМП",
+                        "name": "smp_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Информация о приёме и медуслугах",
+                        "schema": {
+                            "$ref": "#/definitions/entities.MedService"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный ID",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "404": {
+                        "description": "Приём не найден",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -1272,38 +1389,6 @@
                     "description": "Номер СНИЛС",
                     "type": "string",
                     "example": "123-456-789 00"
-                }
-            }
-        },
-        "models.ReceptionShortResponse": {
-            "description": "Содержит основные данные приема для отображения в списках",
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string",
-                    "example": "Москва, ул. Ленина, д. 15"
-                },
-                "date": {
-                    "description": "Форматированная дата приема",
-                    "type": "string",
-                    "example": "15.10.2023 14:30"
-                },
-                "diagnosis": {
-                    "type": "string",
-                    "example": "ОРВИ"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "patient_name": {
-                    "description": "ФИО пациента",
-                    "type": "string",
-                    "example": "Иванов Иван"
-                },
-                "status": {
-                    "description": "Текстовый статус приема",
-                    "type": "string",
-                    "example": "Запланирован"
                 }
             }
         },
