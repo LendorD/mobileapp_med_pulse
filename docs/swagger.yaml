@@ -332,17 +332,17 @@ definitions:
   models.DoctorLoginRequest:
     description: Запрос для входа врача в систему
     properties:
-      login:
-        description: Логин (телефон)
-        example: "+79123456789"
-        type: string
       password:
         description: Пароль
-        example: qwerty123
+        example: password1
+        type: string
+      username:
+        description: Логин (телефон)
+        example: doctor1
         type: string
     required:
-    - login
     - password
+    - username
     type: object
   models.MedCardResponse:
     description: Содержит всю медицинскую информацию о пациенте
@@ -465,6 +465,21 @@ definitions:
         example: true
         type: boolean
     type: object
+  models.UpdateReceptionHospitalRequest:
+    properties:
+      diagnosis:
+        example: Грипп
+        type: string
+      id:
+        type: integer
+      recommendations:
+        example: Постельный режим
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/entities.ReceptionStatus'
+        example: scheduled
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -474,7 +489,7 @@ info:
   title: ClinicHub API
   version: 1.0.0
 paths:
-  /auth/login:
+  /auth:
     post:
       consumes:
       - application/json
@@ -510,7 +525,39 @@ paths:
       summary: Вход в систему
       tags:
       - Auth
-  /doctor:
+  /doctors/{doc_id}:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает данные врача по ID
+      parameters:
+      - description: ID врача
+        in: path
+        name: doc_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные врача
+          schema:
+            $ref: '#/definitions/entities.Doctor'
+        "400":
+          description: Некорректный ID
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "404":
+          description: Врач не найден
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Получить врача по ID
+      tags:
+      - Doctor
     put:
       consumes:
       - application/json
@@ -548,40 +595,7 @@ paths:
       summary: Обновить данные врача
       tags:
       - Doctor
-  /doctor/{id}:
-    get:
-      consumes:
-      - application/json
-      description: Возвращает данные врача по ID
-      parameters:
-      - description: ID врача
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Данные врача
-          schema:
-            $ref: '#/definitions/entities.Doctor'
-        "400":
-          description: Некорректный ID
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "404":
-          description: Врач не найден
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "500":
-          description: Внутренняя ошибка
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-      summary: Получить врача по ID
-      tags:
-      - Doctor
-  /emergency/{doctor_id}/receptions:
+  /emergency/{doctor_id}:
     get:
       consumes:
       - application/json
@@ -623,6 +637,113 @@ paths:
       summary: Получить экстренные приёмы врача по дате
       tags:
       - EmergencyCall
+  /hospital/{doc_id}:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о приёме
+      parameters:
+      - description: ID доктора
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о приёме
+          schema:
+            $ref: '#/definitions/entities.ReceptionHospital'
+        "400":
+          description: Некорректный ID
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "404":
+          description: Приём не найден
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Получить приём по доктору
+      tags:
+      - Reception
+  /hospital/{recep_id}:
+    put:
+      consumes:
+      - application/json
+      description: Обновляет информацию о приёе в больнице
+      parameters:
+      - description: ID приёма
+        in: path
+        name: recep_id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: info
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateReceptionHospitalRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entities.ReceptionHospital'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить приём в больнице
+      tags:
+      - Reception
+  /hospital/patients/{pat_id}:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о приёме
+      parameters:
+      - description: ID приёма
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о приёме
+          schema:
+            $ref: '#/definitions/entities.ReceptionHospital'
+        "400":
+          description: Некорректный ID
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "404":
+          description: Приём не найден
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Получить список приёмов пациента по его ID
+      tags:
+      - Reception
   /medcard/{pat_id}:
     get:
       consumes:
@@ -698,142 +819,6 @@ paths:
       summary: Обновить данные медицинской карты
       tags:
       - Medcard
-  /patient:
-    post:
-      consumes:
-      - application/json
-      description: Создает нового пациента с персональными и контактными данными
-      parameters:
-      - description: Данные пациента
-        in: body
-        name: info
-        required: true
-        schema:
-          $ref: '#/definitions/models.CreatePatientRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Созданный пациент
-          schema:
-            $ref: '#/definitions/entities.Patient'
-        "400":
-          description: Некорректный запрос
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "422":
-          description: Ошибка валидации данных
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "500":
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-      summary: Создать нового пациента
-      tags:
-      - Patient
-    put:
-      consumes:
-      - application/json
-      description: Обновляет информацию о пациенте
-      parameters:
-      - description: Данные для обновления
-        in: body
-        name: info
-        required: true
-        schema:
-          $ref: '#/definitions/models.UpdatePatientRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Обновленный пациент
-          schema:
-            $ref: '#/definitions/entities.Patient'
-        "400":
-          description: Некорректный запрос
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "404":
-          description: Пациент не найден
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "422":
-          description: Ошибка валидации
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "500":
-          description: Внутренняя ошибка
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-      summary: Обновить данные пациента
-      tags:
-      - Patient
-  /patient/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Удаляет пациента по ID
-      parameters:
-      - description: ID пациента
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Успешное удаление
-          schema:
-            $ref: '#/definitions/handlers.ResultResponse'
-        "400":
-          description: Некорректный ID
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "404":
-          description: Пациент не найден
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "500":
-          description: Внутренняя ошибка
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-      summary: Удалить пациента
-      tags:
-      - Patient
-    get:
-      consumes:
-      - application/json
-      description: Возвращает полную информацию о пациенте
-      parameters:
-      - description: ID пациента
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Информация о пациенте
-          schema:
-            $ref: '#/definitions/entities.Patient'
-        "400":
-          description: Некорректный ID
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "404":
-          description: Пациент не найден
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "500":
-          description: Внутренняя ошибка
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-      summary: Получить пациента по ID
-      tags:
-      - Patient
   /patients:
     get:
       consumes:
@@ -871,85 +856,147 @@ paths:
       summary: Получить список пациентов
       tags:
       - Patient
-  /reception/{id}:
-    get:
+    post:
       consumes:
       - application/json
-      description: Возвращает информацию о приёме
+      description: Создает нового пациента с персональными и контактными данными
       parameters:
-      - description: ID приёма
+      - description: Данные пациента
+        in: body
+        name: info
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatePatientRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Созданный пациент
+          schema:
+            $ref: '#/definitions/entities.Patient'
+        "400":
+          description: Некорректный запрос
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "422":
+          description: Ошибка валидации данных
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Создать нового пациента
+      tags:
+      - Patient
+  /patients/{pat_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет пациента по ID
+      parameters:
+      - description: ID пациента
         in: path
-        name: id
+        name: pat_id
         required: true
         type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: Информация о приёме
+          description: Успешное удаление
           schema:
-            $ref: '#/definitions/entities.ReceptionHospital'
+            $ref: '#/definitions/handlers.ResultResponse'
         "400":
           description: Некорректный ID
           schema:
             $ref: '#/definitions/handlers.ResultError'
         "404":
-          description: Приём не найден
+          description: Пациент не найден
           schema:
             $ref: '#/definitions/handlers.ResultError'
         "500":
           description: Внутренняя ошибка
           schema:
             $ref: '#/definitions/handlers.ResultError'
-      summary: Получить приём по ID
+      summary: Удалить пациента
       tags:
-      - Reception
-  /receptions/doctor/{doctor_id}:
+      - Patient
     get:
       consumes:
       - application/json
-      description: Возвращает пагинированный список приёмов для конкретных доктора
-        и даты
+      description: Возвращает полную информацию о пациенте
       parameters:
-      - description: Doctor ID
+      - description: ID пациента
         in: path
-        name: doctor_id
+        name: pat_id
         required: true
-        type: integer
-      - description: Date in YYYY-MM-DD format
-        in: query
-        name: date
-        type: string
-      - default: 1
-        description: Page number
-        in: query
-        name: page
         type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Информация о пациенте
           schema:
-            items:
-              $ref: '#/definitions/entities.ReceptionHospital'
-            type: array
+            $ref: '#/definitions/entities.Patient'
         "400":
-          description: Bad Request
+          description: Некорректный ID
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ResultError'
+        "404":
+          description: Пациент не найден
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
         "500":
-          description: Internal Server Error
+          description: Внутренняя ошибка
           schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Получить приём по доктору и дате
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Получить пациента по ID
       tags:
-      - Reception
-  /smp/{doctor_id}/receptions:
+      - Patient
+    put:
+      consumes:
+      - application/json
+      description: Обновляет информацию о пациенте
+      parameters:
+      - description: ID пациента
+        in: path
+        name: pat_id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: info
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdatePatientRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленный пациент
+          schema:
+            $ref: '#/definitions/entities.Patient'
+        "400":
+          description: Некорректный запрос
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "404":
+          description: Пациент не найден
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "422":
+          description: Ошибка валидации
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Обновить данные пациента
+      tags:
+      - Patient
+  /smp/{doc_id}/receptions:
     get:
       consumes:
       - application/json
