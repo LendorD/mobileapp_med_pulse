@@ -95,6 +95,7 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	hospitalGroup.GET("/doctors/:doc_id/receptions", h.GetReceptionsHospitalByDoctorAndDate)
 	hospitalGroup.PUT("/receptions/:recep_id", h.UpdateReceptionHospitalByReceptionID)
 	hospitalGroup.GET("/receptions/:pat_id", h.GetReceptionsHospitalByPatientID)
+	hospitalGroup.GET("patients/:doc_id/", h.GetAllPatientsOnTreatment)
 
 	// Приёмы СМП
 	smpGroup := baseRouter.Group("/smp")

@@ -95,6 +95,8 @@ type ReceptionHospitalRepository interface {
 	UpdateReceptionHospital(id uint, updateMap map[string]interface{}) (uint, error)
 	DeleteReceptionHospital(id uint) error
 
+	GetAllPatientsFromHospital(page, count int, queryFilter string, parameters []interface{}) ([]entities.Patient, int64, error)
+	GetAllPatientsFromHospitalByDocID(doc_id uint, page, count int, queryFilter string, parameters []interface{}) ([]entities.Patient, int64, error)
 	GetReceptionHospitalByID(id uint) (entities.ReceptionHospital, error)
 	GetReceptionHospitalByDoctorID(doctorID uint) ([]entities.ReceptionHospital, error)
 	GetReceptionHospitalByPatientID(patientID uint) ([]entities.ReceptionHospital, error)
