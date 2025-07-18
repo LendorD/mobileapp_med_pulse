@@ -166,13 +166,13 @@ func seedTestData(db *gorm.DB) error {
 		{
 			FullName:         "Петрова Мария Сергеевна",
 			Login:            "doctor_petrova",
-			PasswordHash:     "$2a$10$somehashedpassword",
+			PasswordHash:     hashPass123,
 			SpecializationID: 2, // Хирург
 		},
 		{
 			FullName:         "Сидоров Алексей Дмитриевич",
 			Login:            "doctor_sidorov",
-			PasswordHash:     "$2a$10$somehashedpassword",
+			PasswordHash:     hashPass123,
 			SpecializationID: 3, // Кардиолог
 		},
 	}
