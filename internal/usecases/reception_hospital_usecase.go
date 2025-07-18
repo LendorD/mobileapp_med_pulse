@@ -47,8 +47,11 @@ func (u *ReceptionHospitalUsecase) GetReceptionsHospitalByPatientID(patientId ui
 		fmt.Printf("Patient: %+v\n", reception.Patient)
 		response := models.ReceptionHospitalResponse{
 			Doctor: models.DoctorInfoResponse{
-				FullName:         reception.Doctor.FullName,
-				SpecializationID: reception.Doctor.SpecializationID,
+				FullName: reception.Doctor.FullName,
+				Specialization: entities.Specialization{
+					ID:    reception.Doctor.Specialization.ID,
+					Title: reception.Doctor.Specialization.Title,
+				},
 			},
 			Patient: models.ShortPatientResponse{
 				ID:        reception.Patient.ID,
@@ -99,7 +102,7 @@ func (u *ReceptionHospitalUsecase) UpdateReceptionHospital(input *models.UpdateR
 	return models.ReceptionHospitalResponse{
 		Doctor: models.DoctorInfoResponse{
 			FullName: reception.Doctor.FullName,
-			Specialization: models.SpecializationInfo{
+			Specialization: entities.Specialization{
 				ID:    reception.Doctor.Specialization.ID,
 				Title: reception.Doctor.Specialization.Title,
 			},
