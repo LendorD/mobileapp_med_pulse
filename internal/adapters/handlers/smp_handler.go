@@ -70,14 +70,22 @@ func (h *Handler) GetReceptionsSMPByCallId(c *gin.Context) {
 // @Router /smp/{smp_id} [get]
 func (h *Handler) GetReceptionWithMedServices(c *gin.Context) {
 	// Парсинг ID
-	id, err := strconv.ParseUint(c.Param("smp_id"), 10, 32)
+	smp_id, err := h.service.ParseUintString(c.Param("smp_id"))
+
 	if err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'id' must be an integer", false)
+		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'smp_id' must be an integer", false)
+		return
+	}
+
+	call_id, err := h.service.ParseUintString(c.Param("call_id"))
+
+	if err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'call_id' must be an integer", false)
 		return
 	}
 
 	// Вызов usecase
-	reception, err := h.usecase.GetReceptionWithMedServicesByID(uint(id))
+	reception, err := h.usecase.GetReceptionWithMedServicesByID(uint(smp_id), uint(call_id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "Reception not found",
