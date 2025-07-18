@@ -239,3 +239,53 @@ func convertMedServicesToResponse(services []entities.MedService) []models.MedSe
 	}
 	return result
 }
+
+func (u *ReceptionSmpUsecase) UpdateReceptionSmp(input *models.UpdateSmpReceptionRequest) (entities.ReceptionSMP, *errors.AppError) {
+	existingReception, err := u.recepSmpRepo.GetReceptionSmpByID(input.ReceptionId)
+	if err != nil {
+		return entities.ReceptionSMP{}, errors.NewAppError(
+			errors.NotFoundErrorCode,
+			"reception SMP not found",
+			err,
+			true,
+		)
+	}
+
+	recepSmpUpdate := map[string]interface{}{
+		"doctor_id":       input.DoctorID,
+		"patient_id":      input.PatientID,
+		"diagnosis":       input.Diagnosis,
+		"recommendations": input.Recommendations,
+	}
+
+	if _, err := u.recepSmpRepo.UpdateReceptionSmp(existingReception.ID, recepSmpUpdate); err != nil {
+		return entities.ReceptionSMP{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to update reception SMP data",
+			err,
+			true,
+		)
+	}
+
+	if input.MedServices != nil {
+		if err := u.recepSmpRepo.UpdateReceptionSmpMedServices(existingReception.ID, input.MedServices); err != nil {
+			return entities.ReceptionSMP{}, errors.NewAppError(
+				errors.InternalServerErrorCode,
+				"failed to update reception SMP medical services",
+				err,
+				true,
+			)
+		}
+	}
+
+	updatedReception, err := u.recepSmpRepo.GetReceptionSmpByID(existingReception.ID)
+	if err != nil {
+		return entities.ReceptionSMP{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get updated reception SMP",
+			err,
+			true,
+		)
+	}
+	return updatedReception, nil
+}

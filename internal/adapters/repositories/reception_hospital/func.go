@@ -87,7 +87,7 @@ func (r *ReceptionHospitalRepositoryImpl) GetReceptionHospitalByPatientID(patien
 	var receptions []entities.ReceptionHospital
 	if err := r.db.
 		Preload("Patient").
-		Preload("Doctor").
+		Preload("Doctor.Specialization").
 		Where("patient_id = ?", patientID).
 		Find(&receptions).Error; err != nil {
 		return nil, errors.NewDBError(op, err)
@@ -232,4 +232,105 @@ func (r *ReceptionHospitalRepositoryImpl) GetReceptionsHospitalByDoctorAndDate(
 	}
 
 	return receptions, total, nil
+}
+
+func (r *ReceptionHospitalRepositoryImpl) GetAllPatientsFromHospitalByDocID(
+	docID uint,
+	page, count int,
+	queryFilter string,
+	parameters []interface{},
+) ([]entities.Patient, int64, error) {
+	var receptions []entities.ReceptionHospital
+
+	// Шаг 1: Получаем все приёмы по доктору с подгрузкой пациентов
+	if err := r.db.
+		Preload("Patient", func(db *gorm.DB) *gorm.DB {
+			return db.Where(queryFilter, parameters...)
+		}).
+		Where("doctor_id = ?", docID).
+		Find(&receptions).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to fetch receptions by doctor: %w", err)
+	}
+
+	// Шаг 2: Уникальные пациенты
+	patientsMap := make(map[uint]entities.Patient)
+	for _, reception := range receptions {
+		if reception.Patient.ID != 0 {
+			patientsMap[reception.Patient.ID] = reception.Patient
+		}
+	}
+
+	// Шаг 3: Преобразуем map -> слайс
+	patients := make([]entities.Patient, 0, len(patientsMap))
+	for _, patient := range patientsMap {
+		patients = append(patients, patient)
+	}
+
+	totalRecords := int64(len(patients))
+
+	// Шаг 5: Пагинация
+	if page > 0 && count > 0 {
+		offset := (page - 1) * count
+		end := offset + count
+		if offset > len(patients) {
+			return []entities.Patient{}, totalRecords, nil
+		}
+		if end > len(patients) {
+			end = len(patients)
+		}
+		patients = patients[offset:end]
+	}
+
+	return patients, totalRecords, nil
+}
+
+func (r *ReceptionHospitalRepositoryImpl) GetAllPatientsFromHospital(page, count int, queryFilter string, parameters []interface{}) ([]entities.Patient, int64, error) {
+	var receptions []entities.ReceptionHospital
+	var totalRecords int64
+
+	// Создаем базовый запрос
+	query := r.db.Model(&entities.ReceptionHospital{})
+
+	// Применяем фильтрацию
+	if queryFilter != "" {
+		query = query.Where(queryFilter, parameters...)
+	}
+
+	// Считаем общее количество записей
+	countQuery := r.db.Model(&entities.ReceptionHospital{}).Select("COUNT(DISTINCT patient_id)")
+	if queryFilter != "" {
+		countQuery = countQuery.Where(queryFilter, parameters...)
+	}
+	if err := countQuery.Count(&totalRecords).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to count unique patients: %w", err)
+	}
+
+	// Применяем пагинацию
+	if page > 0 && count > 0 {
+		offset := (page - 1) * count
+		query = query.Offset(offset).Limit(count)
+	}
+
+	// Загружаем приёмы с пациентами
+	if err := query.
+		Preload("Patient").
+		Find(&receptions).Error; err != nil {
+		return nil, 0, fmt.Errorf("failed to fetch hospital receptions: %w", err)
+	}
+
+	// Извлекаем пациентов из результатов
+	patientsMap := make(map[uint]entities.Patient)
+	for _, reception := range receptions {
+		if reception.Patient.ID != 0 {
+			patientsMap[reception.Patient.ID] = reception.Patient
+		}
+	}
+
+	// Преобразуем map в слайс без дубликатов
+	patients := make([]entities.Patient, 0, len(patientsMap))
+	for _, patient := range patientsMap {
+		patients = append(patients, patient)
+	}
+
+	return patients, totalRecords, nil
 }

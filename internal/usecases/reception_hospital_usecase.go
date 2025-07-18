@@ -13,13 +13,14 @@ import (
 )
 
 type ReceptionHospitalUsecase struct {
-	repo interfaces.ReceptionHospitalRepository
+	repo          interfaces.ReceptionHospitalRepository
+	FilterBuilder interfaces.FilterBuilderService
 }
 
-func NewReceptionHospitalUsecase(repo interfaces.ReceptionHospitalRepository) interfaces.ReceptionHospitalUsecase {
+func NewReceptionHospitalUsecase(repo interfaces.ReceptionHospitalRepository, s interfaces.Service) interfaces.ReceptionHospitalUsecase {
 	return &ReceptionHospitalUsecase{
-		repo: repo,
-	}
+		repo:          repo,
+		FilterBuilder: s}
 }
 
 // []models.ReceptionHospitalResponse
@@ -325,4 +326,55 @@ func getStatusText(status entities.ReceptionStatus) string {
 	default:
 		return string(status)
 	}
+}
+
+func (u *ReceptionHospitalUsecase) GetAllPatientsOnTreatment(doc_id uint, page, count int, filter string) (models.FilterResponse[[]entities.Patient], *errors.AppError) {
+	var queryFilter string
+	var parameters []interface{}
+	empty := models.FilterResponse[[]entities.Patient]{}
+
+	// Статические поля модели (имя таблицы/колонки и их типы)
+	entityFields, err := getFieldTypes(entities.Patient{})
+	if err != nil {
+		return empty, errors.NewAppError(errors.InternalServerErrorCode, errors.InternalServerError, err, false)
+	}
+
+	// Парсим фильтр, если он передан
+	if len(filter) > 0 {
+		subQuery, params, err := u.FilterBuilder.ParseFilterString(filter, entityFields)
+		if err != nil {
+			return empty, errors.NewAppError(
+				errors.InvalidDataCode,
+				fmt.Sprintf("invalid filter syntax: %s", err.Error()),
+				nil,
+				false,
+			)
+		}
+		queryFilter = subQuery
+		parameters = params
+	}
+
+	// Получение пациентов
+	patients, totalRows, err := u.repo.GetAllPatientsFromHospitalByDocID(doc_id, page, count, queryFilter, parameters)
+	if err != nil {
+		return empty, errors.NewAppError(errors.InternalServerErrorCode, "failed to get patients", err, true)
+	}
+
+	var totalPages int
+	if count == 0 {
+		// Если count == 0, то пагинация отключена, и все записи возвращаются на одной странице
+		totalPages = 1
+
+	} else {
+		// Вычисляем количество страниц с округлением вверх
+		totalPages = int(math.Ceil(float64(totalRows) / float64(count)))
+	}
+
+	return models.FilterResponse[[]entities.Patient]{
+		Hits:        patients,
+		CurrentPage: page,
+		HitsPerPage: len(patients),
+		TotalHits:   int(totalRows),
+		TotalPages:  totalPages,
+	}, nil
 }

@@ -80,8 +80,8 @@ type ReceptionSmpRepository interface {
 	CreateReceptionSmp(reception entities.ReceptionSMP) (uint, error)
 	UpdateReceptionSmp(id uint, updateMap map[string]interface{}) (uint, error)
 	DeleteReceptionSmp(id uint) error
-
-	GetReceptionWithMedServicesByID(id uint, emergencyCallID uint) (entities.ReceptionSMP, error)
+	UpdateReceptionSmpMedServices(receptionID uint, services []entities.MedService) error
+	GetReceptionWithMedServicesByID(smp_id uint, call_id uint) (entities.ReceptionSMP, error)
 	GetReceptionSmpByID(id uint) (entities.ReceptionSMP, error)
 	GetReceptionSmpByDoctorID(doctorID uint) ([]entities.ReceptionSMP, error)
 	GetReceptionSmpByPatientID(patientID uint) ([]entities.ReceptionSMP, error)
@@ -95,6 +95,8 @@ type ReceptionHospitalRepository interface {
 	UpdateReceptionHospital(id uint, updateMap map[string]interface{}) (uint, error)
 	DeleteReceptionHospital(id uint) error
 
+	GetAllPatientsFromHospital(page, count int, queryFilter string, parameters []interface{}) ([]entities.Patient, int64, error)
+	GetAllPatientsFromHospitalByDocID(doc_id uint, page, count int, queryFilter string, parameters []interface{}) ([]entities.Patient, int64, error)
 	GetReceptionHospitalByID(id uint) (entities.ReceptionHospital, error)
 	GetReceptionHospitalByDoctorID(doctorID uint) ([]entities.ReceptionHospital, error)
 	GetReceptionHospitalByPatientID(patientID uint) ([]entities.ReceptionHospital, error)
