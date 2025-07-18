@@ -101,7 +101,8 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	smpGroup := baseRouter.Group("/smp")
 	smpGroup.GET("/doctors/:doc_id/receptions", h.GetReceptionsSMPByDoctorAndDate)
 	smpGroup.GET("/:smp_id", h.GetReceptionWithMedServices)
-	smpGroup.POST("/receptions/:recep_id", h.CreateSmReception)
+	smpGroup.POST("/receptions", h.CreateSmpReception)
+	smpGroup.PUT("/receptions/:recep_id", h.UpdateReceptionSmpByReceptionID)
 
 	// Звонки СМП
 	emergencyGroup := baseRouter.Group("/emergency")

@@ -122,7 +122,7 @@ func (h *Handler) GetReceptionWithMedServices(c *gin.Context) {
 // @Failure 404 {object} map[string]string "Переданные данные некорекктны"
 // @Failure 500 {object} map[string]string "Внутренняя ошибка сервера"
 // @Router /smp/{smp_id} [get]
-func (h *Handler) CreateSmReception(c *gin.Context) {
+func (h *Handler) CreateSmpReception(c *gin.Context) {
 	var input models.CreateEmergencyRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
@@ -141,4 +141,36 @@ func (h *Handler) CreateSmReception(c *gin.Context) {
 	}
 
 	h.ResultResponse(c, "Success emergency reception create", Object, emergency)
+}
+
+// UpdateReceptionHospitalByReceptionID godoc
+// @Summary Обновить приём в больнице
+// @Description Обновляет информацию о приёе в больнице
+// @Tags Reception
+// @Accept json
+// @Produce json
+// @Param recep_id path uint true "ID приёма"
+// @Param info body models.UpdateReceptionHospitalRequest true "Данные для обновления"
+// @Success 200 {array} entities.ReceptionHospital
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /hospital/{recep_id} [put]
+func (h *Handler) UpdateReceptionSmpByReceptionID(c *gin.Context) {
+	var input models.UpdateSmpReceptionRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, "Error create ReceptionHospitalRequest", true)
+		return
+	}
+
+	if err := validate.Struct(input); err != nil {
+		h.ErrorResponse(c, err, 422, "Error validate ReceptionHospitalRequest", true)
+		return
+	}
+
+	recepResponse, eerr := h.usecase.UpdateReceptionSmp(&input)
+	if eerr != nil {
+		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
+		return
+	}
+	h.ResultResponse(c, "Success reception hospital update", Object, recepResponse)
 }

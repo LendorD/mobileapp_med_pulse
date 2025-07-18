@@ -102,12 +102,12 @@ func (h *Handler) UpdateReceptionHospitalByReceptionID(c *gin.Context) {
 		return
 	}
 
-	doctor, eerr := h.usecase.UpdateReceptionHospital(&input)
+	recepResponse, eerr := h.usecase.UpdateReceptionHospital(&input)
 	if eerr != nil {
 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
 		return
 	}
-	h.ResultResponse(c, "Success reception hospital update", Object, doctor)
+	h.ResultResponse(c, "Success reception hospital update", Object, recepResponse)
 }
 
 func (h *Handler) GetReceptionsHospitalByDoctorAndDate(c *gin.Context) {

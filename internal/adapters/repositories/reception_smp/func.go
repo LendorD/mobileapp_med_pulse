@@ -1,6 +1,7 @@
 package receptionSmp
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
@@ -54,7 +55,7 @@ func (r *ReceptionSmpRepositoryImpl) GetReceptionSmpByID(id uint) (entities.Rece
 	op := "repo.ReceptionSmp.GetReceptionSmpByID"
 
 	var reception entities.ReceptionSMP
-	if err := r.db.First(&reception, id).Error; err != nil {
+	if err := r.db.Preload("MedServices").First(&reception, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return entities.ReceptionSMP{}, errors.NewNotFoundError("reception not found")
 		}
@@ -91,6 +92,60 @@ func (r *ReceptionSmpRepositoryImpl) GetReceptionSmpByDateRange(start, end time.
 		return nil, errors.NewDBError(op, err)
 	}
 	return receptions, nil
+}
+
+func (r *ReceptionSmpRepositoryImpl) UpdateReceptionSmpMedServices(receptionID uint, services []entities.MedService) error {
+	if len(services) == 0 {
+		return nil
+	}
+	// Получаем ID всех услуг для проверки их существования
+	serviceIDs := make([]uint, len(services))
+	for i, s := range services {
+		serviceIDs[i] = s.ID
+	}
+
+	// Проверяем что все услуги существуют
+	var count int64
+	if err := r.db.Model(&entities.MedService{}).Where("id IN ?", serviceIDs).Count(&count).Error; err != nil {
+		return fmt.Errorf("failed to check med services existence: %v", err)
+	}
+	if int(count) != len(serviceIDs) {
+		return fmt.Errorf("some med services not found")
+	}
+
+	tx := r.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Удаляем старые связи
+	if err := tx.Exec("DELETE FROM reception_smp_med_services WHERE reception_smp_id = ?", receptionID).Error; err != nil {
+		tx.Rollback()
+		return fmt.Errorf("failed to delete existing med services: %v", err)
+	}
+
+	// Создаём batch для вставки
+	var inserts []map[string]interface{}
+	for _, id := range serviceIDs {
+		inserts = append(inserts, map[string]interface{}{
+			"reception_smp_id": receptionID,
+			"med_service_id":   id,
+		})
+	}
+
+	// Вставляем новые связи batch-ом
+	if err := tx.Table("reception_smp_med_services").Create(inserts).Error; err != nil {
+		tx.Rollback()
+		return fmt.Errorf("failed to insert new med services: %v", err)
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return fmt.Errorf("failed to commit transaction: %v", err)
+	}
+
+	return nil
 }
 
 func getReceptionPriority(status entities.ReceptionStatus) int {

@@ -80,7 +80,7 @@ type ReceptionSmpRepository interface {
 	CreateReceptionSmp(reception entities.ReceptionSMP) (uint, error)
 	UpdateReceptionSmp(id uint, updateMap map[string]interface{}) (uint, error)
 	DeleteReceptionSmp(id uint) error
-
+	UpdateReceptionSmpMedServices(receptionID uint, services []entities.MedService) error
 	GetReceptionWithMedServicesByID(id uint) (entities.ReceptionSMP, error)
 	GetReceptionSmpByID(id uint) (entities.ReceptionSMP, error)
 	GetReceptionSmpByDoctorID(doctorID uint) ([]entities.ReceptionSMP, error)
