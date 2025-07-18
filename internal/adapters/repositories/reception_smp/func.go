@@ -2,9 +2,11 @@ package receptionSmp
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
+	"github.com/jackc/pgtype"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -148,33 +150,7 @@ func (r *ReceptionSmpRepositoryImpl) UpdateReceptionSmpMedServices(receptionID u
 	return nil
 }
 
-func getReceptionPriority(status entities.ReceptionStatus) int {
-	switch status {
-	case entities.StatusScheduled:
-		return 1
-	case entities.StatusCompleted:
-		return 2
-	case entities.StatusCancelled, entities.StatusNoShow:
-		return 3
-	default:
-		return 4
-	}
-}
-
-func getOrderByStatusAndDate() string {
-	return `
-        CASE 
-            WHEN status = 'emergency' THEN 1
-            WHEN status = 'scheduled' THEN 2
-            WHEN status = 'completed' THEN 3
-            WHEN status = 'cancelled' THEN 4
-            ELSE 5
-        END,
-        date ASC
-    `
-}
-
-// Repository
+// Обновленные методы репозитория
 func (r *ReceptionSmpRepositoryImpl) GetWithPatientsByEmergencyCallID(
 	emergencyCallID uint,
 	page, perPage int,
@@ -183,21 +159,18 @@ func (r *ReceptionSmpRepositoryImpl) GetWithPatientsByEmergencyCallID(
 	var receptions []entities.ReceptionSMP
 	var total int64
 
-	// Базовый запрос с условием
 	baseQuery := r.db.Model(&entities.ReceptionSMP{}).
 		Where("emergency_call_id = ?", emergencyCallID)
 
-	// Считаем общее количество записей
 	if err := baseQuery.Count(&total).Error; err != nil {
 		return nil, 0, errors.NewDBError(op, err)
 	}
 
-	// Получаем данные с пагинацией
 	offset := (page - 1) * perPage
 	err := baseQuery.
 		Preload("Patient").
-		Preload("Patient.PersonalInfo").
-		Preload("Patient.ContactInfo").
+		Preload("MedServices").
+		Preload("Doctor.Specialization").
 		Order("created_at DESC").
 		Offset(offset).
 		Limit(perPage).
@@ -208,27 +181,42 @@ func (r *ReceptionSmpRepositoryImpl) GetWithPatientsByEmergencyCallID(
 		return nil, 0, errors.NewDBError(op, err)
 	}
 
+	// Декодируем JSONB данные
+	for i := range receptions {
+		if receptions[i].SpecializationData.Status == pgtype.Present {
+			decodedData, err := decodeSpecializationData(
+				receptions[i].SpecializationData,
+				receptions[i].Doctor.Specialization.Title,
+			)
+			if err != nil {
+				log.Printf("Failed to decode data for reception %d: %v", receptions[i].ID, err)
+				continue
+			}
+			receptions[i].SpecializationDataDecoded = decodedData
+		}
+	}
+
 	return receptions, total, nil
 }
 
-func (r *ReceptionSmpRepositoryImpl) GetReceptionWithMedServicesByID(smp_id uint, call_id uint) (entities.ReceptionSMP, error) {
-	var reception entities.ReceptionSMP
+func (r *ReceptionSmpRepositoryImpl) GetReceptionWithMedServicesByID(
+	smpID uint,
+	callID uint,
+) (entities.ReceptionSMP, error) {
 	op := "repo.ReceptionSmp.GetReceptionWithMedServicesByID"
+	var reception entities.ReceptionSMP
 
-	// Создаем запрос с условиями
 	query := r.db.
 		Preload("Patient").
 		Preload("MedServices").
-		Where("id = ?", smp_id)
+		Preload("Doctor.Specialization").
+		Where("id = ?", smpID)
 
-	// Добавляем фильтр по EmergencyCallID если он задан
-	if call_id > 0 {
-		query = query.Where("emergency_call_id = ?", call_id)
+	if callID > 0 {
+		query = query.Where("emergency_call_id = ?", callID)
 	}
 
-	// Выполняем запрос
 	err := query.First(&reception).Error
-
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return entities.ReceptionSMP{}, errors.NewNotFoundError("reception not found")
@@ -236,5 +224,43 @@ func (r *ReceptionSmpRepositoryImpl) GetReceptionWithMedServicesByID(smp_id uint
 		return entities.ReceptionSMP{}, errors.NewDBError(op, err)
 	}
 
+	// Декодируем JSONB данные
+	if reception.SpecializationData.Status == pgtype.Present {
+		decodedData, err := decodeSpecializationData(
+			reception.SpecializationData,
+			reception.Doctor.Specialization.Title,
+		)
+		if err != nil {
+			log.Printf("Failed to decode data for reception %d: %v", reception.ID, err)
+		} else {
+			reception.SpecializationDataDecoded = decodedData
+		}
+	}
+
 	return reception, nil
+}
+
+// Вспомогательная функция для декодирования
+func decodeSpecializationData(data pgtype.JSONB, specialization string) (interface{}, error) {
+	op := "repo.ReceptionSmp.decodeSpecializationData"
+	var result interface{}
+
+	switch specialization {
+	case "Терапевт":
+		result = &entities.TherapistData{}
+	case "Кардиолог":
+		result = &entities.CardiologistData{}
+	case "Невролог":
+		result = &entities.NeurologistData{}
+	case "Травматолог":
+		result = &entities.TraumatologistData{}
+	default:
+		result = make(map[string]interface{})
+	}
+
+	if err := data.AssignTo(result); err != nil {
+		return nil, errors.NewDBError(op, err)
+	}
+
+	return result, nil
 }
