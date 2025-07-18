@@ -180,9 +180,9 @@ func (u *ReceptionSmpUsecase) GetReceptionsSMPByEmergencyCall(
 	}, nil
 }
 
-func (u *ReceptionSmpUsecase) GetReceptionWithMedServicesByID(id uint) (*models.ReceptionSMPResponse, error) {
+func (u *ReceptionSmpUsecase) GetReceptionWithMedServicesByID(smp_id uint, call_id uint) (*models.ReceptionSMPResponse, error) {
 	// Валидация
-	if id == 0 {
+	if smp_id == 0 {
 		return nil, errors.NewAppError(
 			errors.InternalServerErrorCode,
 			"failed to get SMP",
@@ -191,8 +191,17 @@ func (u *ReceptionSmpUsecase) GetReceptionWithMedServicesByID(id uint) (*models.
 		)
 	}
 
+	if call_id == 0 {
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get Call",
+			errors.ErrEmptyData,
+			true,
+		)
+	}
+
 	// Получение данных
-	reception, err := u.recepSmpRepo.GetReceptionWithMedServicesByID(id)
+	reception, err := u.recepSmpRepo.GetReceptionWithMedServicesByID(smp_id, call_id)
 	if err != nil {
 		if errors.Is(err, errors.ErrDataNotFound) {
 			return nil, errors.NewAppError(

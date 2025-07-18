@@ -31,7 +31,7 @@ type DoctorRepository interface {
 	GetDoctorName(id uint) (string, error)
 	GetDoctorByLogin(login string) (entities.Doctor, error)
 
-	GetDoctorSpecialization(id uint) (string, error)
+	// GetDoctorSpecialization(id uint) (string, error)
 	GetDoctorPassHash(id uint) (string, error)
 }
 
@@ -109,7 +109,7 @@ type PatientRepository interface {
 	UpdatePatient(id uint, updateMap map[string]interface{}) (uint, error)
 	DeletePatient(id uint) error
 	GetPatientByID(id uint) (entities.Patient, error)
-	GetAllPatients(limit, offset int, filterQuery string, filterParams []interface{}) ([]entities.Patient, int64, error)
+	GetAllPatients(page, count int, filterQuery string, filterParams []interface{}) ([]entities.Patient, int64, error)
 	GetPatientsByFullName(name string) ([]entities.Patient, error)
 	GetPatientAllergiesByID(id uint) ([]entities.Allergy, error)
 }

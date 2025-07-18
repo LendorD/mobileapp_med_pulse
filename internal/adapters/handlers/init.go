@@ -64,7 +64,6 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	r.Use(LoggingMiddleware(h.logger))
 
 	// Общая группа для API
-	// INFO: в RESTFul лучше использовать множественное число в именовании сущностей в роутах
 	baseRouter := r.Group("/api/v1")
 
 	// Авторизация
@@ -91,22 +90,23 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
 
 	// Приёмы больницы
-	// INFO: тут была неконсистентность путей, пришлось поправить
 	hospitalGroup := baseRouter.Group("/hospital")
 	hospitalGroup.GET("/doctors/:doc_id/receptions", h.GetReceptionsHospitalByDoctorAndDate)
 	hospitalGroup.PUT("/receptions/:recep_id", h.UpdateReceptionHospitalByReceptionID)
 	hospitalGroup.GET("/receptions/:pat_id", h.GetReceptionsHospitalByPatientID)
 
-	// Приёмы СМП
 	smpGroup := baseRouter.Group("/smp")
 	smpGroup.GET("/doctors/:doc_id/receptions", h.GetReceptionsSMPByDoctorAndDate)
 	smpGroup.GET("/:smp_id", h.GetReceptionWithMedServices)
 	smpGroup.POST("/receptions", h.CreateSmpReception)
 	smpGroup.PUT("/receptions/:recep_id", h.UpdateReceptionSmpByReceptionID)
 
-	// Звонки СМП
-	emergencyGroup := baseRouter.Group("/emergency")
+	emergencyGroup := baseRouter.Group("/emergencyGroup")
 	emergencyGroup.GET("/:doc_id", h.GetEmergencyCallsByDoctorAndDate)
+	emergencyGroup.GET("/:doc_id/:call_id", h.GetReceptionsSMPByCallId)
+	emergencyGroup.GET("/:doc_id/:call_id/:smp_id", h.GetReceptionWithMedServices)
+
+	//emergencyGroup.POST("/receptions/:recep_id", h.CreateSmReception)
 
 	return r
 }

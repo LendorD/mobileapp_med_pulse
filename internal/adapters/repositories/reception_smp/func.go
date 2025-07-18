@@ -211,19 +211,29 @@ func (r *ReceptionSmpRepositoryImpl) GetWithPatientsByEmergencyCallID(
 	return receptions, total, nil
 }
 
-func (r *ReceptionSmpRepositoryImpl) GetReceptionWithMedServicesByID(id uint) (entities.ReceptionSMP, error) {
+func (r *ReceptionSmpRepositoryImpl) GetReceptionWithMedServicesByID(smp_id uint, call_id uint) (entities.ReceptionSMP, error) {
 	var reception entities.ReceptionSMP
-	op := "repo.ReceptionSmp.DeleteReceptionSmp"
-	err := r.db.
+	op := "repo.ReceptionSmp.GetReceptionWithMedServicesByID"
+
+	// Создаем запрос с условиями
+	query := r.db.
 		Preload("Patient").
 		Preload("MedServices").
-		First(&reception, id).
-		Error
+		Where("id = ?", smp_id)
+
+	// Добавляем фильтр по EmergencyCallID если он задан
+	if call_id > 0 {
+		query = query.Where("emergency_call_id = ?", call_id)
+	}
+
+	// Выполняем запрос
+	err := query.First(&reception).Error
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return entities.ReceptionSMP{}, errors.NewDBError(op, err)
+			return entities.ReceptionSMP{}, errors.NewNotFoundError("reception not found")
 		}
+		return entities.ReceptionSMP{}, errors.NewDBError(op, err)
 	}
 
 	return reception, nil
