@@ -9,6 +9,7 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
+	"github.com/jackc/pgtype"
 )
 
 type ReceptionHospitalUsecase struct {
@@ -146,8 +147,86 @@ func (u *ReceptionHospitalUsecase) GetPatientsByDoctorID(doctorID uint, limit, o
 	return patients, nil
 }
 
-func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int, perPage int) (models.FilterResponse[[]models.ReceptionShortResponse], error) {
-	empty := models.FilterResponse[[]models.ReceptionShortResponse]{}
+// func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int, perPage int) (models.FilterResponse[[]models.ReceptionShortResponse], error) {
+// 	empty := models.FilterResponse[[]models.ReceptionShortResponse]{}
+
+// 	// Валидация входных параметров
+// 	if doctorID <= 0 {
+// 		return empty, errors.NewAppError(
+// 			errors.InternalServerErrorCode,
+// 			"failed to get doctor",
+// 			errors.ErrEmptyData,
+// 			true,
+// 		)
+// 	}
+
+// 	if page < 1 {
+// 		return empty, errors.NewAppError(
+// 			errors.InternalServerErrorCode,
+// 			"page number must be greater than 0",
+// 			errors.ErrDataNotFound,
+// 			true,
+// 		)
+// 	}
+
+// 	if perPage < 5 {
+// 		return empty, errors.NewAppError(
+// 			errors.InternalServerErrorCode,
+// 			"Perpage number must be greater than 5",
+// 			errors.ErrDataNotFound,
+// 			true,
+// 		)
+// 	}
+
+// 	// Получаем данные из репозитория
+// 	receptions, total, err := u.repo.GetReceptionsHospitalByDoctorAndDate(doctorID, date, page, perPage)
+// 	if err != nil {
+// 		return empty, errors.NewAppError(
+// 			errors.InternalServerErrorCode,
+// 			"Hospital_Use_Case failed to get from repo",
+// 			errors.ErrDataNotFound,
+// 			true,
+// 		)
+// 	}
+
+// 	// Преобразование в DTO
+// 	result := make([]models.ReceptionShortResponse, len(receptions))
+// 	for i, reception := range receptions {
+// 		patientName := ""
+// 		if reception.Patient.ID != 0 {
+// 			patientName = reception.Patient.FullName
+// 		}
+
+// 		result[i] = models.ReceptionShortResponse{
+// 			Id:          reception.ID,
+// 			Date:        reception.Date.Format("02.01.2006 15:04"),
+// 			Status:      getStatusText(reception.Status),
+// 			PatientName: patientName,
+// 			Diagnosis:   reception.Diagnosis,
+// 			Address:     reception.Address,
+// 		}
+// 	}
+
+// 	// Расчет общего количества страниц
+// 	totalPages := int(math.Ceil(float64(total) / float64(perPage)))
+
+// 	// Формируем ответ
+// 	return models.FilterResponse[[]models.ReceptionShortResponse]{
+// 		Hits:        result,
+// 		CurrentPage: page,
+// 		TotalPages:  totalPages,
+// 		TotalHits:   int(total),
+// 		HitsPerPage: perPage,
+// 	}, nil
+// }
+
+func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(
+	doctorID uint,
+	date time.Time,
+	page int,
+	perPage int,
+) (*models.FilterResponse[[]models.ReceptionFullResponse], error) {
+	empty := &models.FilterResponse[[]models.ReceptionFullResponse]{}
 
 	// Валидация входных параметров
 	if doctorID <= 0 {
@@ -189,28 +268,42 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID
 	}
 
 	// Преобразование в DTO
-	result := make([]models.ReceptionShortResponse, len(receptions))
+	result := make([]models.ReceptionFullResponse, len(receptions))
 	for i, reception := range receptions {
 		patientName := ""
 		if reception.Patient.ID != 0 {
 			patientName = reception.Patient.FullName
 		}
 
-		result[i] = models.ReceptionShortResponse{
-			Id:          reception.ID,
-			Date:        reception.Date.Format("02.01.2006 15:04"),
-			Status:      getStatusText(reception.Status),
-			PatientName: patientName,
-			Diagnosis:   reception.Diagnosis,
-			Address:     reception.Address,
+		// Формируем специализированные данные
+		var specData interface{}
+		if reception.SpecializationDataDecoded != nil {
+			specData = reception.SpecializationDataDecoded
+		} else if reception.SpecializationData.Status == pgtype.Present {
+			// Если данные не декодированы, но есть в JSONB
+			var rawData map[string]interface{}
+			if err := reception.SpecializationData.AssignTo(&rawData); err == nil {
+				specData = rawData
+			}
+		}
+
+		result[i] = models.ReceptionFullResponse{
+			Id:                    reception.ID,
+			Date:                  reception.Date.Format("02.01.2006 15:04"),
+			Status:                getStatusText(reception.Status),
+			PatientName:           patientName,
+			Diagnosis:             reception.Diagnosis,
+			Address:               reception.Address,
+			Recommendations:       reception.Recommendations,
+			SpecializationData:    specData,
+			RawSpecializationData: reception.SpecializationData.Bytes,
 		}
 	}
 
 	// Расчет общего количества страниц
 	totalPages := int(math.Ceil(float64(total) / float64(perPage)))
 
-	// Формируем ответ
-	return models.FilterResponse[[]models.ReceptionShortResponse]{
+	return &models.FilterResponse[[]models.ReceptionFullResponse]{
 		Hits:        result,
 		CurrentPage: page,
 		TotalPages:  totalPages,
