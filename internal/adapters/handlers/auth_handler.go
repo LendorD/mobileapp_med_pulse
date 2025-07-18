@@ -45,7 +45,7 @@ func (h *AuthHandler) LoginDoctor(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Auth attempt - Login: %s", req.Login)
 
-	token, err := h.authUC.LoginDoctor(r.Context(), req.Login, req.Password)
+	_, token, err := h.authUC.LoginDoctor(r.Context(), req.Login, req.Password)
 	if err != nil {
 		log.Printf("Auth failed: %v", err)
 		RespondWithError(w, http.StatusUnauthorized, "Invalid credentials")
