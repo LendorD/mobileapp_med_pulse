@@ -154,25 +154,25 @@ func seedTestData(db *gorm.DB) error {
 			return fmt.Errorf("failed to create specialization %s: %w", spec.Title, err)
 		}
 	}
-
+	hashPass123 := hashPassword("123")
 	// 1.2 Создаем докторов с привязкой к специализациям
 	doctors := []*entities.Doctor{
 		{
 			FullName:         "Иванов Иван Иванович",
 			Login:            "doctor_ivanov",
-			PasswordHash:     "$2a$10$somehashedpassword",
+			PasswordHash:     hashPass123,
 			SpecializationID: 1, // Терапевт
 		},
 		{
 			FullName:         "Петрова Мария Сергеевна",
 			Login:            "doctor_petrova",
-			PasswordHash:     "$2a$10$somehashedpassword",
+			PasswordHash:     hashPass123,
 			SpecializationID: 2, // Хирург
 		},
 		{
 			FullName:         "Сидоров Алексей Дмитриевич",
 			Login:            "doctor_sidorov",
-			PasswordHash:     "$2a$10$somehashedpassword",
+			PasswordHash:     hashPass123,
 			SpecializationID: 3, // Кардиолог
 		},
 	}
