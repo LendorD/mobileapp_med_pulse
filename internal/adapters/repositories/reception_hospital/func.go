@@ -87,7 +87,7 @@ func (r *ReceptionHospitalRepositoryImpl) GetReceptionHospitalByPatientID(patien
 	var receptions []entities.ReceptionHospital
 	if err := r.db.
 		Preload("Patient").
-		Preload("Doctor").
+		Preload("Doctor.Specialization").
 		Where("patient_id = ?", patientID).
 		Find(&receptions).Error; err != nil {
 		return nil, errors.NewDBError(op, err)
