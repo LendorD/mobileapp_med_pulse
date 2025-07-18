@@ -31,7 +31,7 @@ type DoctorRepository interface {
 	GetDoctorName(id uint) (string, error)
 	GetDoctorByLogin(login string) (entities.Doctor, error)
 
-	GetDoctorSpecialization(id uint) (string, error)
+	// GetDoctorSpecialization(id uint) (string, error)
 	GetDoctorPassHash(id uint) (string, error)
 }
 
@@ -81,7 +81,7 @@ type ReceptionSmpRepository interface {
 	UpdateReceptionSmp(id uint, updateMap map[string]interface{}) (uint, error)
 	DeleteReceptionSmp(id uint) error
 
-	GetReceptionWithMedServicesByID(id uint) (entities.ReceptionSMP, error)
+	GetReceptionWithMedServicesByID(id uint, emergencyCallID uint) (entities.ReceptionSMP, error)
 	GetReceptionSmpByID(id uint) (entities.ReceptionSMP, error)
 	GetReceptionSmpByDoctorID(doctorID uint) ([]entities.ReceptionSMP, error)
 	GetReceptionSmpByPatientID(patientID uint) ([]entities.ReceptionSMP, error)

@@ -21,13 +21,14 @@ import (
 // @Success 200 {array} entities.ReceptionSMP "Информация о приёме скорой помощи"
 // @Failure 400 {object} ResultError "Некорректные параметры запроса"
 // @Failure 500 {object} ResultError "Внутренняя ошибка сервера"
-// @Router /smp/{doc_id}/receptions [get]
-func (h *Handler) GetReceptionsSMPByDoctorAndDate(c *gin.Context) {
+// @Router /smp/{doctor_id}/receptions [get]
+func (h *Handler) GetReceptionsSMPByCallId(c *gin.Context) {
+
 	// Получаем doctor_id из URL
-	doctorIDStr := c.Param("doc_id")
-	doctorID, err := strconv.ParseUint(doctorIDStr, 10, 32)
+	callIDStr := c.Param("call_id")
+	callID, err := strconv.ParseUint(callIDStr, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid doctor ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid call ID"})
 		return
 	}
 
@@ -48,7 +49,7 @@ func (h *Handler) GetReceptionsSMPByDoctorAndDate(c *gin.Context) {
 	}
 
 	// Вызываем usecase
-	receptions, err := h.usecase.GetReceptionsSMPByEmergencyCall(uint(doctorID), page, perPage)
+	receptions, err := h.usecase.GetReceptionsSMPByEmergencyCall(uint(callID), page, perPage)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -71,14 +72,22 @@ func (h *Handler) GetReceptionsSMPByDoctorAndDate(c *gin.Context) {
 // @Router /smp/{smp_id} [get]
 func (h *Handler) GetReceptionWithMedServices(c *gin.Context) {
 	// Парсинг ID
-	id, err := strconv.ParseUint(c.Param("smp_id"), 10, 32)
+	smp_id, err := h.service.ParseUintString(c.Param("smp_id"))
+
 	if err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'id' must be an integer", false)
+		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'smp_id' must be an integer", false)
+		return
+	}
+
+	call_id, err := h.service.ParseUintString(c.Param("call_id"))
+
+	if err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'call_id' must be an integer", false)
 		return
 	}
 
 	// Вызов usecase
-	reception, err := h.usecase.GetReceptionWithMedServicesByID(uint(id))
+	reception, err := h.usecase.GetReceptionWithMedServicesByID(uint(smp_id), uint(call_id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "Reception not found",
