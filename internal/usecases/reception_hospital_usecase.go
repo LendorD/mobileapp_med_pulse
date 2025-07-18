@@ -47,8 +47,8 @@ func (u *ReceptionHospitalUsecase) GetReceptionsHospitalByPatientID(patientId ui
 		fmt.Printf("Patient: %+v\n", reception.Patient)
 		response := models.ReceptionHospitalResponse{
 			Doctor: models.DoctorInfoResponse{
-				FullName:       reception.Doctor.FullName,
-				Specialization: reception.Doctor.Specialization,
+				FullName:         reception.Doctor.FullName,
+				SpecializationID: reception.Doctor.SpecializationID,
 			},
 			Patient: models.ShortPatientResponse{
 				ID:        reception.Patient.ID,
@@ -87,7 +87,7 @@ func (u *ReceptionHospitalUsecase) UpdateReceptionHospital(input *models.UpdateR
 		)
 	}
 
-	recepHospResponse, err := u.repo.GetReceptionHospitalByID(input.ID)
+	reception, err := u.repo.GetReceptionHospitalByID(input.ID)
 	if err != nil {
 		return models.ReceptionHospitalResponse{}, errors.NewAppError(
 			errors.InternalServerErrorCode,
@@ -98,18 +98,21 @@ func (u *ReceptionHospitalUsecase) UpdateReceptionHospital(input *models.UpdateR
 	}
 	return models.ReceptionHospitalResponse{
 		Doctor: models.DoctorInfoResponse{
-			FullName:       recepHospResponse.Doctor.FullName,
-			Specialization: recepHospResponse.Doctor.Specialization,
+			FullName: reception.Doctor.FullName,
+			Specialization: models.SpecializationInfo{
+				ID:    reception.Doctor.Specialization.ID,
+				Title: reception.Doctor.Specialization.Title,
+			},
 		},
 		Patient: models.ShortPatientResponse{
-			ID:        recepHospResponse.Patient.ID,
-			FullName:  recepHospResponse.Patient.FullName,
-			BirthDate: recepHospResponse.Patient.BirthDate,
-			IsMale:    recepHospResponse.Patient.IsMale,
+			ID:        reception.Patient.ID,
+			FullName:  reception.Patient.FullName,
+			BirthDate: reception.Patient.BirthDate,
+			IsMale:    reception.Patient.IsMale,
 		},
-		Diagnosis:       recepHospResponse.Diagnosis,
-		Recommendations: recepHospResponse.Recommendations,
-		Date:            recepHospResponse.Date,
+		Diagnosis:       reception.Diagnosis,
+		Recommendations: reception.Recommendations,
+		Date:            reception.Date,
 	}, nil
 }
 
@@ -142,7 +145,7 @@ func (u *ReceptionHospitalUsecase) GetPatientsByDoctorID(doctorID uint, limit, o
 
 func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int, perPage int) (models.FilterResponse[[]models.ReceptionShortResponse], error) {
 	empty := models.FilterResponse[[]models.ReceptionShortResponse]{}
-	
+
 	// Валидация входных параметров
 	if doctorID <= 0 {
 		return empty, errors.NewAppError(

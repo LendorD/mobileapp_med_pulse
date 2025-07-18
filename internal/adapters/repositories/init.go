@@ -103,6 +103,7 @@ func autoMigrate(db *gorm.DB) error {
 		"doctors",
 		"med_services",
 		"allergies",
+		"specializations",
 	}
 
 	for _, table := range tables {
@@ -113,6 +114,7 @@ func autoMigrate(db *gorm.DB) error {
 
 	// Создаем таблицы
 	models := []interface{}{
+		&entities.Specialization{},
 		&entities.Doctor{},
 		&entities.Patient{},
 		&entities.ContactInfo{},
@@ -137,25 +139,40 @@ func autoMigrate(db *gorm.DB) error {
 }
 
 func seedTestData(db *gorm.DB) error {
-	// 1. Сначала создаем всех докторов
+	// 1. Сначала создаем специализации
+	specializations := []*entities.Specialization{
+		{Title: "Терапевт"},
+		{Title: "Хирург"},
+		{Title: "Кардиолог"},
+		{Title: "Невролог"},
+		{Title: "Офтальмолог"},
+	}
+
+	for _, spec := range specializations {
+		if err := db.Create(spec).Error; err != nil {
+			return fmt.Errorf("failed to create specialization %s: %w", spec.Title, err)
+		}
+	}
+
+	// 1.2 Создаем докторов с привязкой к специализациям
 	doctors := []*entities.Doctor{
 		{
-			FullName:       "Иванов Иван Иванович",
-			Login:          "doctor_ivanov",
-			PasswordHash:   "$2a$10$somehashedpassword",
-			Specialization: "Терапевт",
+			FullName:         "Иванов Иван Иванович",
+			Login:            "doctor_ivanov",
+			PasswordHash:     "$2a$10$somehashedpassword",
+			SpecializationID: 1, // Терапевт
 		},
 		{
-			FullName:       "Петрова Мария Сергеевна",
-			Login:          "doctor_petrova",
-			PasswordHash:   "$2a$10$somehashedpassword",
-			Specialization: "Хирург",
+			FullName:         "Петрова Мария Сергеевна",
+			Login:            "doctor_petrova",
+			PasswordHash:     "$2a$10$somehashedpassword",
+			SpecializationID: 2, // Хирург
 		},
 		{
-			FullName:       "Сидоров Алексей Дмитриевич",
-			Login:          "doctor_sidorov",
-			PasswordHash:   "$2a$10$somehashedpassword",
-			Specialization: "Кардиолог",
+			FullName:         "Сидоров Алексей Дмитриевич",
+			Login:            "doctor_sidorov",
+			PasswordHash:     "$2a$10$somehashedpassword",
+			SpecializationID: 3, // Кардиолог
 		},
 	}
 
@@ -163,9 +180,7 @@ func seedTestData(db *gorm.DB) error {
 		if err := db.Create(doc).Error; err != nil {
 			return fmt.Errorf("failed to create doctor %s: %w", doc.FullName, err)
 		}
-		fmt.Printf("Doctor %s has ID %d\n", doc.FullName, doc.ID)
 	}
-
 	// 2. Создаем медицинские услуги
 	services := []*entities.MedService{
 		{Name: "ЭКГ", Price: 500},
