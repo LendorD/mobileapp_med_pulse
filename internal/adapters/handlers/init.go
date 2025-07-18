@@ -97,15 +97,18 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	hospitalGroup.GET("/receptions/:pat_id", h.GetReceptionsHospitalByPatientID)
 	hospitalGroup.GET("patients/:doc_id/", h.GetAllPatientsOnTreatment)
 
+	// МАКСИМ ДУДКО СЧИТАЕТ ЭТО НЕ НУЖНОЙ ГРУППОЙ ПУСКАЙ ВСЕ БУДЕТ В EMERGENCY
 	// Приёмы СМП
-	smpGroup := baseRouter.Group("/smp")
-	smpGroup.GET("/:smp_id", h.GetReceptionWithMedServices)
-	smpGroup.POST("/receptions", h.CreateSmpReception)
-	smpGroup.PUT("/receptions/:recep_id", h.UpdateReceptionSmpByReceptionID)
+	// smpGroup := baseRouter.Group("/smp")
+	// smpGroup.GET("/:smp_id", h.GetReceptionWithMedServices)
+	// smpGroup.POST("/receptions", h.CreateSmpReception)
+	// smpGroup.PUT("/receptions/:recep_id", h.UpdateReceptionSmpByReceptionID)
 
 	// Звонки СМП
 	emergencyGroup := baseRouter.Group("/emergency")
 	emergencyGroup.GET("/:doc_id", h.GetEmergencyCallsByDoctorAndDate)
+	emergencyGroup.GET("/:doc_id/:call_id", h.GetReceptionsSMPByCallId)
+	emergencyGroup.GET("/:doc_id/:call_id/:smp_id", h.GetReceptionWithMedServices)
 
 	return r
 }

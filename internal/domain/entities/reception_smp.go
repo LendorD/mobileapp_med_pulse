@@ -27,5 +27,8 @@ type ReceptionSMP struct {
 	// Кэшированная специализация для быстрых запросов
 	CachedSpecialization string `gorm:"index" json:"-"`
 
+	// Добавленное поле для декодированных данных
+	SpecializationDataDecoded interface{} `gorm:"-" json:"specialization_data_decoded"`
+
 	MedServices []MedService `gorm:"many2many:reception_smp_med_services;" json:"med_services" rus:"Медицинские услуги"`
 }
