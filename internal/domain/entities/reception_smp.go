@@ -2,6 +2,8 @@ package entities
 
 import (
 	"time"
+
+	"github.com/jackc/pgtype"
 )
 
 // ReceptionSMP представляет приёмы скорой помощи
@@ -18,6 +20,12 @@ type ReceptionSMP struct {
 	Patient         Patient `gorm:"foreignKey:PatientID" json:"-"`
 	Diagnosis       string  `json:"diagnosis" example:"ОРВИ" rus:"Диагноз"`
 	Recommendations string  `json:"recommendations" example:"Постельный режим" rus:"Рекомендации"`
+
+	// Специализированные данные
+	SpecializationData pgtype.JSONB `gorm:"type:jsonb" json:"specialization_data"`
+
+	// Кэшированная специализация для быстрых запросов
+	CachedSpecialization string `gorm:"index" json:"-"`
 
 	MedServices []MedService `gorm:"many2many:reception_smp_med_services;" json:"med_services" rus:"Медицинские услуги"`
 }

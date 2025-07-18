@@ -25,8 +25,9 @@ type ReceptionHospitalUsecase interface {
 	GetReceptionsHospitalByPatientID(patientId uint) ([]models.ReceptionHospitalResponse, *errors.AppError)
 	UpdateReceptionHospital(input *models.UpdateReceptionHospitalRequest) (models.ReceptionHospitalResponse, *errors.AppError)
 	GetPatientsByDoctorID(doctorID uint, limit, offset int) ([]entities.Patient, *errors.AppError)
-	GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int, perPage int) (models.FilterResponse[[]models.ReceptionShortResponse], error)
+	GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int, perPage int) (*models.FilterResponse[[]models.ReceptionFullResponse], error)
 	GetAllPatientsOnTreatment(doc_id uint, page, count int, filter string) (models.FilterResponse[[]entities.Patient], *errors.AppError)
+
 }
 type ReceptionSmpUsecase interface {
 	CreateReceptionSMP(input *models.CreateEmergencyRequest) (entities.ReceptionSMP, *errors.AppError)
