@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
+	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -86,4 +88,57 @@ func (h *Handler) GetReceptionWithMedServices(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, reception)
+}
+
+// Примеры JSON
+// Создание нового пациента на вызове
+//
+//	{
+//	  "emergency_call_id": 123,
+//	  "doctor_id": 1,
+//	  "patient": {
+//	    "full_name": "Иванов Иван Иванович",
+//	    "birth_date": "1980-05-15",
+//	    "is_male": true
+//	  }
+//	}
+//
+// Добавление существуещего пользователя
+//
+//	{
+//	  "emergency_call_id": 124,
+//	  "doctor_id": 2,
+//	  "patient_id": 42
+//	}
+//
+// CreateSmReception godoc
+// @Summary Создать заключение на скорой
+// @Description Возвращает созданное заключение
+// @Tags SMP
+// @Accept json
+// @Produce json
+// @Success 200 {object} entities.ReceptionSMP "Заключение для пациента"
+// @Failure 400 {object} ResultError "Некорректный ID"
+// @Failure 404 {object} map[string]string "Переданные данные некорекктны"
+// @Failure 500 {object} map[string]string "Внутренняя ошибка сервера"
+// @Router /smp/{smp_id} [get]
+func (h *Handler) CreateSmReception(c *gin.Context) {
+	var input models.CreateEmergencyRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
+		return
+	}
+
+	if err := validate.Struct(input); err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
+		return
+	}
+
+	emergency, eerr := h.usecase.CreateReceptionSMP(&input)
+	if eerr != nil {
+		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
+		return
+	}
+
+	h.ResultResponse(c, "Success emergency reception create", Object, emergency)
 }
