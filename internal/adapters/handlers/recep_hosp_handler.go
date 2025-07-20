@@ -173,6 +173,10 @@ func (h *Handler) GetReceptionsHospitalByDoctorAndDate(c *gin.Context) {
 // @Router /patients [get]
 func (h *Handler) GetAllPatientsOnTreatment(c *gin.Context) {
 	doc_id, err := h.service.ParseUintString(c.DefaultQuery("doc_id", "1"))
+	if err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'doc_id' must be an integer", false)
+		return
+	}
 
 	// Получаем и валидируем параметр page
 	page, err := h.service.ParseIntString(c.DefaultQuery("page", "1"))
