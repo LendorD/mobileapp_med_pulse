@@ -844,6 +844,60 @@ const docTemplate = `{
         },
         "/smp/{smp_id}": {
             "get": {
+                "description": "Возвращает информацию о приёме скорой медицинской помощи вместе со списком медицинских услуг",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SMP"
+                ],
+                "summary": "Получить приём СМП с медуслугами по ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID приёма СМП",
+                        "name": "smp_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Информация о приёме и медуслугах",
+                        "schema": {
+                            "$ref": "#/definitions/entities.MedService"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный ID",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "404": {
+                        "description": "Приём не найден",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
                 "description": "Возвращает созданное заключение",
                 "consumes": [
                     "application/json"

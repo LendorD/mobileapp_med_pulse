@@ -54,7 +54,7 @@ type UpdateReceptionHospitalRequest struct {
 
 // ReceptionFullResponse - полная информация о приеме
 type ReceptionFullResponse struct {
-	Id              uint                `json:"id"`
+	ID              uint                `json:"id"`
 	Date            string              `json:"date" example:"15.10.2023 14:30"`
 	Status          string              `json:"status" example:"Запланирован"`
 	PatientName     string              `json:"patient_name" example:"Иванов Иван"`
@@ -72,7 +72,7 @@ type ReceptionFullResponse struct {
 
 // DoctorShortResponse - краткая информация о враче
 type DoctorShortResponse struct {
-	Id             uint   `json:"id"`
+	ID             uint   `json:"id"`
 	FullName       string `json:"full_name" example:"Петров Петр Петрович"`
 	Specialization string `json:"specialization" example:"Терапевт"`
 }

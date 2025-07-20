@@ -4,8 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
-
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 )
 
@@ -95,14 +93,13 @@ type ReceptionHospitalRepository interface {
 	UpdateReceptionHospital(id uint, updateMap map[string]interface{}) (uint, error)
 	DeleteReceptionHospital(id uint) error
 
+	// Работают с пагинацией и фильтрацией по возращаемой структуре
 	GetAllPatientsFromHospital(page, count int, queryFilter string, parameters []interface{}) ([]entities.Patient, int64, error)
-	GetAllPatientsFromHospitalByDocID(doc_id uint, page, count int, queryFilter string, parameters []interface{}) ([]entities.Patient, int64, error)
+	GetAllPatientsFromHospitalByDoctorID(doc_id uint, page, count int, queryFilter string, queryOrder string, parameters []interface{}) ([]entities.Patient, int64, error)
+	GetAllHospitalReceptionsByDoctorID(doc_id uint, page, count int, queryFilter string, queryOrder string, parameters []interface{}) ([]entities.ReceptionHospital, int64, error)
+	GetAllHospitalReceptionsByPatientID(patientID uint, page, count int, queryFilter string, queryOrder string, parameters []interface{}) ([]entities.ReceptionHospital, int64, error)
+
 	GetReceptionHospitalByID(id uint) (entities.ReceptionHospital, error)
-	GetReceptionHospitalByDoctorID(doctorID uint) ([]entities.ReceptionHospital, error)
-	GetReceptionHospitalByPatientID(patientID uint) ([]entities.ReceptionHospital, error)
-	GetReceptionsHospitalByDateRange(start, end time.Time) ([]entities.ReceptionHospital, error)
-	GetReceptionsHospitalByDoctorAndDate(doctorID uint, date time.Time, page, perPage int) ([]entities.ReceptionHospital, int64, error)
-	GetPatientsByDoctorID(doctorID uint, limit, offset int) ([]entities.Patient, *errors.AppError)
 }
 
 // updated to match the new structured

@@ -130,7 +130,7 @@ func (h *Handler) GetReceptionWithMedServices(c *gin.Context) {
 // @Failure 400 {object} ResultError "Некорректный ID"
 // @Failure 404 {object} map[string]string "Переданные данные некорекктны"
 // @Failure 500 {object} map[string]string "Внутренняя ошибка сервера"
-// @Router /smp/{smp_id} [get]
+// @Router /smp/{smp_id} [put]
 func (h *Handler) CreateSmpReception(c *gin.Context) {
 	var input models.CreateEmergencyRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
