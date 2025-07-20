@@ -114,7 +114,7 @@ func (h *Handler) GetPatientsByDoctorID(c *gin.Context) {
 // @Produce json
 // @Param recep_id path uint true "ID приёма"
 // @Param info body models.UpdateReceptionHospitalRequest true "Данные для обновления"
-// @Success 200 {array} entities.ReceptionHospital
+// @Success 201 {array} entities.ReceptionHospital
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /hospital/{recep_id} [put]
@@ -195,7 +195,7 @@ func (h *Handler) GetAllPatientsByDoctorID(c *gin.Context) {
 	// Получаем doctor_id из URL, по умолчанию - все пациенты всех докторов при doc_id = 0
 	doc_id, err := h.service.ParseUintString(c.DefaultQuery("doc_id", "0"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid doctor ID"})
+		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'doc_id' must be an integer", false)
 		return
 	}
 
