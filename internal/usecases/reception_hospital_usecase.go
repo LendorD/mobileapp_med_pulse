@@ -2,14 +2,12 @@ package usecases
 
 import (
 	"fmt"
-	"math"
-	"time"
-
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"github.com/jackc/pgtype"
+	"math"
 )
 
 type ReceptionHospitalUsecase struct {
@@ -23,10 +21,11 @@ func NewReceptionHospitalUsecase(repo interfaces.ReceptionHospitalRepository, s 
 		FilterBuilder: s}
 }
 
-// []models.ReceptionHospitalResponse
-func (u *ReceptionHospitalUsecase) GetReceptionsHospitalByPatientID(patientId uint) ([]models.ReceptionHospitalResponse, *errors.AppError) {
+func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByPatientID(patientId uint, page, count int, filter, order string) (models.FilterResponse[[]models.ReceptionHospitalResponse], *errors.AppError) {
+	empty := models.FilterResponse[[]models.ReceptionHospitalResponse]{}
+
 	if patientId == 0 {
-		return nil, errors.NewAppError(
+		return empty, errors.NewAppError(
 			errors.InternalServerErrorCode,
 			"failed to get patient",
 			errors.ErrEmptyData,
@@ -34,19 +33,58 @@ func (u *ReceptionHospitalUsecase) GetReceptionsHospitalByPatientID(patientId ui
 		)
 	}
 
-	receptions, err := u.repo.GetReceptionHospitalByPatientID(patientId)
+	var queryFilter string
+	var queryOrder string
+	var parameters []interface{}
+
+	// Статические поля модели (имя таблицы/колонки и их типы)
+	entityFields, err := getFieldTypes(entities.ReceptionHospital{})
 	if err != nil {
-		return nil, errors.NewAppError(
-			errors.InternalServerErrorCode,
-			"failed to get receptions",
-			errors.ErrEmptyData,
-			true,
-		)
+		return empty, errors.NewAppError(errors.InternalServerErrorCode, errors.InternalServerError, err, true)
 	}
-	var responses []models.ReceptionHospitalResponse
+
+	// Парсим фильтр, если он передан
+	if len(filter) > 0 {
+		subQuery, params, err := u.FilterBuilder.ParseFilterString(filter, entityFields)
+		if err != nil {
+			return empty, errors.NewAppError(
+				errors.InvalidDataCode,
+				fmt.Sprintf("invalid filter syntax: %s", err.Error()),
+				nil,
+				false,
+			)
+		}
+		queryFilter = subQuery
+		parameters = params
+	}
+
+	if len(order) > 0 {
+		subQuery, err := u.FilterBuilder.ParseOrderString(order, entityFields)
+		if err != nil {
+			return empty, errors.NewAppError(errors.InternalServerErrorCode, fmt.Sprintf("invalid order syntax: %s", err.Error()), nil, false)
+		}
+		queryOrder = subQuery
+	}
+
+	// Получение пациентов
+	receptions, totalRows, err := u.repo.GetAllHospitalReceptionsByPatientID(patientId, page, count, queryFilter, queryOrder, parameters)
+	if err != nil {
+		return empty, errors.NewAppError(errors.InternalServerErrorCode, "failed to get patients", err, true)
+	}
+
+	var totalPages int
+	if count == 0 {
+		// Если count == 0, то пагинация отключена, и все записи возвращаются на одной странице
+		totalPages = 1
+		page = 1
+
+	} else {
+		// Вычисляем количество страниц с округлением вверх
+		totalPages = int(math.Ceil(float64(totalRows) / float64(count)))
+	}
+
+	var result []models.ReceptionHospitalResponse
 	for _, reception := range receptions {
-		fmt.Printf("Doctor: %+v\n", reception.Doctor)
-		fmt.Printf("Patient: %+v\n", reception.Patient)
 		response := models.ReceptionHospitalResponse{
 			Doctor: models.DoctorInfoResponse{
 				FullName: reception.Doctor.FullName,
@@ -65,14 +103,20 @@ func (u *ReceptionHospitalUsecase) GetReceptionsHospitalByPatientID(patientId ui
 			Recommendations: reception.Recommendations,
 			Date:            reception.Date,
 		}
-		responses = append(responses, response)
+		result = append(result, response)
 	}
 
-	if len(responses) == 0 {
-		return []models.ReceptionHospitalResponse{}, nil
+	if len(result) == 0 {
+		return empty, nil
 	}
 
-	return responses, nil
+	return models.FilterResponse[[]models.ReceptionHospitalResponse]{
+		Hits:        result,
+		CurrentPage: page,
+		HitsPerPage: len(result),
+		TotalHits:   int(totalRows),
+		TotalPages:  totalPages,
+	}, nil
 }
 
 func (u *ReceptionHospitalUsecase) UpdateReceptionHospital(input *models.UpdateReceptionHospitalRequest) (models.ReceptionHospitalResponse, *errors.AppError) {
@@ -121,151 +165,57 @@ func (u *ReceptionHospitalUsecase) UpdateReceptionHospital(input *models.UpdateR
 	}, nil
 }
 
-func (u *ReceptionHospitalUsecase) GetPatientsByDoctorID(doctorID uint, limit, offset int) ([]entities.Patient, *errors.AppError) {
-	if doctorID == 0 {
-		return nil, errors.NewAppError(
-			errors.InternalServerErrorCode,
-			"failed to get patient",
-			errors.ErrEmptyData,
-			true,
-		)
-	}
+func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorID(doc_id uint, page, count int, filter, order string) (models.FilterResponse[[]models.ReceptionFullResponse], *errors.AppError) {
+	var queryFilter string
+	var queryOrder string
+	var parameters []interface{}
 
-	patients, err := u.repo.GetPatientsByDoctorID(doctorID, limit, offset)
+	empty := models.FilterResponse[[]models.ReceptionFullResponse]{}
+
+	// Статические поля модели (имя таблицы/колонки и их типы)
+	entityFields, err := getFieldTypes(entities.ReceptionHospital{})
 	if err != nil {
-		return nil, errors.NewAppError(
-			errors.InternalServerErrorCode,
-			"failed to get receptions",
-			errors.ErrEmptyData,
-			true,
-		)
+		return empty, errors.NewAppError(errors.InternalServerErrorCode, errors.InternalServerError, err, true)
 	}
 
-	if patients == nil {
-		return []entities.Patient{}, nil
+	// Парсим фильтр, если он передан
+	if len(filter) > 0 {
+		subQuery, params, err := u.FilterBuilder.ParseFilterString(filter, entityFields)
+		if err != nil {
+			return empty, errors.NewAppError(
+				errors.InvalidDataCode,
+				fmt.Sprintf("invalid filter syntax: %s", err.Error()),
+				nil,
+				false,
+			)
+		}
+		queryFilter = subQuery
+		parameters = params
 	}
 
-	return patients, nil
-}
-
-// func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int, perPage int) (models.FilterResponse[[]models.ReceptionShortResponse], error) {
-// 	empty := models.FilterResponse[[]models.ReceptionShortResponse]{}
-
-// 	// Валидация входных параметров
-// 	if doctorID <= 0 {
-// 		return empty, errors.NewAppError(
-// 			errors.InternalServerErrorCode,
-// 			"failed to get doctor",
-// 			errors.ErrEmptyData,
-// 			true,
-// 		)
-// 	}
-
-// 	if page < 1 {
-// 		return empty, errors.NewAppError(
-// 			errors.InternalServerErrorCode,
-// 			"page number must be greater than 0",
-// 			errors.ErrDataNotFound,
-// 			true,
-// 		)
-// 	}
-
-// 	if perPage < 5 {
-// 		return empty, errors.NewAppError(
-// 			errors.InternalServerErrorCode,
-// 			"Perpage number must be greater than 5",
-// 			errors.ErrDataNotFound,
-// 			true,
-// 		)
-// 	}
-
-// 	// Получаем данные из репозитория
-// 	receptions, total, err := u.repo.GetReceptionsHospitalByDoctorAndDate(doctorID, date, page, perPage)
-// 	if err != nil {
-// 		return empty, errors.NewAppError(
-// 			errors.InternalServerErrorCode,
-// 			"Hospital_Use_Case failed to get from repo",
-// 			errors.ErrDataNotFound,
-// 			true,
-// 		)
-// 	}
-
-// 	// Преобразование в DTO
-// 	result := make([]models.ReceptionShortResponse, len(receptions))
-// 	for i, reception := range receptions {
-// 		patientName := ""
-// 		if reception.Patient.ID != 0 {
-// 			patientName = reception.Patient.FullName
-// 		}
-
-// 		result[i] = models.ReceptionShortResponse{
-// 			Id:          reception.ID,
-// 			Date:        reception.Date.Format("02.01.2006 15:04"),
-// 			Status:      getStatusText(reception.Status),
-// 			PatientName: patientName,
-// 			Diagnosis:   reception.Diagnosis,
-// 			Address:     reception.Address,
-// 		}
-// 	}
-
-// 	// Расчет общего количества страниц
-// 	totalPages := int(math.Ceil(float64(total) / float64(perPage)))
-
-// 	// Формируем ответ
-// 	return models.FilterResponse[[]models.ReceptionShortResponse]{
-// 		Hits:        result,
-// 		CurrentPage: page,
-// 		TotalPages:  totalPages,
-// 		TotalHits:   int(total),
-// 		HitsPerPage: perPage,
-// 	}, nil
-// }
-
-func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(
-	doctorID uint,
-	date time.Time,
-	page int,
-	perPage int,
-) (*models.FilterResponse[[]models.ReceptionFullResponse], error) {
-	empty := &models.FilterResponse[[]models.ReceptionFullResponse]{}
-
-	// Валидация входных параметров
-	if doctorID <= 0 {
-		return empty, errors.NewAppError(
-			errors.InternalServerErrorCode,
-			"failed to get doctor",
-			errors.ErrEmptyData,
-			true,
-		)
+	if len(order) > 0 {
+		subQuery, err := u.FilterBuilder.ParseOrderString(order, entityFields)
+		if err != nil {
+			return empty, errors.NewAppError(errors.InternalServerErrorCode, fmt.Sprintf("invalid order syntax: %s", err.Error()), nil, false)
+		}
+		queryOrder = subQuery
 	}
 
-	if page < 1 {
-		return empty, errors.NewAppError(
-			errors.InternalServerErrorCode,
-			"page number must be greater than 0",
-			errors.ErrDataNotFound,
-			true,
-		)
-	}
-
-	if perPage < 5 {
-		return empty, errors.NewAppError(
-			errors.InternalServerErrorCode,
-			"Perpage number must be greater than 5",
-			errors.ErrDataNotFound,
-			true,
-		)
-	}
-
-	// Получаем данные из репозитория
-	receptions, total, err := u.repo.GetReceptionsHospitalByDoctorAndDate(doctorID, date, page, perPage)
+	// Получение пациентов
+	receptions, totalRows, err := u.repo.GetAllHospitalReceptionsByDoctorID(doc_id, page, count, queryFilter, queryOrder, parameters)
 	if err != nil {
-		return empty, errors.NewAppError(
-			errors.InternalServerErrorCode,
-			"Hospital_Use_Case failed to get from repo",
-			errors.ErrDataNotFound,
-			true,
-		)
+		return empty, errors.NewAppError(errors.InternalServerErrorCode, "failed to get patients", err, true)
+	}
+
+	var totalPages int
+	if count == 0 {
+		// Если count == 0, то пагинация отключена, и все записи возвращаются на одной странице
+		totalPages = 1
+		page = 1
+
+	} else {
+		// Вычисляем количество страниц с округлением вверх
+		totalPages = int(math.Ceil(float64(totalRows) / float64(count)))
 	}
 
 	// Преобразование в DTO
@@ -289,27 +239,29 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorAndDate(
 		}
 
 		result[i] = models.ReceptionFullResponse{
-			Id:                    reception.ID,
-			Date:                  reception.Date.Format("02.01.2006 15:04"),
-			Status:                getStatusText(reception.Status),
-			PatientName:           patientName,
-			Diagnosis:             reception.Diagnosis,
-			Address:               reception.Address,
+			ID:          reception.ID,
+			Date:        reception.Date.Format("02.01.2006 15:04"),
+			Status:      getStatusText(reception.Status),
+			PatientName: patientName,
+			Diagnosis:   reception.Diagnosis,
+			Address:     reception.Address,
+			Doctor: models.DoctorShortResponse{
+				ID:       reception.Doctor.ID,
+				FullName: reception.Doctor.FullName,
+				// TODO: добавить специализацию если нужно
+			},
 			Recommendations:       reception.Recommendations,
 			SpecializationData:    specData,
 			RawSpecializationData: reception.SpecializationData.Bytes,
 		}
 	}
 
-	// Расчет общего количества страниц
-	totalPages := int(math.Ceil(float64(total) / float64(perPage)))
-
-	return &models.FilterResponse[[]models.ReceptionFullResponse]{
+	return models.FilterResponse[[]models.ReceptionFullResponse]{
 		Hits:        result,
 		CurrentPage: page,
+		HitsPerPage: len(result),
+		TotalHits:   int(totalRows),
 		TotalPages:  totalPages,
-		TotalHits:   int(total),
-		HitsPerPage: perPage,
 	}, nil
 }
 
@@ -328,8 +280,9 @@ func getStatusText(status entities.ReceptionStatus) string {
 	}
 }
 
-func (u *ReceptionHospitalUsecase) GetAllPatientsOnTreatment(doc_id uint, page, count int, filter string) (models.FilterResponse[[]entities.Patient], *errors.AppError) {
+func (u *ReceptionHospitalUsecase) GetHospitalPatientsByDoctorID(doc_id uint, page, count int, filter, order string) (models.FilterResponse[[]entities.Patient], *errors.AppError) {
 	var queryFilter string
+	var queryOrder string
 	var parameters []interface{}
 	empty := models.FilterResponse[[]entities.Patient]{}
 
@@ -354,8 +307,16 @@ func (u *ReceptionHospitalUsecase) GetAllPatientsOnTreatment(doc_id uint, page, 
 		parameters = params
 	}
 
+	if len(order) > 0 {
+		subQuery, err := u.FilterBuilder.ParseOrderString(order, entityFields)
+		if err != nil {
+			return empty, errors.NewAppError(errors.InternalServerErrorCode, fmt.Sprintf("invalid order syntax: %s", err.Error()), nil, false)
+		}
+		queryOrder = subQuery
+	}
+
 	// Получение пациентов
-	patients, totalRows, err := u.repo.GetAllPatientsFromHospitalByDocID(doc_id, page, count, queryFilter, parameters)
+	patients, totalRows, err := u.repo.GetAllPatientsFromHospitalByDoctorID(doc_id, page, count, queryFilter, queryOrder, parameters)
 	if err != nil {
 		return empty, errors.NewAppError(errors.InternalServerErrorCode, "failed to get patients", err, true)
 	}
@@ -364,6 +325,7 @@ func (u *ReceptionHospitalUsecase) GetAllPatientsOnTreatment(doc_id uint, page, 
 	if count == 0 {
 		// Если count == 0, то пагинация отключена, и все записи возвращаются на одной странице
 		totalPages = 1
+		page = 1
 
 	} else {
 		// Вычисляем количество страниц с округлением вверх

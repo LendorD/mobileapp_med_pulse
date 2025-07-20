@@ -21,4 +21,5 @@ type ParamsParserService interface {
 
 type FilterBuilderService interface {
 	ParseFilterString(filterStr string, modelFields map[string]string) (string, []interface{}, error)
+	ParseOrderString(orderStr string, modelFields map[string]string) (string, error)
 }
