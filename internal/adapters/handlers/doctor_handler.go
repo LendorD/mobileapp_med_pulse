@@ -41,7 +41,7 @@ func (h *Handler) GetDoctorByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param info body models.UpdateDoctorRequest true "Данные для обновления"
-// @Success 200 {object} entities.Doctor "Обновленный врач"
+// @Success 201 {object} entities.Doctor "Обновленный врач"
 // @Failure 400 {object} ResultError "Некорректный запрос"
 // @Failure 404 {object} ResultError "Врач не найден"
 // @Failure 422 {object} ResultError "Ошибка валидации"

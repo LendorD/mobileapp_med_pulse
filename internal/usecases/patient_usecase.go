@@ -3,6 +3,7 @@ package usecases
 import (
 	"fmt"
 	"math"
+	"net/http"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
@@ -18,8 +19,7 @@ type PatientUsecase struct {
 }
 
 func NewPatientUsecase(repo interfaces.PatientRepository, s interfaces.Service) interfaces.PatientUsecase {
-	return &PatientUsecase{repo: repo,
-		FilterBuilder: s}
+	return &PatientUsecase{repo: repo, FilterBuilder: s}
 }
 
 func (u *PatientUsecase) CreatePatient(input *models.CreatePatientRequest) (entities.Patient, *errors.AppError) {
@@ -49,13 +49,23 @@ func (u *PatientUsecase) CreatePatient(input *models.CreatePatientRequest) (enti
 }
 
 func (u *PatientUsecase) GetPatientByID(id uint) (entities.Patient, *errors.AppError) {
-
 	patient, err := u.repo.GetPatientByID(id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return entities.Patient{}, errors.NewNotFoundError("patient not found")
+		if errors.Is(err, gorm.ErrRecordNotFound) || errors.Is(err, errors.ErrNotFound) {
+			return entities.Patient{}, errors.NewAppError(
+				http.StatusNotFound,
+				"Пациент не найден",
+				nil,
+				true,
+			)
 		}
-		return entities.Patient{}, errors.NewAppError(errors.InternalServerErrorCode, errors.InternalServerError, err, false)
+
+		return entities.Patient{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			errors.InternalServerError,
+			err,
+			false,
+		)
 	}
 	return patient, nil
 }

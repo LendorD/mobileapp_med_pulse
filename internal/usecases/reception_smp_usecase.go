@@ -197,16 +197,17 @@ func (u *ReceptionSmpUsecase) GetReceptionWithMedServicesByID(
 	return response, nil
 }
 
-func convertMedServicesToResponse(services []entities.MedService) []models.MedServicesResponse {
-	result := make([]models.MedServicesResponse, len(services))
-	for i, svc := range services {
-		result[i] = models.MedServicesResponse{
-			Name:  svc.Name,
-			Price: svc.Price,
-		}
-	}
-	return result
-}
+// Сейчас вечно вызывает unused, нужно применить
+// func convertMedServicesToResponse(services []entities.MedService) []models.MedServicesResponse {
+// 	result := make([]models.MedServicesResponse, len(services))
+// 	for i, svc := range services {
+// 		result[i] = models.MedServicesResponse{
+// 			Name:  svc.Name,
+// 			Price: svc.Price,
+// 		}
+// 	}
+// 	return result
+// }
 
 func (u *ReceptionSmpUsecase) UpdateReceptionSmp(input *models.UpdateSmpReceptionRequest) (entities.ReceptionSMP, *errors.AppError) {
 	existingReception, err := u.recepSmpRepo.GetReceptionSmpByID(input.ReceptionId)

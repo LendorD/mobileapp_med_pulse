@@ -89,7 +89,7 @@ func (h *Handler) GetPatientByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param info body models.CreatePatientRequest true "Данные пациента"
-// @Success 200 {object} entities.Patient "Созданный пациент"
+// @Success 201 {object} entities.Patient "Созданный пациент"
 // @Failure 400 {object} ResultError "Некорректный запрос"
 // @Failure 422 {object} ResultError "Ошибка валидации данных"
 // @Failure 500 {object} ResultError "Внутренняя ошибка сервера"
@@ -116,7 +116,7 @@ func (h *Handler) CreatePatient(c *gin.Context) {
 // @Produce json
 // @Param pat_id path uint true "ID пациента"
 // @Param info body models.UpdatePatientRequest true "Данные для обновления"
-// @Success 200 {object} entities.Patient "Обновленный пациент"
+// @Success 201 {object} entities.Patient "Обновленный пациент"
 // @Failure 400 {object} ResultError "Некорректный запрос"
 // @Failure 404 {object} ResultError "Пациент не найден"
 // @Failure 422 {object} ResultError "Ошибка валидации"
@@ -156,7 +156,7 @@ func (h *Handler) UpdatePatient(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param pat_id path uint true "ID пациента"
-// @Success 200 {object} ResultResponse "Успешное удаление"
+// @Success 204 {object} ResultResponse "Успешное удаление"
 // @Failure 400 {object} ResultError "Некорректный ID"
 // @Failure 404 {object} ResultError "Пациент не найден"
 // @Failure 500 {object} ResultError "Внутренняя ошибка"

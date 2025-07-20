@@ -86,7 +86,7 @@ func (h *Handler) GetPatientsByDoctorID(c *gin.Context) {
 // @Produce json
 // @Param recep_id path uint true "ID приёма"
 // @Param info body models.UpdateReceptionHospitalRequest true "Данные для обновления"
-// @Success 200 {array} entities.ReceptionHospital
+// @Success 201 {array} entities.ReceptionHospital
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /hospital/{recep_id} [put]

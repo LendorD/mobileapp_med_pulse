@@ -146,7 +146,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "Обновленный врач",
                         "schema": {
                             "$ref": "#/definitions/entities.Doctor"
@@ -482,7 +482,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "Обновленная медицинская карта",
                         "schema": {
                             "$ref": "#/definitions/models.MedCardResponse"
@@ -593,7 +593,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "Созданный пациент",
                         "schema": {
                             "$ref": "#/definitions/entities.Patient"
@@ -700,7 +700,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "Обновленный пациент",
                         "schema": {
                             "$ref": "#/definitions/entities.Patient"
@@ -754,7 +754,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "204": {
                         "description": "Успешное удаление",
                         "schema": {
                             "$ref": "#/definitions/handlers.ResultResponse"
