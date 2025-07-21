@@ -1051,6 +1051,43 @@ paths:
     get:
       consumes:
       - application/json
+      description: Возвращает информацию о приёме скорой медицинской помощи вместе
+        со списком медицинских услуг
+      parameters:
+      - description: ID приёма СМП
+        in: path
+        name: smp_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о приёме и медуслугах
+          schema:
+            $ref: '#/definitions/entities.MedService'
+        "400":
+          description: Некорректный ID
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "404":
+          description: Приём не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить приём СМП с медуслугами по ID
+      tags:
+      - SMP
+    put:
+      consumes:
+      - application/json
       description: Возвращает созданное заключение
       produces:
       - application/json
