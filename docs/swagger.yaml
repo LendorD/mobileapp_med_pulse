@@ -338,6 +338,15 @@ definitions:
         example: true
         type: boolean
     type: object
+  models.DoctorInfoResponse:
+    properties:
+      full_name:
+        description: Полное имя врача
+        example: Иванов Иван Иванович
+        type: string
+      specialization:
+        $ref: '#/definitions/entities.Specialization'
+    type: object
   models.DoctorLoginRequest:
     description: Запрос для входа врача в систему
     properties:
@@ -374,6 +383,21 @@ definitions:
         - $ref: '#/definitions/models.PersonalInfoResponse'
         description: Персональная информация
     type: object
+  models.PatientsListResponse:
+    properties:
+      currentPage:
+        type: integer
+      hits:
+        items:
+          $ref: '#/definitions/entities.Patient'
+        type: array
+      hitsPerPage:
+        type: integer
+      totalHits:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
   models.PersonalInfoResponse:
     description: Документы и идентификационные данные пациента
     properties:
@@ -388,6 +412,37 @@ definitions:
       snils:
         description: Номер СНИЛС
         example: 123-456-789 00
+        type: string
+    type: object
+  models.ReceptionHospitalListResponse:
+    properties:
+      currentPage:
+        type: integer
+      hits:
+        items:
+          $ref: '#/definitions/models.ReceptionHospitalResponse'
+        type: array
+      hitsPerPage:
+        type: integer
+      totalHits:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  models.ReceptionHospitalResponse:
+    properties:
+      date:
+        example: "2023-10-15T14:30:00Z"
+        type: string
+      diagnosis:
+        example: ОРВИ
+        type: string
+      doctor:
+        $ref: '#/definitions/models.DoctorInfoResponse'
+      patient:
+        $ref: '#/definitions/models.ShortPatientResponse'
+      recommendations:
+        example: Постельный режим
         type: string
     type: object
   models.ShortPatientResponse:
@@ -646,39 +701,6 @@ paths:
       summary: Получить экстренные приёмы врача по дате
       tags:
       - EmergencyCall
-  /hospital/{doc_id}:
-    get:
-      consumes:
-      - application/json
-      description: Возвращает информацию о приёме
-      parameters:
-      - description: ID доктора
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Информация о приёме
-          schema:
-            $ref: '#/definitions/entities.ReceptionHospital'
-        "400":
-          description: Некорректный ID
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "404":
-          description: Приём не найден
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "500":
-          description: Внутренняя ошибка
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-      summary: Получить приём по доктору
-      tags:
-      - Reception
   /hospital/{recep_id}:
     put:
       consumes:
@@ -720,30 +742,211 @@ paths:
       summary: Обновить приём в больнице
       tags:
       - Reception
-  /hospital/patients/{pat_id}:
+  /hospital/patients/{doc_id}:
     get:
       consumes:
       - application/json
-      description: Возвращает информацию о приёме
+      description: Возвращает список уникальных пациентов, посетивших указанного доктора
       parameters:
-      - description: ID приёма
+      - description: ID доктора
         in: path
-        name: id
+        name: doc_id
         required: true
         type: integer
+      - description: |-
+          Номер страницы
+          (по умолчанию 1)
+        in: query
+        name: page
+        type: integer
+      - description: |-
+          Количество записей на странице
+          (по умолчанию 0 — без ограничения)
+        in: query
+        name: count
+        type: integer
+      - description: |-
+          Фильтр в формате field.operation.value.
+          Примеры:
+          full_name.like.Иван - имя содержит 'Иван',
+          birth_date.eq.1988-07-14 - точная дата рождения
+        in: query
+        name: filter
+        type: string
+      - description: |-
+          Сортировка в формате field.direction.
+          Примеры:
+          full_name.asc - по алфавиту,
+          id.desc - по убыванию ID пациента
+        in: query
+        name: order
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: Информация о приёме
+          description: Список пациентов
+          schema:
+            $ref: '#/definitions/models.PatientsListResponse'
+        "400":
+          description: Некорректные данные
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Получить список пациентов по ID доктора
+      tags:
+      - HospitalReception
+  /hospital/receptions/{doc_id}:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        История приёмов пациентов у конкретного врача в больнице. Если `doctor_id` = 0, возвращаются все приёмы всех врачей.
+        По умолчанию сортировка по статусу - "Запланирован" и дате приема.
+      parameters:
+      - description: ID врача
+        in: path
+        name: doc_id
+        required: true
+        type: integer
+      - description: |-
+          Номер страницы
+          (по умолчанию 1)
+        in: query
+        name: page
+        type: integer
+      - description: |-
+          Количество записей на странице
+          (по умолчанию 0 — без ограничения)
+        in: query
+        name: count
+        type: integer
+      - description: |-
+          Фильтр в формате field.operation.value.
+          Примеры:
+          recommendations.like.режим - поле с подстрокой 'режим',
+          date.eq.2025-07-10 - фильтр по дате
+          date.eq.14:00:00 - фильтр по времени
+        in: query
+        name: filter
+        type: string
+      - description: |-
+          Сортировка в формате field.direction.
+          Примеры:
+          date.desc - по убыванию даты,
+          id.asc - по возрастанию id
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: История приёмов врача списком
+          schema:
+            $ref: '#/definitions/models.ReceptionHospitalListResponse'
+        "400":
+          description: Некорректные данные запроса
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Получить список приёмов врача по его ID
+      tags:
+      - HospitalReception
+  /hospital/receptions/{recep_id}:
+    put:
+      consumes:
+      - application/json
+      description: Обновляет информацию о приёме в больнице по его ID
+      parameters:
+      - description: ID приёма
+        in: path
+        name: recep_id
+        required: true
+        type: integer
+      - description: Данные для обновления приёма
+        in: body
+        name: info
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateReceptionHospitalRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновлённый приём
           schema:
             $ref: '#/definitions/entities.ReceptionHospital'
         "400":
-          description: Некорректный ID
+          description: Ошибка разбора тела запроса или некорректные данные
           schema:
             $ref: '#/definitions/handlers.ResultError'
-        "404":
-          description: Приём не найден
+        "422":
+          description: Ошибка валидации входных данных
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Обновить приём в больнице
+      tags:
+      - HospitalReception
+  /hospital/receptions/patients/{pat_id}:
+    get:
+      consumes:
+      - application/json
+      description: История приемов пациента в больнице
+      parameters:
+      - description: ID пациента
+        in: path
+        name: pat_id
+        required: true
+        type: integer
+      - description: |-
+          Номер страницы
+          (по умолчанию 1)
+        in: query
+        name: page
+        type: integer
+      - description: |-
+          Количество записей на странице
+          (по умолчанию 0 — без ограничения)
+        in: query
+        name: count
+        type: integer
+      - description: |-
+          Фильтр в формате field.operation.value.
+          Примеры:
+          recommendations.like.режим - поле с подстрокой 'режим',
+          date.eq.2025-07-10 - фильтр по дате
+          date.eq.14:00:00 - фильтр по времени
+        in: query
+        name: filter
+        type: string
+      - description: |-
+          Сортировка в формате field.direction.
+          Примеры:
+          date.desc - по убыванию даты,
+          id.asc - по возрастанию id
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: История приёмов списком
+          schema:
+            $ref: '#/definitions/models.ReceptionHospitalListResponse'
+        "400":
+          description: Некорректные данные
           schema:
             $ref: '#/definitions/handlers.ResultError'
         "500":
@@ -752,7 +955,7 @@ paths:
             $ref: '#/definitions/handlers.ResultError'
       summary: Получить список приёмов пациента по его ID
       tags:
-      - Reception
+      - HospitalReception
   /medcard/{pat_id}:
     get:
       consumes:

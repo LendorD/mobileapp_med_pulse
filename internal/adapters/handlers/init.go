@@ -90,15 +90,11 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
 
 	// Приёмы больницы
-	// INFO: тут была неконсистентность путей, пришлось поправить
 	hospitalGroup := baseRouter.Group("/hospital")
+	hospitalGroup.GET("/receptions/patients/:pat_id", h.GetAllHospitalReceptionsByPatientID) // Все приемы пациента
+	hospitalGroup.GET("/receptions/:doc_id", h.GetReceptionsHospitalByDoctorID)              // Все приемы доктора
+	hospitalGroup.GET("/patients/:doc_id/", h.GetAllPatientsByDoctorID)                      // Все пациенты доктора
 	hospitalGroup.PUT("/receptions/:recep_id", h.UpdateReceptionHospitalByReceptionID)
-
-	hospitalGroup.GET("/receptions/patients/:pat_id", h.GetReceptionsHospitalByPatientID) // Все приемы пациента
-	hospitalGroup.GET("/receptions/:doc_id", h.GetReceptionsHospitalByDoctorID)           // Все приемы доктора
-
-	hospitalGroup.GET("/patients/:doc_id/", h.GetAllPatientsByDoctorID) // Все пациенты доктора
-
 	// МАКСИМ ДУДКО СЧИТАЕТ ЭТО НЕ НУЖНОЙ ГРУППОЙ ПУСКАЙ ВСЕ БУДЕТ В EMERGENCY
 	// Приёмы СМП
 	// smpGroup := baseRouter.Group("/smp")
