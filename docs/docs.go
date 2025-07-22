@@ -499,7 +499,7 @@ const docTemplate = `{
         },
         "/medcard/{pat_id}": {
             "get": {
-                "description": "Возвращает полную информацию из медицинской карты пациента",
+                "description": "Возвращает список платных услуг",
                 "consumes": [
                     "application/json"
                 ],
@@ -507,35 +507,14 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Medcard"
+                    "MedServices"
                 ],
-                "summary": "Получить медкарту по ID пациента",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID пациента",
-                        "name": "pat_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
+                "summary": "Получить все доступные платные услуги",
                 "responses": {
                     "200": {
                         "description": "Медицинская карта пациента",
                         "schema": {
-                            "$ref": "#/definitions/models.MedCardResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Некорректный ID пациента",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    },
-                    "404": {
-                        "description": "Медкарта не найдена",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/models.MedServicesListResponse"
                         }
                     },
                     "500": {
@@ -547,7 +526,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Обновляет информацию в медицинской карте пациента",
+                "description": "Обновляет данные в медицинской карте по ID пациента",
                 "consumes": [
                     "application/json"
                 ],
@@ -557,7 +536,7 @@ const docTemplate = `{
                 "tags": [
                     "Medcard"
                 ],
-                "summary": "Обновить данные медицинской карты",
+                "summary": "Обновить медицинскую карту пациента",
                 "parameters": [
                     {
                         "type": "integer",
@@ -578,7 +557,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Обновленная медицинская карта",
+                        "description": "Обновлённая медицинская карта",
                         "schema": {
                             "$ref": "#/definitions/models.MedCardResponse"
                         }
@@ -590,7 +569,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Медкарта не найдена",
+                        "description": "Медицинская карта не найдена",
                         "schema": {
                             "$ref": "#/definitions/handlers.ResultError"
                         }
@@ -944,8 +923,8 @@ const docTemplate = `{
                     "example": "+79991234567"
                 },
                 "priority": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "integer",
+                    "example": 1
                 },
                 "receptions": {
                     "type": "array",
@@ -953,37 +932,14 @@ const docTemplate = `{
                         "$ref": "#/definitions/entities.ReceptionSMP"
                     }
                 },
-                "status": {
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/entities.EmergencyStatus"
-                        }
-                    ],
-                    "example": "scheduled"
+                "type": {
+                    "type": "boolean",
+                    "example": true
                 },
                 "updated_at": {
                     "type": "string"
                 }
             }
-        },
-        "entities.EmergencyStatus": {
-            "type": "string",
-            "enum": [
-                "scheduled",
-                "accepted",
-                "on_place",
-                "completed",
-                "cancelled",
-                "no_show"
-            ],
-            "x-enum-varnames": [
-                "EmergencyStatusScheduled",
-                "EmergencyStatusAccepted",
-                "EmergencyStatusOnPlace",
-                "EmergencyStatusCompleted",
-                "EmergencyStatusCancelled",
-                "EmergencyStatusNoShow"
-            ]
         },
         "entities.MedService": {
             "type": "object",
@@ -1343,6 +1299,33 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.PersonalInfoResponse"
                         }
                     ]
+                }
+            }
+        },
+        "models.MedServicesListResponse": {
+            "type": "object",
+            "properties": {
+                "hits": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MedServicesResponse"
+                    }
+                },
+                "totalHits": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.MedServicesResponse": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "EKG"
+                },
+                "price": {
+                    "type": "integer",
+                    "example": 100
                 }
             }
         },

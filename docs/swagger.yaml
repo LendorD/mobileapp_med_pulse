@@ -69,35 +69,18 @@ definitions:
         example: "+79991234567"
         type: string
       priority:
-        example: true
-        type: boolean
+        example: 1
+        type: integer
       receptions:
         items:
           $ref: '#/definitions/entities.ReceptionSMP'
         type: array
-      status:
-        allOf:
-        - $ref: '#/definitions/entities.EmergencyStatus'
-        example: scheduled
+      type:
+        example: true
+        type: boolean
       updated_at:
         type: string
     type: object
-  entities.EmergencyStatus:
-    enum:
-    - scheduled
-    - accepted
-    - on_place
-    - completed
-    - cancelled
-    - no_show
-    type: string
-    x-enum-varnames:
-    - EmergencyStatusScheduled
-    - EmergencyStatusAccepted
-    - EmergencyStatusOnPlace
-    - EmergencyStatusCompleted
-    - EmergencyStatusCancelled
-    - EmergencyStatusNoShow
   entities.MedService:
     properties:
       created_at:
@@ -347,6 +330,24 @@ definitions:
         allOf:
         - $ref: '#/definitions/models.PersonalInfoResponse'
         description: Персональная информация
+    type: object
+  models.MedServicesListResponse:
+    properties:
+      hits:
+        items:
+          $ref: '#/definitions/models.MedServicesResponse'
+        type: array
+      totalHits:
+        type: integer
+    type: object
+  models.MedServicesResponse:
+    properties:
+      name:
+        example: EKG
+        type: string
+      price:
+        example: 100
+        type: integer
     type: object
   models.PatientsListResponse:
     properties:
@@ -848,39 +849,25 @@ paths:
     get:
       consumes:
       - application/json
-      description: Возвращает полную информацию из медицинской карты пациента
-      parameters:
-      - description: ID пациента
-        in: path
-        name: pat_id
-        required: true
-        type: integer
+      description: Возвращает список платных услуг
       produces:
       - application/json
       responses:
         "200":
           description: Медицинская карта пациента
           schema:
-            $ref: '#/definitions/models.MedCardResponse'
-        "400":
-          description: Некорректный ID пациента
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "404":
-          description: Медкарта не найдена
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
+            $ref: '#/definitions/models.MedServicesListResponse'
         "500":
           description: Внутренняя ошибка сервера
           schema:
             $ref: '#/definitions/handlers.ResultError'
-      summary: Получить медкарту по ID пациента
+      summary: Получить все доступные платные услуги
       tags:
-      - Medcard
+      - MedServices
     put:
       consumes:
       - application/json
-      description: Обновляет информацию в медицинской карте пациента
+      description: Обновляет данные в медицинской карте по ID пациента
       parameters:
       - description: ID пациента
         in: path
@@ -897,7 +884,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: Обновленная медицинская карта
+          description: Обновлённая медицинская карта
           schema:
             $ref: '#/definitions/models.MedCardResponse'
         "400":
@@ -905,7 +892,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ResultError'
         "404":
-          description: Медкарта не найдена
+          description: Медицинская карта не найдена
           schema:
             $ref: '#/definitions/handlers.ResultError'
         "422":
@@ -916,7 +903,7 @@ paths:
           description: Внутренняя ошибка сервера
           schema:
             $ref: '#/definitions/handlers.ResultError'
-      summary: Обновить данные медицинской карты
+      summary: Обновить медицинскую карту пациента
       tags:
       - Medcard
   /patients/{doc_id}:

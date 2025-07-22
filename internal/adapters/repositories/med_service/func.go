@@ -73,12 +73,13 @@ func (r *MedServiceRepositoryImpl) GetMedServiceByName(name string) (entities.Me
 	return service, nil
 }
 
-func (r *MedServiceRepositoryImpl) GetAllMedServices() ([]entities.MedService, error) {
+func (r *MedServiceRepositoryImpl) GetAllMedServices() ([]entities.MedService, int64, error) {
 	op := "repo.MedService.GetAllMedServices"
 
+	var total int64
 	var services []entities.MedService
-	if err := r.db.Find(&services).Error; err != nil {
-		return nil, errors.NewDBError(op, err)
+	if err := r.db.Model(&entities.MedService{}).Count(&total).Find(&services).Error; err != nil {
+		return nil, 0, errors.NewDBError(op, err)
 	}
-	return services, nil
+	return services, total, nil
 }
