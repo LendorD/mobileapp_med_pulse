@@ -97,6 +97,7 @@ func (r *ReceptionSmpRepositoryImpl) GetReceptionSmpByDateRange(start, end time.
 }
 
 func (r *ReceptionSmpRepositoryImpl) UpdateReceptionSmpMedServices(receptionID uint, services []entities.MedService) error {
+	op := "repo.ReceptionSmp.UpdateReceptionSmpMedServices"
 	if len(services) == 0 {
 		return nil
 	}
@@ -109,10 +110,10 @@ func (r *ReceptionSmpRepositoryImpl) UpdateReceptionSmpMedServices(receptionID u
 	// Проверяем что все услуги существуют
 	var count int64
 	if err := r.db.Model(&entities.MedService{}).Where("id IN ?", serviceIDs).Count(&count).Error; err != nil {
-		return fmt.Errorf("failed to check med services existence: %v", err)
+		return errors.NewDBError(op, err)
 	}
 	if int(count) != len(serviceIDs) {
-		return fmt.Errorf("some med services not found")
+		return errors.NewDBError(op, fmt.Errorf("some med services not found"))
 	}
 
 	tx := r.db.Begin()
@@ -125,7 +126,7 @@ func (r *ReceptionSmpRepositoryImpl) UpdateReceptionSmpMedServices(receptionID u
 	// Удаляем старые связи
 	if err := tx.Exec("DELETE FROM reception_smp_med_services WHERE reception_smp_id = ?", receptionID).Error; err != nil {
 		tx.Rollback()
-		return fmt.Errorf("failed to delete existing med services: %v", err)
+		return errors.NewDBError(op, err)
 	}
 
 	// Создаём batch для вставки
@@ -140,11 +141,11 @@ func (r *ReceptionSmpRepositoryImpl) UpdateReceptionSmpMedServices(receptionID u
 	// Вставляем новые связи batch-ом
 	if err := tx.Table("reception_smp_med_services").Create(inserts).Error; err != nil {
 		tx.Rollback()
-		return fmt.Errorf("failed to insert new med services: %v", err)
+		return errors.NewDBError(op, err)
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		return fmt.Errorf("failed to commit transaction: %v", err)
+		return errors.NewDBError(op, err)
 	}
 
 	return nil

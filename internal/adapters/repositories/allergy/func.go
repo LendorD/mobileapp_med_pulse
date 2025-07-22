@@ -1,8 +1,6 @@
 package allergy
 
 import (
-	"fmt"
-
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"gorm.io/gorm"
@@ -14,7 +12,7 @@ func (r *AllergyRepositoryImpl) CreateAllergy(allergy *entities.Allergy) (uint, 
 
 	err := r.db.Clauses(clause.Returning{}).Create(&allergy).Error
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", op, err)
+		return 0, errors.NewDBError(op, err)
 	}
 	return allergy.ID, nil
 }
@@ -93,10 +91,14 @@ func (r *AllergyRepositoryImpl) GetAllAllergies() ([]entities.Allergy, error) {
 }
 
 func (r *AllergyRepositoryImpl) GetAllergiesByPatientID(patientID uint) ([]entities.Allergy, error) {
+	op := "repo.Allergy.GetAllAllergiesByPatientId"
 	var allergies []entities.Allergy
 	err := r.db.Model(&entities.Patient{ID: patientID}).
 		Association("Allergy").
 		Find(&allergies)
+	if err == nil {
+		return nil, errors.NewDBError(op, err)
+	}
 	return allergies, err
 }
 
