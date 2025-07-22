@@ -27,6 +27,7 @@ func (u *MedServiceUsecase) GetAllMedServices() (models.MedServicesListResponse,
 	var result []models.MedServicesResponse
 	for _, s := range services {
 		result = append(result, models.MedServicesResponse{
+			ID:    s.ID,
 			Name:  s.Name,
 			Price: s.Price,
 		})
