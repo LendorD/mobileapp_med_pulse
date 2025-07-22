@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// Allergy представляет информацию об аллергене и его связи с пациентами
+// Allergy представляет информацию об аллергене
 type Allergy struct {
 	ID        uint      `gorm:"primarykey" json:"id"`
 	CreatedAt time.Time `json:"created_at"`

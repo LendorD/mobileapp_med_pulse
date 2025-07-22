@@ -35,3 +35,10 @@ type UpdateDoctorRequest struct {
 	Password         string `json:"password" example:"newpassword123"`        // Новый пароль
 	SpecializationID uint   `json:"specialization_id" example:"1"`            // Новая специализация
 }
+
+// DoctorShortResponse - краткая информация о враче
+type DoctorShortResponse struct {
+	ID             uint   `json:"id"`
+	FullName       string `json:"full_name" example:"Петров Петр Петрович"`
+	Specialization string `json:"specialization" example:"Терапевт"`
+}
