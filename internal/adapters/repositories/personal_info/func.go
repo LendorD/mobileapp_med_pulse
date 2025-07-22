@@ -97,3 +97,31 @@ func (r *PersonalInfoRepositoryImpl) UpdatePersonalInfoByPatientID(id uint, upda
 
 	return updatedContact.ID, nil
 }
+
+func (r *PersonalInfoRepositoryImpl) GetPersonalInfoByPatientIDWithTx(tx *gorm.DB, patientID uint) (*entities.PersonalInfo, error) {
+	var info entities.PersonalInfo
+	if err := tx.Where("patient_id = ?", patientID).First(&info).Error; err != nil {
+		return nil, err
+	}
+	return &info, nil
+}
+
+func (r *PersonalInfoRepositoryImpl) UpdatePersonalInfoByPatientIDWithTx(tx *gorm.DB, patientID uint, updateMap map[string]interface{}) (uint, error) {
+	op := "repo.PersonalInfo.UpdateInfoByPatientIDWithTx"
+
+	var updatedInfo entities.PersonalInfo
+	result := tx.
+		Clauses(clause.Returning{}).
+		Model(&updatedInfo).
+		Where("patient_id = ?", patientID).
+		Updates(updateMap)
+
+	if result.Error != nil {
+		return 0, errors.NewDBError(op, result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return 0, errors.NewNotFoundError("personal info not found")
+	}
+
+	return updatedInfo.ID, nil
+}

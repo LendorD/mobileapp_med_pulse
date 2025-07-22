@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
+	"gorm.io/gorm"
 )
 
 type Repository interface {
@@ -18,6 +19,13 @@ type Repository interface {
 	PersonalInfoRepository
 	ReceptionHospitalRepository
 	ReceptionSmpRepository
+	TxRepository
+}
+
+type TxRepository interface {
+	BeginTx() (*gorm.DB, error)
+	CommitTx(tx *gorm.DB) error
+	RollbackTx(tx *gorm.DB) error
 }
 
 // updated to match the new structure
@@ -42,6 +50,8 @@ type PersonalInfoRepository interface {
 	GetPersonalInfoByID(id uint) (entities.PersonalInfo, error)
 	GetPersonalInfoByPatientID(patientID uint) (entities.PersonalInfo, error)
 	UpdatePersonalInfoByPatientID(id uint, updateMap map[string]interface{}) (uint, error)
+	GetPersonalInfoByPatientIDWithTx(tx *gorm.DB, patientID uint) (*entities.PersonalInfo, error)
+	UpdatePersonalInfoByPatientIDWithTx(tx *gorm.DB, patientID uint, updateMap map[string]interface{}) (uint, error)
 }
 
 // updated to match the new structure
@@ -111,6 +121,8 @@ type PatientRepository interface {
 	GetAllPatients(page, count int, filterQuery string, filterParams []interface{}) ([]entities.Patient, int64, error)
 	GetPatientsByFullName(name string) ([]entities.Patient, error)
 	GetPatientAllergiesByID(id uint) ([]entities.Allergy, error)
+	GetPatientByIDWithTx(tx *gorm.DB, id uint) (*entities.Patient, error)
+	UpdatePatientWithTx(tx *gorm.DB, id uint, updateMap map[string]interface{}) (uint, error)
 }
 
 // updated to match the new structure
@@ -122,6 +134,9 @@ type ContactInfoRepository interface {
 	GetContactInfoByID(id uint) (entities.ContactInfo, error)
 	GetContactInfoByPatientID(patientID uint) (entities.ContactInfo, error)
 	UpdateContactInfoByPatientID(id uint, updateMap map[string]interface{}) (uint, error)
+	CreateContactInfoWithTx(tx *gorm.DB, info entities.ContactInfo) (uint, error)
+	GetContactInfoByIDWithTx(tx *gorm.DB, id uint) (*entities.ContactInfo, error)
+	UpdateContactInfoByIDWithTx(tx *gorm.DB, id uint, updateMap map[string]interface{}) (uint, error)
 }
 
 // updated to match the new structure
@@ -136,6 +151,8 @@ type AllergyRepository interface {
 	GetAllergiesByPatientID(patientID uint) ([]entities.Allergy, error)
 	RemovePatientAllergies(patientID uint, allergies []entities.Allergy) error
 	AddPatientAllergies(patientID uint, allergies []entities.Allergy) error
+	GetPatientAllergiesByIDWithTx(tx *gorm.DB, patientID uint) ([]entities.Allergy, error)
+	SyncPatientAllergiesWithTx(tx *gorm.DB, patientID uint, allergies []entities.Allergy) error
 }
 
 type AuthRepository interface {

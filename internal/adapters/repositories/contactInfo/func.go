@@ -20,6 +20,44 @@ func (r *ContactInfoRepositoryImpl) CreateContactInfo(info entities.ContactInfo)
 	return info.ID, nil
 }
 
+func (r *ContactInfoRepositoryImpl) CreateContactInfoWithTx(tx *gorm.DB, info entities.ContactInfo) (uint, error) {
+	op := "repo.ContactInfo.CreateContactInfo"
+
+	if err := tx.Create(&info).Error; err != nil {
+		return 0, errors.NewDBError(op, fmt.Errorf("failed to create Patient: %w", err))
+	}
+
+	return info.ID, nil
+}
+
+func (r *ContactInfoRepositoryImpl) GetContactInfoByIDWithTx(tx *gorm.DB, id uint) (*entities.ContactInfo, error) {
+	var info entities.ContactInfo
+	if err := tx.Where("id = ?", id).First(&info).Error; err != nil {
+		return nil, err
+	}
+	return &info, nil
+}
+
+func (r *ContactInfoRepositoryImpl) UpdateContactInfoByIDWithTx(tx *gorm.DB, id uint, updateMap map[string]interface{}) (uint, error) {
+	op := "repo.ContactInfo.UpdateContactInfoByPatientIDWithTx"
+
+	var updatedContact entities.ContactInfo
+	result := tx.
+		Clauses(clause.Returning{}).
+		Model(&updatedContact).
+		Where("id = ?", id).
+		Updates(updateMap)
+
+	if result.Error != nil {
+		return 0, errors.NewDBError(op, result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return 0, errors.NewNotFoundError("contact info not found")
+	}
+
+	return updatedContact.ID, nil
+}
+
 func (r *ContactInfoRepositoryImpl) UpdateContactInfo(id uint, updateMap map[string]interface{}) (uint, error) {
 	op := "repo.ContactInfo.UpdateContactInfo"
 
