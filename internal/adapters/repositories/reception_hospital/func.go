@@ -1,7 +1,6 @@
 package receptionHospital
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
@@ -199,6 +198,7 @@ func (r *ReceptionHospitalRepositoryImpl) GetReceptionsHospitalByDoctorAndDate(d
 	return receptions, total, nil
 }
 func (r *ReceptionHospitalRepositoryImpl) GetAllPatientsFromHospitalByDoctorID(docID uint, page, count int, queryFilter string, queryOrder string, parameters []interface{}) ([]entities.Patient, int64, error) {
+	op := "repo.ReceptionHospital.GetAllPatientsFromHospitalByDoctorID"
 	var patients []entities.Patient
 	var total int64
 	var db *gorm.DB
@@ -227,7 +227,7 @@ func (r *ReceptionHospitalRepositoryImpl) GetAllPatientsFromHospitalByDoctorID(d
 		}
 
 		if err := countDb.Select("COUNT(DISTINCT p.id)").Scan(&total).Error; err != nil {
-			return nil, 0, fmt.Errorf("failed to count unique patients: %w", err)
+			return nil, 0, errors.NewDBError(op, err)
 		}
 	} else {
 		// Все пациенты напрямую без приёмов
@@ -244,7 +244,7 @@ func (r *ReceptionHospitalRepositoryImpl) GetAllPatientsFromHospitalByDoctorID(d
 		}
 
 		if err := countDb.Count(&total).Error; err != nil {
-			return nil, 0, fmt.Errorf("failed to count patients: %w", err)
+			return nil, 0, errors.NewDBError(op, err)
 		}
 	}
 
@@ -261,13 +261,15 @@ func (r *ReceptionHospitalRepositoryImpl) GetAllPatientsFromHospitalByDoctorID(d
 
 	// Выполняем основной запрос
 	if err := db.Scan(&patients).Error; err != nil {
-		return nil, 0, fmt.Errorf("failed to get patients: %w", err)
+		return nil, 0, errors.NewDBError(op, err)
 	}
 
 	return patients, total, nil
 }
 
 func (r *ReceptionHospitalRepositoryImpl) GetAllPatientsFromHospital(page, count int, queryFilter string, parameters []interface{}) ([]entities.Patient, int64, error) {
+	op := "repo.ReceptionHospital.GetAllPatientsFromHospital"
+
 	var receptions []entities.ReceptionHospital
 	var totalRecords int64
 
@@ -285,7 +287,7 @@ func (r *ReceptionHospitalRepositoryImpl) GetAllPatientsFromHospital(page, count
 		countQuery = countQuery.Where(queryFilter, parameters...)
 	}
 	if err := countQuery.Count(&totalRecords).Error; err != nil {
-		return nil, 0, fmt.Errorf("failed to count unique patients: %w", err)
+		return nil, 0, errors.NewDBError(op, err)
 	}
 
 	// Применяем пагинацию
@@ -298,7 +300,7 @@ func (r *ReceptionHospitalRepositoryImpl) GetAllPatientsFromHospital(page, count
 	if err := query.
 		Preload("Patient").
 		Find(&receptions).Error; err != nil {
-		return nil, 0, fmt.Errorf("failed to fetch hospital receptions: %w", err)
+		return nil, 0, errors.NewDBError(op, err)
 	}
 
 	// Извлекаем пациентов из результатов
@@ -319,6 +321,7 @@ func (r *ReceptionHospitalRepositoryImpl) GetAllPatientsFromHospital(page, count
 }
 
 func (r *ReceptionHospitalRepositoryImpl) GetAllHospitalReceptionsByDoctorID(doc_id uint, page, count int, queryFilter string, queryOrder string, parameters []interface{}) ([]entities.ReceptionHospital, int64, error) {
+	op := "repo.ReceptionHospital.GetAllHospitalReceptionsByDoctorID"
 	var receptions []entities.ReceptionHospital
 	var total int64
 
@@ -338,7 +341,7 @@ func (r *ReceptionHospitalRepositoryImpl) GetAllHospitalReceptionsByDoctorID(doc
 	countDb := db.Session(&gorm.Session{}).Select("COUNT(*)")
 
 	if err := countDb.Count(&total).Error; err != nil {
-		return nil, 0, fmt.Errorf("failed to count receptions: %w", err)
+		return nil, 0, errors.NewDBError(op, err)
 	}
 
 	// Применяем сортировку
@@ -354,12 +357,13 @@ func (r *ReceptionHospitalRepositoryImpl) GetAllHospitalReceptionsByDoctorID(doc
 
 	// Получаем приёмы с preload'ом пациента
 	if err := db.Preload("Patient").Preload("Doctor").Find(&receptions).Error; err != nil {
-		return nil, 0, fmt.Errorf("failed to get receptions: %w", err)
+		return nil, 0, errors.NewDBError(op, err)
 	}
 	return receptions, total, nil
 }
 
 func (r *ReceptionHospitalRepositoryImpl) GetAllHospitalReceptionsByPatientID(pat_id uint, page, count int, queryFilter string, queryOrder string, parameters []interface{}) ([]entities.ReceptionHospital, int64, error) {
+	op := "repo.ReceptionHospital.GetAllHospitalReceptionsByPatientID"
 	var receptions []entities.ReceptionHospital
 	var total int64
 
@@ -379,7 +383,7 @@ func (r *ReceptionHospitalRepositoryImpl) GetAllHospitalReceptionsByPatientID(pa
 	countDb := db.Session(&gorm.Session{}).Select("COUNT(*)")
 
 	if err := countDb.Count(&total).Error; err != nil {
-		return nil, 0, fmt.Errorf("failed to count receptions: %w", err)
+		return nil, 0, errors.NewDBError(op, err)
 	}
 
 	// Применяем сортировку
@@ -395,7 +399,7 @@ func (r *ReceptionHospitalRepositoryImpl) GetAllHospitalReceptionsByPatientID(pa
 
 	// Получаем приёмы с preload'ом пациента
 	if err := db.Preload("Patient").Preload("Doctor.Specialization").Find(&receptions).Error; err != nil {
-		return nil, 0, fmt.Errorf("failed to get receptions: %w", err)
+		return nil, 0, errors.NewDBError(op, err)
 	}
 	return receptions, total, nil
 }

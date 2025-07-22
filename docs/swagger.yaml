@@ -286,15 +286,6 @@ definitions:
         example: "+79991234567"
         type: string
     type: object
-  models.DoctorInfoResponse:
-    properties:
-      full_name:
-        description: Полное имя врача
-        example: Иванов Иван Иванович
-        type: string
-      specialization:
-        $ref: '#/definitions/entities.Specialization'
-    type: object
   models.DoctorAuthResponse:
     description: Ответ с данными авторизованного врача
     properties:
@@ -306,6 +297,15 @@ definitions:
         description: JWT токен
         example: eyJhbGciOi...
         type: string
+    type: object
+  models.DoctorInfoResponse:
+    properties:
+      full_name:
+        description: Полное имя врача
+        example: Иванов Иван Иванович
+        type: string
+      specialization:
+        $ref: '#/definitions/entities.Specialization'
     type: object
   models.DoctorLoginRequest:
     description: Запрос для входа врача в систему

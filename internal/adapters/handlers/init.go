@@ -91,6 +91,7 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	hospitalGroup.GET("/receptions/:doc_id", h.GetReceptionsHospitalByDoctorID)              // Все приемы доктора
 
 	hospitalGroup.PUT("/receptions/:recep_id", h.UpdateReceptionHospitalByReceptionID)
+
 	// МАКСИМ ДУДКО СЧИТАЕТ ЭТО НЕ НУЖНОЙ ГРУППОЙ ПУСКАЙ ВСЕ БУДЕТ В EMERGENCY
 	// Приёмы СМП
 	// smpGroup := baseRouter.Group("/smp")

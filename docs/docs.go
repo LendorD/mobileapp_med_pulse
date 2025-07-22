@@ -1229,19 +1229,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.DoctorInfoResponse": {
-            "type": "object",
-            "properties": {
-                "full_name": {
-                    "description": "Полное имя врача",
-                    "type": "string",
-                    "example": "Иванов Иван Иванович"
-                },
-                "specialization": {
-                    "$ref": "#/definitions/entities.Specialization"
-                }
-            }
-        },
         "models.DoctorAuthResponse": {
             "description": "Ответ с данными авторизованного врача",
             "type": "object",
@@ -1255,6 +1242,19 @@ const docTemplate = `{
                     "description": "JWT токен",
                     "type": "string",
                     "example": "eyJhbGciOi..."
+                }
+            }
+        },
+        "models.DoctorInfoResponse": {
+            "type": "object",
+            "properties": {
+                "full_name": {
+                    "description": "Полное имя врача",
+                    "type": "string",
+                    "example": "Иванов Иван Иванович"
+                },
+                "specialization": {
+                    "$ref": "#/definitions/entities.Specialization"
                 }
             }
         },

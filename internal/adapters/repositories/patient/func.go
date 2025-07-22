@@ -10,9 +10,10 @@ import (
 )
 
 func (r *PatientRepositoryImpl) GetPatientByIDWithTx(tx *gorm.DB, id uint) (*entities.Patient, error) {
+	op := "repo.Patient.UpdatePatientWithTx"
 	var patient entities.Patient
 	if err := tx.First(&patient, id).Error; err != nil {
-		return nil, err
+		return nil, errors.NewDBError(op, err)
 	}
 	return &patient, nil
 }
@@ -154,6 +155,7 @@ func (r *PatientRepositoryImpl) GetPatientByID(id uint) (entities.Patient, error
 }
 
 func (r *PatientRepositoryImpl) GetAllPatients(page, count int, queryFilter string, parameters []interface{}) ([]entities.Patient, int64, error) {
+	op := "repo.Patient.GetAllPatients"
 	// Создаем базовый запрос
 	query := r.db.Model(&entities.Patient{})
 
@@ -165,7 +167,7 @@ func (r *PatientRepositoryImpl) GetAllPatients(page, count int, queryFilter stri
 	// Подсчитываем общее количество записей
 	var totalRecords int64
 	if err := query.Count(&totalRecords).Error; err != nil {
-		return nil, 0, fmt.Errorf("failed to count records: %w", err)
+		return nil, 0, errors.NewDBError(op, err)
 	}
 
 	// Применяем пагинацию
@@ -178,7 +180,7 @@ func (r *PatientRepositoryImpl) GetAllPatients(page, count int, queryFilter stri
 	var patients []entities.Patient
 	result := query.Find(&patients)
 	if result.Error != nil {
-		return nil, 0, fmt.Errorf("failed to fetch patients: %w", result.Error)
+		return nil, 0, errors.NewDBError(op, result.Error)
 	}
 
 	return patients, totalRecords, nil

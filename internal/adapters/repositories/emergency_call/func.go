@@ -1,7 +1,6 @@
 package EmergencyCall
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
@@ -110,6 +109,7 @@ func (r *EmergencyCallRepositoryImpl) GetEmergencyReceptionsByDoctorAndDate(
 	date time.Time,
 	page, perPage int,
 ) ([]entities.EmergencyCall, int64, error) {
+	op := "repo.EmergencyCall.GetEmergencyReceptionsByDoctorAndDate"
 	var calls []entities.EmergencyCall
 	var total int64
 
@@ -129,7 +129,7 @@ func (r *EmergencyCallRepositoryImpl) GetEmergencyReceptionsByDoctorAndDate(
 
 	// Получаем общее количество
 	if err := baseQuery.Count(&total).Error; err != nil {
-		return nil, 0, fmt.Errorf("failed to count emergency calls: %w", err)
+		return nil, 0, errors.NewDBError(op, err)
 	}
 
 	// Получаем данные с пагинацией и сортировкой
@@ -150,7 +150,7 @@ func (r *EmergencyCallRepositoryImpl) GetEmergencyReceptionsByDoctorAndDate(
 		Error
 
 	if err != nil {
-		return nil, 0, fmt.Errorf("failed to get emergency calls: %w", err)
+		return nil, 0, errors.NewDBError(op, err)
 	}
 
 	return calls, total, nil

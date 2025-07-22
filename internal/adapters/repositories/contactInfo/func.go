@@ -31,9 +31,10 @@ func (r *ContactInfoRepositoryImpl) CreateContactInfoWithTx(tx *gorm.DB, info en
 }
 
 func (r *ContactInfoRepositoryImpl) GetContactInfoByIDWithTx(tx *gorm.DB, id uint) (*entities.ContactInfo, error) {
+	op := "repo.ContactInfo.GetContactInfoByIDWithTx"
 	var info entities.ContactInfo
 	if err := tx.Where("id = ?", id).First(&info).Error; err != nil {
-		return nil, err
+		return nil, errors.NewDBError(op, err)
 	}
 	return &info, nil
 }
