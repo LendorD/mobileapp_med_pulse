@@ -58,7 +58,7 @@ func (r *ReceptionHospitalRepositoryImpl) GetReceptionHospitalByID(id uint) (ent
 	op := "repo.ReceptionHospital.GetReceptionHospitalByID"
 
 	var reception entities.ReceptionHospital
-	if err := r.db.First(&reception, id).Error; err != nil {
+	if err := r.db.Preload("Doctor.Specialization").Preload("Patient").First(&reception, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return entities.ReceptionHospital{}, errors.NewNotFoundError("hospital reception not found")
 		}
@@ -198,35 +198,54 @@ func (r *ReceptionHospitalRepositoryImpl) GetReceptionsHospitalByDoctorAndDate(d
 
 	return receptions, total, nil
 }
-
 func (r *ReceptionHospitalRepositoryImpl) GetAllPatientsFromHospitalByDoctorID(docID uint, page, count int, queryFilter string, queryOrder string, parameters []interface{}) ([]entities.Patient, int64, error) {
 	var patients []entities.Patient
 	var total int64
-	db := r.db
-	// Базовый запрос: JOIN пациентов через приёмы
+	var db *gorm.DB
+	var countDb *gorm.DB
+
 	if docID > 0 {
 		// JOIN через приёмы
-		db = db.
+		db = r.db.
 			Table("reception_hospitals AS r").
 			Select("DISTINCT p.*").
 			Joins("JOIN patients p ON p.id = r.patient_id").
 			Where("r.doctor_id = ?", docID)
+
+		if queryFilter != "" {
+			db = db.Where(queryFilter, parameters...)
+		}
+
+		// Отдельный запрос на подсчёт уникальных пациентов
+		countDb = r.db.
+			Table("reception_hospitals AS r").
+			Joins("JOIN patients p ON p.id = r.patient_id").
+			Where("r.doctor_id = ?", docID)
+
+		if queryFilter != "" {
+			countDb = countDb.Where(queryFilter, parameters...)
+		}
+
+		if err := countDb.Select("COUNT(DISTINCT p.id)").Scan(&total).Error; err != nil {
+			return nil, 0, fmt.Errorf("failed to count unique patients: %w", err)
+		}
 	} else {
-		// Просто все пациенты
-		db = db.Model(&entities.Patient{})
-	}
+		// Все пациенты напрямую без приёмов
+		db = r.db.Model(&entities.Patient{})
 
-	// Дополнительные фильтры по пациенту
-	if queryFilter != "" {
-		db = db.Where(queryFilter, parameters...)
-	}
+		if queryFilter != "" {
+			db = db.Where(queryFilter, parameters...)
+		}
 
-	// Копия запроса для подсчёта общего числа пациентов
-	countDb := db.Session(&gorm.Session{}).
-		Select("COUNT(DISTINCT p.id)")
+		countDb = r.db.Model(&entities.Patient{})
 
-	if err := countDb.Count(&total).Error; err != nil {
-		return nil, 0, fmt.Errorf("failed to count unique patients: %w", err)
+		if queryFilter != "" {
+			countDb = countDb.Where(queryFilter, parameters...)
+		}
+
+		if err := countDb.Count(&total).Error; err != nil {
+			return nil, 0, fmt.Errorf("failed to count patients: %w", err)
+		}
 	}
 
 	// Применяем сортировку

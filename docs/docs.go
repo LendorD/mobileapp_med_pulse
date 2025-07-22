@@ -240,9 +240,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/hospital/patients/{pat_id}": {
+        "/hospital/patients/{doc_id}": {
             "get": {
-                "description": "Возвращает информацию о приёме",
+                "description": "Возвращает список уникальных пациентов, посетивших указанного доктора",
                 "consumes": [
                     "application/json"
                 ],
@@ -250,33 +250,51 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Reception"
+                    "HospitalReception"
                 ],
-                "summary": "Получить список приёмов пациента по его ID",
+                "summary": "Получить список пациентов по ID доктора",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "ID приёма",
-                        "name": "id",
+                        "description": "ID доктора",
+                        "name": "doc_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Номер страницы\n(по умолчанию 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Количество записей на странице\n(по умолчанию 0 — без ограничения)",
+                        "name": "count",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фильтр в формате field.operation.value.\nПримеры:\nfull_name.like.Иван - имя содержит 'Иван',\nbirth_date.eq.1988-07-14 - точная дата рождения",
+                        "name": "filter",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Сортировка в формате field.direction.\nПримеры:\nfull_name.asc - по алфавиту,\nid.desc - по убыванию ID пациента",
+                        "name": "order",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Информация о приёме",
+                        "description": "Список пациентов",
                         "schema": {
-                            "$ref": "#/definitions/entities.ReceptionHospital"
+                            "$ref": "#/definitions/models.PatientsListResponse"
                         }
                     },
                     "400": {
-                        "description": "Некорректный ID",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    },
-                    "404": {
-                        "description": "Приём не найден",
+                        "description": "Некорректные данные",
                         "schema": {
                             "$ref": "#/definitions/handlers.ResultError"
                         }
@@ -290,9 +308,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/hospital/{doc_id}": {
+        "/hospital/receptions/patients/{pat_id}": {
             "get": {
-                "description": "Возвращает информацию о приёме",
+                "description": "История приемов пациента в больнице",
                 "consumes": [
                     "application/json"
                 ],
@@ -300,39 +318,184 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Reception"
+                    "HospitalReception"
                 ],
-                "summary": "Получить приём по доктору",
+                "summary": "Получить список приёмов пациента по его ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "ID доктора",
-                        "name": "id",
+                        "description": "ID пациента",
+                        "name": "pat_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Номер страницы\n(по умолчанию 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Количество записей на странице\n(по умолчанию 0 — без ограничения)",
+                        "name": "count",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фильтр в формате field.operation.value.\nПримеры:\nrecommendations.like.режим - поле с подстрокой 'режим',\ndate.eq.2025-07-10 - фильтр по дате\ndate.eq.14:00:00 - фильтр по времени",
+                        "name": "filter",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Сортировка в формате field.direction.\nПримеры:\ndate.desc - по убыванию даты,\nid.asc - по возрастанию id",
+                        "name": "order",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Информация о приёме",
+                        "description": "История приёмов списком",
                         "schema": {
-                            "$ref": "#/definitions/entities.ReceptionHospital"
+                            "$ref": "#/definitions/models.ReceptionHospitalListResponse"
                         }
                     },
                     "400": {
-                        "description": "Некорректный ID",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    },
-                    "404": {
-                        "description": "Приём не найден",
+                        "description": "Некорректные данные",
                         "schema": {
                             "$ref": "#/definitions/handlers.ResultError"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    }
+                }
+            }
+        },
+        "/hospital/receptions/{doc_id}": {
+            "get": {
+                "description": "История приёмов пациентов у конкретного врача в больнице. Если ` + "`" + `doctor_id` + "`" + ` = 0, возвращаются все приёмы всех врачей.\nПо умолчанию сортировка по статусу - \"Запланирован\" и дате приема.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "HospitalReception"
+                ],
+                "summary": "Получить список приёмов врача по его ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID врача",
+                        "name": "doc_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Номер страницы\n(по умолчанию 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Количество записей на странице\n(по умолчанию 0 — без ограничения)",
+                        "name": "count",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фильтр в формате field.operation.value.\nПримеры:\nrecommendations.like.режим - поле с подстрокой 'режим',\ndate.eq.2025-07-10 - фильтр по дате\ndate.eq.14:00:00 - фильтр по времени",
+                        "name": "filter",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Сортировка в формате field.direction.\nПримеры:\ndate.desc - по убыванию даты,\nid.asc - по возрастанию id",
+                        "name": "order",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "История приёмов врача списком",
+                        "schema": {
+                            "$ref": "#/definitions/models.ReceptionHospitalListResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные данные запроса",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    }
+                }
+            }
+        },
+        "/hospital/receptions/{recep_id}": {
+            "put": {
+                "description": "Обновляет информацию о приёме в больнице по его ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "HospitalReception"
+                ],
+                "summary": "Обновить приём в больнице",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID приёма",
+                        "name": "recep_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные для обновления приёма",
+                        "name": "info",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateReceptionHospitalRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Обновлённый приём",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ReceptionHospital"
+                        }
+                    },
+                    "400": {
+                        "description": "Ошибка разбора тела запроса или некорректные данные",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка валидации входных данных",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
                         "schema": {
                             "$ref": "#/definitions/handlers.ResultError"
                         }
@@ -1427,6 +1590,19 @@ const docTemplate = `{
                 }
             }
         },
+        "models.DoctorInfoResponse": {
+            "type": "object",
+            "properties": {
+                "full_name": {
+                    "description": "Полное имя врача",
+                    "type": "string",
+                    "example": "Иванов Иван Иванович"
+                },
+                "specialization": {
+                    "$ref": "#/definitions/entities.Specialization"
+                }
+            }
+        },
         "models.DoctorLoginRequest": {
             "description": "Запрос для входа врача в систему",
             "type": "object",
@@ -1484,6 +1660,29 @@ const docTemplate = `{
                 }
             }
         },
+        "models.PatientsListResponse": {
+            "type": "object",
+            "properties": {
+                "currentPage": {
+                    "type": "integer"
+                },
+                "hits": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Patient"
+                    }
+                },
+                "hitsPerPage": {
+                    "type": "integer"
+                },
+                "totalHits": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.PersonalInfoResponse": {
             "description": "Документы и идентификационные данные пациента",
             "type": "object",
@@ -1502,6 +1701,52 @@ const docTemplate = `{
                     "description": "Номер СНИЛС",
                     "type": "string",
                     "example": "123-456-789 00"
+                }
+            }
+        },
+        "models.ReceptionHospitalListResponse": {
+            "type": "object",
+            "properties": {
+                "currentPage": {
+                    "type": "integer"
+                },
+                "hits": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ReceptionHospitalResponse"
+                    }
+                },
+                "hitsPerPage": {
+                    "type": "integer"
+                },
+                "totalHits": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.ReceptionHospitalResponse": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "example": "2023-10-15T14:30:00Z"
+                },
+                "diagnosis": {
+                    "type": "string",
+                    "example": "ОРВИ"
+                },
+                "doctor": {
+                    "$ref": "#/definitions/models.DoctorInfoResponse"
+                },
+                "patient": {
+                    "$ref": "#/definitions/models.ShortPatientResponse"
+                },
+                "recommendations": {
+                    "type": "string",
+                    "example": "Постельный режим"
                 }
             }
         },
