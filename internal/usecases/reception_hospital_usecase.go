@@ -2,12 +2,13 @@ package usecases
 
 import (
 	"fmt"
+	"math"
+
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"github.com/jackc/pgtype"
-	"math"
 )
 
 type ReceptionHospitalUsecase struct {
@@ -257,9 +258,8 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorID(doc_id uint, 
 				FullName: reception.Doctor.FullName,
 				// TODO: добавить специализацию если нужно
 			},
-			Recommendations:       reception.Recommendations,
-			SpecializationData:    specData,
-			RawSpecializationData: reception.SpecializationData.Bytes,
+			Recommendations:    reception.Recommendations,
+			SpecializationData: specData,
 		}
 	}
 

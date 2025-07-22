@@ -29,6 +29,42 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+type SpecializationType int
+
+const (
+	Neurologist SpecializationType = iota + 1
+	Traumatologist
+	Psychiatrist
+	Urologist
+	Otolaryngologist
+	Proctologist
+	Allergologist
+)
+
+func (s SpecializationType) Title() string {
+	return [...]string{
+		"Невролог",
+		"Травматолог",
+		"Психиатр",
+		"Уролог",
+		"Оториноларинголог",
+		"Проктолог",
+		"Аллерголог",
+	}[s-1]
+}
+
+func AllSpecializations() []SpecializationType {
+	return []SpecializationType{
+		Neurologist,
+		Traumatologist,
+		Psychiatrist,
+		Urologist,
+		Otolaryngologist,
+		Proctologist,
+		Allergologist,
+	}
+}
+
 type Repository struct {
 	interfaces.AuthRepository
 	interfaces.AllergyRepository
@@ -381,13 +417,14 @@ func autoMigrate(db *gorm.DB) error {
 func seedTestData(db *gorm.DB) error {
 	// 1. Создаем специализации
 	specializations := []*entities.Specialization{
-		{Title: "Терапевт"},
-		{Title: "Хирург"},
-		{Title: "Кардиолог"},
 		{Title: "Невролог"},
-		{Title: "Офтальмолог"},
+		{Title: "Травматолог"},
+		{Title: "Психиатр"},
+		{Title: "Уролог"},
+		{Title: "Оториноларинголог"},
+		{Title: "Аллерголог"},
+		{Title: "Проктолог"},
 	}
-
 	for _, spec := range specializations {
 		if err := db.Create(spec).Error; err != nil {
 			return fmt.Errorf("failed to create specialization %s: %w", spec.Title, err)
@@ -396,25 +433,68 @@ func seedTestData(db *gorm.DB) error {
 
 	hashPass123 := hashPassword("123")
 	// 1.2 Создаем докторов с привязкой к специализациям
-
 	doctors := []*entities.Doctor{
+		// Неврологи
 		{
 			FullName:         "Иванов Иван Иванович",
 			Login:            "doctor_ivanov",
 			PasswordHash:     hashPass123,
-			SpecializationID: 1, // Терапевт
+			SpecializationID: 1,
+			Specialization:   &entities.Specialization{ID: 1, Title: "Невролог"},
 		},
 		{
 			FullName:         "Петрова Мария Сергеевна",
 			Login:            "doctor_petrova",
 			PasswordHash:     hashPass123,
-			SpecializationID: 2, // Хирург
+			SpecializationID: 1,
+			Specialization:   &entities.Specialization{ID: 1, Title: "Невролог"},
 		},
+		// Травматологи
 		{
 			FullName:         "Сидоров Алексей Дмитриевич",
 			Login:            "doctor_sidorov",
 			PasswordHash:     hashPass123,
-			SpecializationID: 3, // Кардиолог
+			SpecializationID: 2,
+			Specialization:   &entities.Specialization{ID: 2},
+		},
+		{
+			FullName:         "Кузнецова Елена Викторовна",
+			Login:            "doctor_kuznetsova",
+			PasswordHash:     hashPass123,
+			SpecializationID: 2,
+			Specialization:   &entities.Specialization{ID: 2},
+		},
+		// Кардиологи
+		{
+			FullName:         "Смирнов Дмитрий Олегович",
+			Login:            "doctor_smirnov",
+			PasswordHash:     hashPass123,
+			SpecializationID: 3,
+			Specialization:   &entities.Specialization{ID: 3},
+		},
+		// Неврологи
+		{
+			FullName:         "Васильев Андрей Николаевич",
+			Login:            "doctor_vasiliev",
+			PasswordHash:     hashPass123,
+			SpecializationID: 4,
+			Specialization:   &entities.Specialization{ID: 4},
+		},
+		// Травматологи
+		{
+			FullName:         "Попов Сергей Иванович",
+			Login:            "doctor_popov",
+			PasswordHash:     hashPass123,
+			SpecializationID: 6,
+			Specialization:   &entities.Specialization{ID: 6},
+		},
+		// Психиатры
+		{
+			FullName:         "Морозова Ольга Дмитриевна",
+			Login:            "doctor_morozova",
+			PasswordHash:     hashPass123,
+			SpecializationID: 7,
+			Specialization:   &entities.Specialization{ID: 7},
 		},
 	}
 
@@ -424,11 +504,15 @@ func seedTestData(db *gorm.DB) error {
 		}
 	}
 
+	// Остальной код остается без изменений...
 	// 3. Создаем медицинские услуги
 	services := []*entities.MedService{
 		{Name: "ЭКГ", Price: 500},
 		{Name: "Рентген", Price: 1500},
 		{Name: "УЗИ", Price: 1000},
+		{Name: "Анализ крови", Price: 300},
+		{Name: "КТ", Price: 2500},
+		{Name: "МРТ", Price: 3000},
 	}
 
 	for _, serv := range services {
@@ -506,12 +590,12 @@ func seedTestData(db *gorm.DB) error {
 		}
 	}
 
-	// 7. Создаем обычные приемы в больнице с JSONB данными
+	// 7. Создаем обычные приемы в больнице с детализированными JSONB данными
 	now := time.Now()
 	dates := []time.Time{
-		time.Date(now.Year(), 7, 10, 0, 0, 0, 0, time.UTC),
-		time.Date(now.Year(), 7, 11, 0, 0, 0, 0, time.UTC),
-		time.Date(now.Year(), 7, 12, 0, 0, 0, 0, time.UTC),
+		time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, time.UTC),
+		time.Date(now.Year(), now.Month(), now.Day()+2, 0, 0, 0, 0, time.UTC),
+		time.Date(now.Year(), now.Month(), now.Day()+3, 0, 0, 0, 0, time.UTC),
 	}
 
 	statuses := []entities.ReceptionStatus{
@@ -520,13 +604,11 @@ func seedTestData(db *gorm.DB) error {
 		entities.StatusCancelled,
 		entities.StatusNoShow,
 	}
-
 	addresses := []string{
 		"Москва, ул. Ленина, д. 15",
 		"Москва, ул. Пушкина, д. 10",
 		"Москва, пр. Вернадского, д. 25",
 	}
-
 	for i := 0; i < 50; i++ {
 		doctor := doctors[i%len(doctors)]
 		patient := patients[i%len(patients)]
@@ -536,33 +618,96 @@ func seedTestData(db *gorm.DB) error {
 
 		// Создаем JSONB данные в зависимости от специализации врача
 		var specData map[string]interface{}
+
+		log.Printf("DEBUG:  Specialization title: '%s'", doctor.Specialization.Title)
+
 		switch doctor.Specialization.Title {
-		case "Терапевт":
-			specData = map[string]interface{}{
-				"blood_pressure": fmt.Sprintf("%d/%d", 110+rand.Intn(20), 70+rand.Intn(15)),
-				"temperature":    36.6 + rand.Float32()*0.7,
-				"anamnesis":      "Стандартный осмотр терапевта",
-			}
-		case "Кардиолог":
-			specData = map[string]interface{}{
-				"ecg":            "Нормальный синусовый ритм",
-				"heart_rate":     60 + rand.Intn(40),
-				"blood_pressure": fmt.Sprintf("%d/%d", 110+rand.Intn(30), 70+rand.Intn(20)),
-			}
+
 		case "Невролог":
 			specData = map[string]interface{}{
 				"reflexes": map[string]string{
-					"knee":    "normal",
-					"pupil":   "reactive",
-					"plantar": "normal",
+					"knee":    []string{"норма", "повышен", "снижен"}[rand.Intn(3)],
+					"biceps":  []string{"норма", "повышен", "снижен"}[rand.Intn(3)],
+					"plantar": []string{"норма", "патологический"}[rand.Intn(2)],
 				},
-				"complaints": []string{"головная боль", "головокружение"},
+				"muscle_strength": map[string]int{
+					"right_arm": 3 + rand.Intn(3),
+					"left_arm":  3 + rand.Intn(3),
+				},
+				"sensitivity":        []string{"норма", "гипестезия", "гиперстезия"}[rand.Intn(3)],
+				"coordination_tests": []string{"норма", "атаксия", "дисметрия"}[rand.Intn(3)],
+				"gait":               []string{"нормальная", "атактическая", "спастическая"}[rand.Intn(3)],
+				"diagnosis":          []string{"Остеохондроз", "ДЭП", "Последствия ОНМК"}[rand.Intn(3)],
+				"recommendations":    "МРТ головного мозга, консультация сосудистого хирурга",
 			}
+
+		case "Травматолог":
+			injuryType := []string{"перелом", "ушиб", "растяжение", "вывих"}[rand.Intn(4)]
+			specData = map[string]interface{}{
+				"injury_type":      injuryType,
+				"injury_mechanism": []string{"падение", "ДТП", "спортивная травма", "бытовая травма"}[rand.Intn(4)],
+				"localization":     []string{"кисть", "плечо", "голень", "позвоночник"}[rand.Intn(4)],
+				"xray_results":     fmt.Sprintf("%s не обнаружен", injuryType),
+				"fracture":         injuryType == "перелом",
+				"dislocation":      injuryType == "вывих",
+				"sprain":           injuryType == "растяжение",
+				"treatment_plan":   []string{"гипс", "фиксатор", "операция", "физиотерапия"}[rand.Intn(4)],
+			}
+
+		case "Психиатр":
+			risk := rand.Intn(2) == 1
+			specData = map[string]interface{}{
+				"mental_status":   []string{"ясное", "помраченное", "делирий"}[rand.Intn(3)],
+				"mood":            []string{"нормальное", "депрессивное", "эйфоричное"}[rand.Intn(3)],
+				"thought_process": []string{"логичное", "разорванное", "замедленное"}[rand.Intn(3)],
+				"risk_assessment": map[string]bool{
+					"suicide":  risk,
+					"selfHarm": risk,
+					"violence": rand.Intn(2) == 1,
+				},
+				"diagnosis_icd": fmt.Sprintf("F%02d.%d", 20+rand.Intn(30), rand.Intn(5)),
+				"therapy_plan":  []string{"амбулаторное наблюдение", "стационар", "медикаментозная терапия"}[rand.Intn(3)],
+			}
+
+		case "Уролог":
+			specData = map[string]interface{}{
+				"complaints": []string{"боли", "дизурия", "гематурия", "отеки"}[rand.Intn(4)],
+				"urinalysis": map[string]string{
+					"color":      []string{"светло-желтый", "темный", "мутный"}[rand.Intn(3)],
+					"protein":    []string{"отсутствует", "следы", "1+"}[rand.Intn(3)],
+					"leukocytes": []string{"0-1", "10-15", "50-100"}[rand.Intn(3)],
+				},
+				"diagnosis": []string{"Цистит", "Пиелонефрит", "МКБ"}[rand.Intn(3)],
+				"treatment": "Антибиотикотерапия, обильное питье",
+			}
+
+		case "Оториноларинголог":
+			specData = map[string]interface{}{
+				"complaints":         []string{"боль в горле", "заложенность носа", "снижение слуха"}[rand.Intn(3)],
+				"nose_examination":   []string{"норма", "отек", "гнойное отделяемое"}[rand.Intn(3)],
+				"throat_examination": []string{"гиперемия", "налеты", "норма"}[rand.Intn(3)],
+				"diagnosis":          []string{"Острый фарингит", "Отит", "Гайморит"}[rand.Intn(3)],
+				"recommendations":    "Антисептики, антибиотики местно",
+			}
+
+		case "Проктолог":
+			specData = map[string]interface{}{
+				"complaints":          []string{"боль", "кровотечение", "зуд"}[rand.Intn(3)],
+				"digital_examination": []string{"без патологии", "геморроидальные узлы", "трещина"}[rand.Intn(3)],
+				"hemorrhoids":         rand.Intn(2) == 1,
+				"anal_fissure":        rand.Intn(2) == 1,
+				"diagnosis":           []string{"Геморрой", "Анальная трещина", "Проктит"}[rand.Intn(3)],
+				"recommendations":     "Венотоники, ректальные свечи",
+			}
+
 		default:
 			specData = map[string]interface{}{
-				"notes": "Общий медицинский осмотр",
+				"notes":           "Проведен общий осмотр",
+				"diagnosis":       "Практически здоров",
+				"recommendations": "Плановое наблюдение",
 			}
 		}
+		log.Printf("DEBUG:  Specialization title: '%s'", doctor.Specialization.Title)
 
 		jsonData, _ := json.Marshal(specData)
 
@@ -570,8 +715,8 @@ func seedTestData(db *gorm.DB) error {
 			DoctorID:             doctor.ID,
 			PatientID:            patient.ID,
 			Date:                 date,
-			Diagnosis:            []string{"ОРВИ", "Гипертония", "Остеохондроз"}[i%3],
-			Recommendations:      []string{"Постельный режим", "Анализы крови", "Физиотерапия"}[i%3],
+			Diagnosis:            specData["diagnosis"].(string),
+			Recommendations:      specData["recommendations"].(string),
 			Status:               statuses[i%len(statuses)],
 			Address:              addresses[i%len(addresses)],
 			CachedSpecialization: doctor.Specialization.Title,
@@ -586,29 +731,24 @@ func seedTestData(db *gorm.DB) error {
 		}
 	}
 
-	// 8. Создаем экстренные вызовы и приемы SMP с JSONB данными
+	// 8. SMPS
 
 	for i := 1; i < 50; i++ {
 		doctor := doctors[i%len(doctors)]
-		date := dates[i%len(dates)]
-		hour := 9 + i%8
-		minute := 30 * (i % 2)
-		date = date.Add(time.Hour*time.Duration(hour) + time.Minute*time.Duration(minute))
-
-		// Определяем приоритет (каждый 3-й вызов без приоритета)
+		patient := patients[i%len(patients)]
 		var priority *uint
 		if i%5 == 0 {
 			priority = nil
 		} else {
-			p := uint(i)
+			p := uint(i) // Приоритеты от 1 до 5
 			priority = &p
 		}
 
-		// Создаем экстренный вызов
+		// Создаем экстренный вызов с уникальным возрастающим приоритетом
 		emergencyCall := entities.EmergencyCall{
 			DoctorID: doctor.ID,
 			Type:     i%2 == 0,
-			Priority: priority,
+			Priority: priority, // Уникальный возрастающий приоритет
 			Address:  addresses[i%len(addresses)],
 			Phone:    fmt.Sprintf("+7915%07d", 2000000+i),
 		}
@@ -617,80 +757,201 @@ func seedTestData(db *gorm.DB) error {
 			return fmt.Errorf("failed to create emergency call %d: %w", i, err)
 		}
 
-		// Создаем JSONB данные для приемов SMP
-		var smpSpecData map[string]interface{}
+		// Создаем специализированные данные для приемов SMP
+		var smpJsonData []byte
+		var diagnosis, recommendations string
+		urgencyLevels := []string{"low", "medium", "high"}
+		log.Printf("DEBUG:  Specialization title: '%s'", doctor.Specialization.Title)
 		switch doctor.Specialization.Title {
-		case "Терапевт":
-			smpSpecData = map[string]interface{}{
-				"symptoms":      []string{"температура", "кашель", "слабость"},
-				"first_aid":     "жаропонижающее, обильное питье",
-				"urgency_level": "medium",
-			}
-		case "Кардиолог":
-			smpSpecData = map[string]interface{}{
-				"symptoms":      []string{"боль в груди", "одышка"},
-				"first_aid":     "нитроглицерин, покой",
-				"ecg_performed": true,
-				"urgency_level": "high",
-			}
 		case "Невролог":
-			smpSpecData = map[string]interface{}{
-				"symptoms":      []string{"головокружение", "тошнота"},
-				"consciousness": "ясное",
-				"urgency_level": "medium",
+			log.Printf("DEBUG: Creating neurologist reception. Specialization title: '%s'", doctor.Specialization.Title)
+			data := entities.NeurologistData{
+				Reflexes: map[string]string{
+					"knee":   []string{"норма", "гиперрефлексия", "гипорефлексия"}[rand.Intn(3)],
+					"biceps": []string{"норма", "гиперрефлексия", "гипорефлексия"}[rand.Intn(3)],
+				},
+				MuscleStrength: map[string]int{
+					"right_arm": 3 + rand.Intn(3),
+					"left_arm":  3 + rand.Intn(3),
+				},
+				Sensitivity:      []string{"сохранена", "гипестезия", "анестезия"}[rand.Intn(3)],
+				CoordinationTest: []string{"норма", "атаксия", "дисметрия"}[rand.Intn(3)],
+				Gait:             []string{"нормальная", "атактическая", "спастическая"}[rand.Intn(3)],
+				Speech:           []string{"норма", "дизартрия", "афазия"}[rand.Intn(3)],
+				Memory:           []string{"сохранена", "снижена", "грубо нарушена"}[rand.Intn(3)],
+				CranialNerves:    "Без патологии",
+				Complaints:       []string{"головная боль", "головокружение", "слабость в конечностях"},
+				Diagnosis:        []string{"ОНМК", "Эпилептический приступ", "Мигрень"}[rand.Intn(3)],
+				Recommendations:  "Экстренная госпитализация",
 			}
+			smpJsonData, _ = json.Marshal(data)
+			diagnosis = data.Diagnosis
+			recommendations = data.Recommendations
+
+		case "Травматолог":
+			injuryType := []string{"перелом", "ушиб", "рана", "ожог"}[rand.Intn(4)]
+			data := entities.TraumatologistData{
+				InjuryType:       injuryType,
+				InjuryMechanism:  []string{"падение", "ДТП", "производственная травма", "спорт"}[rand.Intn(4)],
+				Localization:     []string{"верхняя конечность", "нижняя конечность", "голова", "грудная клетка"}[rand.Intn(4)],
+				XRayResults:      "Требуется выполнение",
+				CTResults:        "Не выполнялось",
+				MRIResults:       "Не выполнялось",
+				Fracture:         rand.Intn(2) == 1,
+				Dislocation:      rand.Intn(2) == 1,
+				Sprain:           rand.Intn(2) == 1,
+				Contusion:        rand.Intn(2) == 1,
+				WoundDescription: []string{"чистая", "загрязненная", "инфицированная"}[rand.Intn(3)],
+				TreatmentPlan:    []string{"гипс", "операция", "консервативное лечение"}[rand.Intn(3)],
+			}
+			smpJsonData, _ = json.Marshal(data)
+			diagnosis = "Травма: " + data.InjuryType
+			recommendations = data.TreatmentPlan
+
+		case "Психиатр":
+			data := entities.PsychiatristData{
+				MentalStatus:   []string{"ясное", "помраченное", "ступор", "кома"}[rand.Intn(4)],
+				Mood:           []string{"нормальное", "депрессивное", "эйфоричное", "дисфоричное"}[rand.Intn(4)],
+				Affect:         []string{"адекватный", "неадекватный", "суженный", "лабильный"}[rand.Intn(4)],
+				ThoughtProcess: []string{"нормальный", "ускоренный", "замедленный", "разорванный"}[rand.Intn(4)],
+				ThoughtContent: "Без бредовых идей",
+				Perception:     "Без галлюцинаций",
+				Cognition:      []string{"сохранено", "снижено", "грубо нарушено"}[rand.Intn(3)],
+				Insight:        []string{"полное", "частичное", "отсутствует"}[rand.Intn(3)],
+				Judgment:       []string{"сохранено", "снижено", "нарушено"}[rand.Intn(3)],
+				RiskAssessment: struct {
+					Suicide  bool `json:"suicide"`
+					SelfHarm bool `json:"self_harm"`
+					Violence bool `json:"violence"`
+				}{
+					Suicide:  rand.Intn(2) == 1,
+					SelfHarm: rand.Intn(2) == 1,
+					Violence: rand.Intn(2) == 1,
+				},
+				DiagnosisICD: fmt.Sprintf("F%02d.%d", 20+rand.Intn(30), rand.Intn(5)),
+				TherapyPlan:  []string{"госпитализация", "амбулаторное лечение", "наблюдение"}[rand.Intn(3)],
+			}
+			smpJsonData, _ = json.Marshal(data)
+			diagnosis = "Психиатрический диагноз: " + data.DiagnosisICD
+			recommendations = data.TherapyPlan
+
+		case "Уролог":
+			data := entities.UrologistData{
+				Complaints: []string{"госпитализация", "амбулаторное лечение", "наблюдение"},
+				Urinalysis: struct {
+					Color        string `json:"color"`
+					Transparency string `json:"transparency"`
+					Protein      string `json:"protein"`
+					Glucose      string `json:"glucose"`
+					Leukocytes   string `json:"leukocytes"`
+					Erythrocytes string `json:"erythrocytes"`
+				}{
+					Color:        []string{"соломенный", "темный", "красный"}[rand.Intn(3)],
+					Transparency: []string{"прозрачная", "мутная"}[rand.Intn(2)],
+					Protein:      []string{"отсутствует", "следы", "1+"}[rand.Intn(3)],
+					Leukocytes:   []string{"0-1", "10-15", "50-100"}[rand.Intn(3)],
+				},
+				Ultrasound:          "Требуется выполнение",
+				ProstateExamination: "Не выполнялось",
+				Diagnosis:           []string{"МКБ", "Пиелонефрит", "Цистит"}[rand.Intn(3)],
+				Treatment:           []string{"антибиотики", "спазмолитики", "операция"}[rand.Intn(3)],
+			}
+			smpJsonData, _ = json.Marshal(data)
+			diagnosis = data.Diagnosis
+			recommendations = data.Treatment
+
+		case "Оториноларинголог":
+			data := entities.OtolaryngologistData{
+				Complaints:         []string{"боль в горле", "заложенность носа", "снижение слуха", "головокружение"},
+				NoseExamination:    []string{"норма", "отек", "гнойное отделяемое"}[rand.Intn(3)],
+				ThroatExamination:  []string{"норма", "гиперемия", "налеты"}[rand.Intn(3)],
+				EarExamination:     []string{"норма", "воспаление", "серная пробка"}[rand.Intn(3)],
+				HearingTest:        []string{"норма", "снижен", "значительно снижен"}[rand.Intn(3)],
+				Audiometry:         "Не выполнялась",
+				VestibularFunction: []string{"норма", "нарушена"}[rand.Intn(2)],
+				Endoscopy:          "Не выполнялась",
+				Diagnosis:          []string{"Отит", "Фарингит", "Синусит"}[rand.Intn(3)],
+				Recommendations:    []string{"антибиотики", "промывание", "физиотерапия"}[rand.Intn(3)],
+			}
+			smpJsonData, _ = json.Marshal(data)
+			diagnosis = data.Diagnosis
+			recommendations = data.Recommendations
+
+		case "Проктолог":
+			data := entities.ProctologistData{
+				Complaints:         []string{"боль", "кровотечение", "зуд", "выделения"},
+				DigitalExamination: []string{"без патологии", "геморроидальные узлы", "трещина", "новообразование"}[rand.Intn(4)],
+				Rectoscopy:         "Не выполнялась",
+				Colonoscopy:        "Не выполнялась",
+				Hemorrhoids:        rand.Intn(2) == 1,
+				AnalFissure:        rand.Intn(2) == 1,
+				Paraproctitis:      rand.Intn(2) == 1,
+				Tumor:              rand.Intn(10) == 1, // 10% вероятность
+				Diagnosis:          []string{"Геморрой", "Анальная трещина", "Проктит"}[rand.Intn(3)],
+				Recommendations:    []string{"консервативное лечение", "операция", "наблюдение"}[rand.Intn(3)],
+			}
+			smpJsonData, _ = json.Marshal(data)
+			diagnosis = data.Diagnosis
+			recommendations = data.Recommendations
+
+		case "Аллерголог":
+			data := entities.AllergologistData{
+				Complaints:      []string{"сыпь", "зуд", "отек", "затруднение дыхания"},
+				AllergenHistory: []string{"пищевая", "бытовая", "пыльцевая", "лекарственная"}[rand.Intn(4)] + " аллергия",
+				SkinTests: []struct {
+					Allergen string `json:"allergen"`
+					Reaction string `json:"reaction"`
+				}{
+					{Allergen: "пыльца", Reaction: "положительная"},
+					{Allergen: "шерсть", Reaction: "отрицательная"},
+				},
+				IgELevel:        float32(100 + rand.Intn(500)),
+				Immunotherapy:   rand.Intn(2) == 1,
+				Diagnosis:       []string{"Поллиноз", "Крапивница", "Отек Квинке"}[rand.Intn(3)],
+				Recommendations: []string{"антигистаминные", "элиминационная диета", "АСИТ"}[rand.Intn(3)],
+			}
+			smpJsonData, _ = json.Marshal(data)
+			diagnosis = data.Diagnosis
+			recommendations = data.Recommendations
+
 		default:
-			smpSpecData = map[string]interface{}{
+			defaultData := map[string]interface{}{
 				"emergency_notes": "Неотложная помощь оказана",
-				"urgency_level":   "low",
+				"urgency_level":   urgencyLevels[rand.Intn(3)],
+				"diagnosis":       "Неотложное состояние",
+				"actions_taken":   []string{"стабилизация", "обезболивание", "транспортировка"}[rand.Intn(3)],
 			}
+			smpJsonData, _ = json.Marshal(defaultData)
+			diagnosis = "Неотложное состояние"
+			recommendations = "Госпитализация"
 		}
 
-		smpJsonData, _ := json.Marshal(smpSpecData)
-
-		// Создаем приемы SMP связанные с вызовом
-		receptions := []*entities.ReceptionSMP{
-			{
-				EmergencyCallID:      emergencyCall.ID,
-				DoctorID:             doctor.ID,
-				PatientID:            patients[i%len(patients)].ID,
-				Diagnosis:            []string{"ОРВИ", "Гипертонический криз", "Травма"}[i%3],
-				Recommendations:      []string{"Госпитализация", "Лечение на дому", "Наблюдение"}[i%3],
-				CachedSpecialization: doctor.Specialization.Title,
-				SpecializationData: pgtype.JSONB{
-					Bytes:  smpJsonData,
-					Status: pgtype.Present,
-				},
-			},
-			{
-				EmergencyCallID:      emergencyCall.ID,
-				DoctorID:             doctor.ID,
-				PatientID:            patients[(i+1)%len(patients)].ID,
-				Diagnosis:            []string{"Отравление", "Аллергическая реакция", "Обморок"}[i%3],
-				Recommendations:      []string{"Детоксикация", "Антигистаминные", "Покой"}[i%3],
-				CachedSpecialization: doctor.Specialization.Title,
-				SpecializationData: pgtype.JSONB{
-					Bytes:  smpJsonData,
-					Status: pgtype.Present,
-				},
+		// Создаем прием SMP
+		reception := &entities.ReceptionSMP{
+			EmergencyCallID:      emergencyCall.ID,
+			DoctorID:             doctor.ID,
+			PatientID:            patient.ID,
+			Diagnosis:            diagnosis,
+			Recommendations:      recommendations,
+			CachedSpecialization: doctor.Specialization.Title,
+			SpecializationData: pgtype.JSONB{
+				Bytes:  smpJsonData,
+				Status: pgtype.Present,
 			},
 		}
 
-		for j := range receptions {
-			if err := db.Create(receptions[j]).Error; err != nil {
-				return fmt.Errorf("failed to create SMP reception %d: %w", i, err)
-			}
+		if err := db.Create(reception).Error; err != nil {
+			return fmt.Errorf("failed to create SMP reception %d: %w", i, err)
+		}
 
-			// Добавляем медуслуги (каждому второму приему)
-			if i%2 == 0 {
-				service := services[(i+j)%len(services)]
-				if err := db.Model(receptions[j]).Association("MedServices").Append(service); err != nil {
-					return fmt.Errorf("failed to add service to SMP reception %d: %w", i, err)
-				}
+		// Добавляем медуслуги (каждому третьему приему)
+		if i%3 == 0 {
+			service := services[rand.Intn(len(services))]
+			if err := db.Model(reception).Association("MedServices").Append(service); err != nil {
+				return fmt.Errorf("failed to add service to SMP reception %d: %w", i, err)
 			}
 		}
 	}
-
 	return nil
 }
 
