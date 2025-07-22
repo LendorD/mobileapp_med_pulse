@@ -58,6 +58,7 @@ type ReceptionFullResponse struct {
 	Date            string              `json:"date" example:"15.10.2023 14:30"`
 	Status          string              `json:"status" example:"Запланирован"`
 	PatientName     string              `json:"patient_name" example:"Иванов Иван"`
+	PatientID       uint                `json:"patient_id" example:"5"`
 	Diagnosis       string              `json:"diagnosis" example:"ОРВИ"`
 	Address         string              `json:"address" example:"Москва, ул. Ленина, д. 15"`
 	Doctor          DoctorShortResponse `json:"doctor"`

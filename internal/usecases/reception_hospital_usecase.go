@@ -231,10 +231,6 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorID(doc_id uint, 
 	// Преобразование в DTO
 	result := make([]models.ReceptionFullResponse, len(receptions))
 	for i, reception := range receptions {
-		patientName := ""
-		if reception.Patient.ID != 0 {
-			patientName = reception.Patient.FullName
-		}
 
 		// Формируем специализированные данные
 		var specData interface{}
@@ -252,7 +248,8 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorID(doc_id uint, 
 			ID:          reception.ID,
 			Date:        reception.Date.Format("02.01.2006 15:04"),
 			Status:      getStatusText(reception.Status),
-			PatientName: patientName,
+			PatientName: reception.Patient.FullName,
+			PatientID:   reception.Patient.ID,
 			Diagnosis:   reception.Diagnosis,
 			Address:     reception.Address,
 			Doctor: models.DoctorShortResponse{
