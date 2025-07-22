@@ -113,28 +113,39 @@ func (r *EmergencyCallRepositoryImpl) GetEmergencyReceptionsByDoctorAndDate(
 	var calls []entities.EmergencyCall
 	var total int64
 
+	// Если дата не указана, используем сегодняшнюю
+	if date.IsZero() {
+		date = time.Now()
+	}
+
 	// Базовый запрос
 	baseQuery := r.db.Model(&entities.EmergencyCall{}).
 		Where("doctor_id = ?", doctorID)
 
 	// Фильтрация по дате
-	if !date.IsZero() {
-		startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
-		endOfDay := startOfDay.Add(24 * time.Hour)
-		baseQuery = baseQuery.Where("created_at BETWEEN ? AND ?", startOfDay, endOfDay)
-	}
+	startOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+	endOfDay := startOfDay.Add(24 * time.Hour)
+	baseQuery = baseQuery.Where("created_at BETWEEN ? AND ?", startOfDay, endOfDay)
 
 	// Получаем общее количество
 	if err := baseQuery.Count(&total).Error; err != nil {
 		return nil, 0, fmt.Errorf("failed to count emergency calls: %w", err)
 	}
 
-	// Получаем данные с пагинацией
+	// Получаем данные с пагинацией и сортировкой
 	offset := (page - 1) * perPage
 	err := baseQuery.
-		Order("priority DESC, created_at DESC").
+		// Сначала сортируем по приоритету (NULL последние, чем меньше значение - тем выше приоритет)
+		Order("priority IS NULL"). // NULL значения идут последними (FALSE(0) раньше TRUE(1))
+		Order("priority ASC").     // Уникальные приоритеты от 1 по возрастанию
+		// Затем по типу (true выше)
+		Order("type DESC").
+		// Затем по дате создания (чем раньше - тем выше)
+		Order("created_at ASC").
 		Offset(offset).
 		Limit(perPage).
+		Preload("Doctor").
+		Preload("ReceptionSMPs").
 		Find(&calls).
 		Error
 
@@ -143,15 +154,4 @@ func (r *EmergencyCallRepositoryImpl) GetEmergencyReceptionsByDoctorAndDate(
 	}
 
 	return calls, total, nil
-}
-
-// Вспомогательная функция для сортировки
-func getEmergencyOrderByPriorityAndDate() string {
-	return `
-        CASE 
-            WHEN priority = true THEN 1
-            ELSE 2
-        END,
-        date ASC
-    `
 }

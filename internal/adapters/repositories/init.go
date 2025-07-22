@@ -587,27 +587,28 @@ func seedTestData(db *gorm.DB) error {
 	}
 
 	// 8. Создаем экстренные вызовы и приемы SMP с JSONB данными
-	statusesE := []entities.EmergencyStatus{
-		entities.EmergencyStatusScheduled,
-		entities.EmergencyStatusAccepted,
-		entities.EmergencyStatusOnPlace,
-		entities.EmergencyStatusCompleted,
-		entities.EmergencyStatusCancelled,
-		entities.EmergencyStatusNoShow,
-	}
 
-	for i := 0; i < 50; i++ {
+	for i := 1; i < 50; i++ {
 		doctor := doctors[i%len(doctors)]
 		date := dates[i%len(dates)]
 		hour := 9 + i%8
 		minute := 30 * (i % 2)
 		date = date.Add(time.Hour*time.Duration(hour) + time.Minute*time.Duration(minute))
 
+		// Определяем приоритет (каждый 3-й вызов без приоритета)
+		var priority *uint
+		if i%5 == 0 {
+			priority = nil
+		} else {
+			p := uint(i)
+			priority = &p
+		}
+
 		// Создаем экстренный вызов
 		emergencyCall := entities.EmergencyCall{
 			DoctorID: doctor.ID,
-			Status:   statusesE[i%len(statusesE)],
-			Priority: i%2 == 0,
+			Type:     i%2 == 0,
+			Priority: priority,
 			Address:  addresses[i%len(addresses)],
 			Phone:    fmt.Sprintf("+7915%07d", 2000000+i),
 		}
