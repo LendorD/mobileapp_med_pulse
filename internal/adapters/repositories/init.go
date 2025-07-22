@@ -14,6 +14,7 @@ import (
 	personalInfo "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/personal_info"
 	receptionHospital "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/reception_hospital"
 	receptionSmp "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/reception_smp"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/tx"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/jackc/pgtype"
 	"golang.org/x/crypto/bcrypt"
@@ -40,6 +41,7 @@ type Repository struct {
 	interfaces.PersonalInfoRepository
 	interfaces.ReceptionHospitalRepository
 	interfaces.ReceptionSmpRepository
+	interfaces.TxRepository
 }
 
 func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
@@ -86,6 +88,7 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 		personalInfo.NewPersonalInfoRepository(db),
 		receptionHospital.NewReceptionRepository(db),
 		receptionSmp.NewReceptionSmpRepository(db),
+		tx.NewTxRepository(db),
 	}, nil
 
 }

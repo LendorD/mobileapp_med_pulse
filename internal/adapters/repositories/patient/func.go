@@ -9,6 +9,34 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+func (r *PatientRepositoryImpl) GetPatientByIDWithTx(tx *gorm.DB, id uint) (*entities.Patient, error) {
+	var patient entities.Patient
+	if err := tx.First(&patient, id).Error; err != nil {
+		return nil, err
+	}
+	return &patient, nil
+}
+
+func (r *PatientRepositoryImpl) UpdatePatientWithTx(tx *gorm.DB, id uint, updateMap map[string]interface{}) (uint, error) {
+	op := "repo.Patient.UpdatePatientWithTx"
+
+	var updatedPatient entities.Patient
+	result := tx.
+		Clauses(clause.Returning{}).
+		Model(&updatedPatient).
+		Where("id = ?", id).
+		Updates(updateMap)
+
+	if result.Error != nil {
+		return 0, errors.NewDBError(op, result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return 0, errors.NewNotFoundError("patient not found")
+	}
+
+	return updatedPatient.ID, nil
+}
+
 func (r *PatientRepositoryImpl) CreatePatient(patient entities.Patient) (uint, error) {
 	op := "repo.Patient.CreatePatient"
 
