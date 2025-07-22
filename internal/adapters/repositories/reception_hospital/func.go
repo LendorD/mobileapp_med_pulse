@@ -169,10 +169,10 @@ func (r *ReceptionHospitalRepositoryImpl) GetReceptionsHospitalByDoctorAndDate(d
 			var specData interface{}
 
 			switch receptions[i].Doctor.Specialization.Title {
-			case "Терапевт":
-				specData = &entities.TherapistData{}
-			case "Кардиолог":
-				specData = &entities.CardiologistData{}
+			// case "Терапевт":
+			// 	specData = &entities.TherapistData{}
+			// case "Кардиолог":
+			// 	specData = &entities.CardiologistData{}
 			case "Невролог":
 				specData = &entities.NeurologistData{}
 			case "Травматолог":

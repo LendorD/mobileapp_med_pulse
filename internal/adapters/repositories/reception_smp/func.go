@@ -1,6 +1,8 @@
 package receptionSmp
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -156,6 +158,7 @@ func (r *ReceptionSmpRepositoryImpl) GetWithPatientsByEmergencyCallID(
 	page, perPage int,
 ) ([]entities.ReceptionSMP, int64, error) {
 	op := "repo.ReceptionSmp.GetReceptionSmpByPatientID"
+
 	var receptions []entities.ReceptionSMP
 	var total int64
 
@@ -181,12 +184,19 @@ func (r *ReceptionSmpRepositoryImpl) GetWithPatientsByEmergencyCallID(
 		return nil, 0, errors.NewDBError(op, err)
 	}
 
-	// Декодируем JSONB данные
 	for i := range receptions {
-		if receptions[i].SpecializationData.Status == pgtype.Present {
+		if receptions[i].SpecializationData.Status == pgtype.Present &&
+			len(receptions[i].SpecializationData.Bytes) > 0 {
+
+			specTitle := ""
+			// Безопасная проверка для структуры
+			if receptions[i].Doctor.Specialization.ID != 0 { // Проверка по ID
+				specTitle = receptions[i].Doctor.Specialization.Title
+			}
+
 			decodedData, err := decodeSpecializationData(
 				receptions[i].SpecializationData,
-				receptions[i].Doctor.Specialization.Title,
+				specTitle,
 			)
 			if err != nil {
 				log.Printf("Failed to decode data for reception %d: %v", receptions[i].ID, err)
@@ -198,7 +208,6 @@ func (r *ReceptionSmpRepositoryImpl) GetWithPatientsByEmergencyCallID(
 
 	return receptions, total, nil
 }
-
 func (r *ReceptionSmpRepositoryImpl) GetReceptionWithMedServicesByID(
 	smpID uint,
 	callID uint,
@@ -206,6 +215,7 @@ func (r *ReceptionSmpRepositoryImpl) GetReceptionWithMedServicesByID(
 	op := "repo.ReceptionSmp.GetReceptionWithMedServicesByID"
 	var reception entities.ReceptionSMP
 
+	// Явно указываем нужные поля для загрузки
 	query := r.db.
 		Preload("Patient").
 		Preload("MedServices").
@@ -224,42 +234,76 @@ func (r *ReceptionSmpRepositoryImpl) GetReceptionWithMedServicesByID(
 		return entities.ReceptionSMP{}, errors.NewDBError(op, err)
 	}
 
-	// Декодируем JSONB данные
-	if reception.SpecializationData.Status == pgtype.Present {
-		decodedData, err := decodeSpecializationData(
-			reception.SpecializationData,
-			reception.Doctor.Specialization.Title,
-		)
-		if err != nil {
-			log.Printf("Failed to decode data for reception %d: %v", reception.ID, err)
-		} else {
-			reception.SpecializationDataDecoded = decodedData
-		}
+	// Улучшенное декодирование JSONB
+	if err := decodeReceptionSpecializationData(&reception); err != nil {
+		log.Printf("%s: failed to decode specialization data: %v", op, err)
+		// Не возвращаем ошибку, так как основная информация уже получена
 	}
 
 	return reception, nil
 }
 
-// Вспомогательная функция для декодирования
-func decodeSpecializationData(data pgtype.JSONB, specialization string) (interface{}, error) {
-	op := "repo.ReceptionSmp.decodeSpecializationData"
-	var result interface{}
+// Вынесенная функция для декодирования
+func decodeReceptionSpecializationData(reception *entities.ReceptionSMP) error {
+	// Проверяем что данные существуют и не пустые
+	if reception.SpecializationData.Status != pgtype.Present ||
+		len(reception.SpecializationData.Bytes) == 0 {
+		return nil
+	}
 
+	// Получаем название специализации (с проверкой)
+	specTitle := ""
+	if reception.Doctor.Specialization.ID != 0 { // Проверка что специализация загружена
+		specTitle = reception.Doctor.Specialization.Title
+	}
+
+	decoded, err := decodeSpecializationData(reception.SpecializationData, specTitle)
+	if err != nil {
+		return fmt.Errorf("decoding failed: %w", err)
+	}
+
+	reception.SpecializationDataDecoded = decoded
+	return nil
+}
+
+// Обновлённая функция декодирования
+func decodeSpecializationData(data pgtype.JSONB, specialization string) (interface{}, error) {
+	// Проверка наличия данных
+	if data.Status != pgtype.Present || len(data.Bytes) == 0 {
+		fmt.Print("BEDAAAA")
+		return nil, nil
+	}
+
+	// Логгирование сырых данных
+	log.Printf("Raw JSON data: %s", string(data.Bytes))
+
+	var result interface{}
 	switch specialization {
-	case "Терапевт":
-		result = &entities.TherapistData{}
-	case "Кардиолог":
-		result = &entities.CardiologistData{}
 	case "Невролог":
-		result = &entities.NeurologistData{}
+		result = new(entities.NeurologistData)
 	case "Травматолог":
-		result = &entities.TraumatologistData{}
+		result = new(entities.TraumatologistData)
+	case "Психиатр":
+		result = new(entities.PsychiatristData)
+	case "Уролог":
+		result = new(entities.UrologistData)
+	case "Оториноларинголог":
+		result = new(entities.OtolaryngologistData)
+	case "Проктолог":
+		result = new(entities.ProctologistData)
+	case "Аллерголог":
+		result = new(entities.AllergologistData)
 	default:
 		result = make(map[string]interface{})
 	}
 
-	if err := data.AssignTo(result); err != nil {
-		return nil, errors.NewDBError(op, err)
+	// Декодирование с проверкой структуры
+	decoder := json.NewDecoder(bytes.NewReader(data.Bytes))
+	decoder.DisallowUnknownFields() // Для отлова несоответствий структур
+
+	if err := decoder.Decode(&result); err != nil {
+		log.Printf("Decoding error for %s: %v, data: %s", specialization, err, string(data.Bytes))
+		return nil, fmt.Errorf("decoding error: %w", err)
 	}
 
 	return result, nil
