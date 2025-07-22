@@ -27,12 +27,12 @@ func NewAuthHandler(authUC *usecases.AuthUsecase) *AuthHandler {
 // @Accept json
 // @Produce json
 // @Param input body models.DoctorLoginRequest true "Данные для входа"
-// @Success 200 {object} map[string]string
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
+// @Success 200 {object} models.DoctorAuthResponse "Успешное создание"
+// @Failure 400 {object} ResultError "Неверный формат запроса"
+// @Failure 401 {object} ResultError "Неверные учётные данные"
+// @Failure 500 {object} ResultError "Внутренняя ошибка сервера"
 // @Router /auth [post]
 func (h *AuthHandler) LoginDoctor(w http.ResponseWriter, r *http.Request) {
-	// Логируем входящий запрос
 	body, _ := io.ReadAll(r.Body)
 	r.Body = io.NopCloser(bytes.NewBuffer(body))
 	log.Printf("Incoming auth request: %s", string(body))
@@ -44,9 +44,9 @@ func (h *AuthHandler) LoginDoctor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Auth attempt - Login: %s", req.Login)
+	log.Printf("Auth attempt - Login: %s", req.Username)
 
-	id, token, err := h.authUC.LoginDoctor(r.Context(), req.Login, req.Password)
+	id, token, err := h.authUC.LoginDoctor(r.Context(), req.Username, req.Password)
 	if err != nil {
 		log.Printf("Auth failed: %v", err)
 		RespondWithError(w, http.StatusUnauthorized, "Invalid credentials")

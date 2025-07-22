@@ -69,35 +69,18 @@ definitions:
         example: "+79991234567"
         type: string
       priority:
-        example: true
-        type: boolean
+        example: 1
+        type: integer
       receptions:
         items:
           $ref: '#/definitions/entities.ReceptionSMP'
         type: array
-      status:
-        allOf:
-        - $ref: '#/definitions/entities.EmergencyStatus'
-        example: scheduled
+      type:
+        example: true
+        type: boolean
       updated_at:
         type: string
     type: object
-  entities.EmergencyStatus:
-    enum:
-    - scheduled
-    - accepted
-    - on_place
-    - completed
-    - cancelled
-    - no_show
-    type: string
-    x-enum-varnames:
-    - EmergencyStatusScheduled
-    - EmergencyStatusAccepted
-    - EmergencyStatusOnPlace
-    - EmergencyStatusCompleted
-    - EmergencyStatusCancelled
-    - EmergencyStatusNoShow
   entities.MedService:
     properties:
       created_at:
@@ -312,16 +295,28 @@ definitions:
       specialization:
         $ref: '#/definitions/entities.Specialization'
     type: object
+  models.DoctorAuthResponse:
+    description: Ответ с данными авторизованного врача
+    properties:
+      id:
+        description: ID врача
+        example: 1
+        type: integer
+      token:
+        description: JWT токен
+        example: eyJhbGciOi...
+        type: string
+    type: object
   models.DoctorLoginRequest:
     description: Запрос для входа врача в систему
     properties:
       password:
         description: Пароль
-        example: password1
+        example: "123"
         type: string
       username:
         description: Логин (телефон)
-        example: doctor1
+        example: doctor_ivanov
         type: string
     required:
     - password
@@ -514,23 +509,21 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Успешное создание
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.DoctorAuthResponse'
         "400":
-          description: Bad Request
+          description: Неверный формат запроса
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ResultError'
         "401":
-          description: Unauthorized
+          description: Неверные учётные данные
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
       summary: Вход в систему
       tags:
       - Auth

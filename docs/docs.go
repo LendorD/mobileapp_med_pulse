@@ -44,30 +44,27 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Успешное создание",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/models.DoctorAuthResponse"
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Неверный формат запроса",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/handlers.ResultError"
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Неверные учётные данные",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
                         }
                     }
                 }
@@ -944,8 +941,8 @@ const docTemplate = `{
                     "example": "+79991234567"
                 },
                 "priority": {
-                    "type": "boolean",
-                    "example": true
+                    "type": "integer",
+                    "example": 1
                 },
                 "receptions": {
                     "type": "array",
@@ -953,37 +950,14 @@ const docTemplate = `{
                         "$ref": "#/definitions/entities.ReceptionSMP"
                     }
                 },
-                "status": {
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/entities.EmergencyStatus"
-                        }
-                    ],
-                    "example": "scheduled"
+                "type": {
+                    "type": "boolean",
+                    "example": true
                 },
                 "updated_at": {
                     "type": "string"
                 }
             }
-        },
-        "entities.EmergencyStatus": {
-            "type": "string",
-            "enum": [
-                "scheduled",
-                "accepted",
-                "on_place",
-                "completed",
-                "cancelled",
-                "no_show"
-            ],
-            "x-enum-varnames": [
-                "EmergencyStatusScheduled",
-                "EmergencyStatusAccepted",
-                "EmergencyStatusOnPlace",
-                "EmergencyStatusCompleted",
-                "EmergencyStatusCancelled",
-                "EmergencyStatusNoShow"
-            ]
         },
         "entities.MedService": {
             "type": "object",
@@ -1289,6 +1263,22 @@ const docTemplate = `{
                 }
             }
         },
+        "models.DoctorAuthResponse": {
+            "description": "Ответ с данными авторизованного врача",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "ID врача",
+                    "type": "integer",
+                    "example": 1
+                },
+                "token": {
+                    "description": "JWT токен",
+                    "type": "string",
+                    "example": "eyJhbGciOi..."
+                }
+            }
+        },
         "models.DoctorLoginRequest": {
             "description": "Запрос для входа врача в систему",
             "type": "object",
@@ -1300,12 +1290,12 @@ const docTemplate = `{
                 "password": {
                     "description": "Пароль",
                     "type": "string",
-                    "example": "password1"
+                    "example": "123"
                 },
                 "username": {
                     "description": "Логин (телефон)",
                     "type": "string",
-                    "example": "doctor1"
+                    "example": "doctor_ivanov"
                 }
             }
         },
