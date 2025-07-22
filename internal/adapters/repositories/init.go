@@ -30,42 +30,6 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-type SpecializationType int
-
-const (
-	Neurologist SpecializationType = iota + 1
-	Traumatologist
-	Psychiatrist
-	Urologist
-	Otolaryngologist
-	Proctologist
-	Allergologist
-)
-
-func (s SpecializationType) Title() string {
-	return [...]string{
-		"Невролог",
-		"Травматолог",
-		"Психиатр",
-		"Уролог",
-		"Оториноларинголог",
-		"Проктолог",
-		"Аллерголог",
-	}[s-1]
-}
-
-func AllSpecializations() []SpecializationType {
-	return []SpecializationType{
-		Neurologist,
-		Traumatologist,
-		Psychiatrist,
-		Urologist,
-		Otolaryngologist,
-		Proctologist,
-		Allergologist,
-	}
-}
-
 type Repository struct {
 	interfaces.AuthRepository
 	interfaces.AllergyRepository
@@ -458,14 +422,14 @@ func seedTestData(db *gorm.DB) error {
 			Login:            "doctor_sidorov",
 			PasswordHash:     hashPass123,
 			SpecializationID: 2,
-			Specialization:   &entities.Specialization{ID: 2},
+			Specialization:   &entities.Specialization{ID: 2, Title: "Травматолог"},
 		},
 		{
 			FullName:         "Кузнецова Елена Викторовна",
 			Login:            "doctor_kuznetsova",
 			PasswordHash:     hashPass123,
 			SpecializationID: 2,
-			Specialization:   &entities.Specialization{ID: 2},
+			Specialization:   &entities.Specialization{ID: 2, Title: "Травматолог"},
 		},
 		// Кардиологи
 		{
@@ -473,7 +437,7 @@ func seedTestData(db *gorm.DB) error {
 			Login:            "doctor_smirnov",
 			PasswordHash:     hashPass123,
 			SpecializationID: 3,
-			Specialization:   &entities.Specialization{ID: 3},
+			Specialization:   &entities.Specialization{ID: 3, Title: "Психиатр"},
 		},
 		// Неврологи
 		{
@@ -481,7 +445,7 @@ func seedTestData(db *gorm.DB) error {
 			Login:            "doctor_vasiliev",
 			PasswordHash:     hashPass123,
 			SpecializationID: 4,
-			Specialization:   &entities.Specialization{ID: 4},
+			Specialization:   &entities.Specialization{ID: 4, Title: "Уролог"},
 		},
 		// Травматологи
 		{
@@ -489,7 +453,7 @@ func seedTestData(db *gorm.DB) error {
 			Login:            "doctor_popov",
 			PasswordHash:     hashPass123,
 			SpecializationID: 6,
-			Specialization:   &entities.Specialization{ID: 6},
+			Specialization:   &entities.Specialization{ID: 6, Title: "Аллерголог"},
 		},
 		// Психиатры
 		{
@@ -497,7 +461,7 @@ func seedTestData(db *gorm.DB) error {
 			Login:            "doctor_morozova",
 			PasswordHash:     hashPass123,
 			SpecializationID: 7,
-			Specialization:   &entities.Specialization{ID: 7},
+			Specialization:   &entities.Specialization{ID: 7, Title: "Проктолог"},
 		},
 	}
 
@@ -612,6 +576,8 @@ func seedTestData(db *gorm.DB) error {
 		"Москва, ул. Пушкина, д. 10",
 		"Москва, пр. Вернадского, д. 25",
 	}
+	diagnosis := "Cancer"
+	recommendations := "Dont die"
 	for i := 0; i < 50; i++ {
 		doctor := doctors[i%len(doctors)]
 		patient := patients[i%len(patients)]
@@ -711,6 +677,21 @@ func seedTestData(db *gorm.DB) error {
 			}
 		}
 		log.Printf("DEBUG:  Specialization title: '%s'", doctor.Specialization.Title)
+		if specData["diagnosis"] != nil {
+			log.Printf("DEBUG:  diagnosis")
+		}
+		if specData["recommendations"] != nil {
+			log.Printf("DEBUG:  recommendations")
+
+		}
+		if specData["diagnosis"] != nil {
+			diagnosis = specData["diagnosis"].(string)
+			diagnosis = "Canser"
+		}
+		if specData["recommendations"] != nil {
+			recommendations = specData["recommendations"].(string)
+			recommendations = "dont die"
+		}
 
 		jsonData, _ := json.Marshal(specData)
 
@@ -718,8 +699,8 @@ func seedTestData(db *gorm.DB) error {
 			DoctorID:             doctor.ID,
 			PatientID:            patient.ID,
 			Date:                 date,
-			Diagnosis:            specData["diagnosis"].(string),
-			Recommendations:      specData["recommendations"].(string),
+			Diagnosis:            diagnosis,
+			Recommendations:      recommendations,
 			Status:               statuses[i%len(statuses)],
 			Address:              addresses[i%len(addresses)],
 			CachedSpecialization: doctor.Specialization.Title,
@@ -743,7 +724,7 @@ func seedTestData(db *gorm.DB) error {
 		if i%5 == 0 {
 			priority = nil
 		} else {
-			p := uint(i) // Приоритеты от 1 до 5
+			p := uint(i)
 			priority = &p
 		}
 
@@ -762,7 +743,6 @@ func seedTestData(db *gorm.DB) error {
 
 		// Создаем специализированные данные для приемов SMP
 		var smpJsonData []byte
-		var diagnosis, recommendations string
 		urgencyLevels := []string{"low", "medium", "high"}
 		log.Printf("DEBUG:  Specialization title: '%s'", doctor.Specialization.Title)
 		switch doctor.Specialization.Title {
