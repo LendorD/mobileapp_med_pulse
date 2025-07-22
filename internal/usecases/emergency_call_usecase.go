@@ -105,9 +105,9 @@ func (u *EmergencyCallUsecase) GetEmergencyCallsByDoctorAndDate(
 		result[i] = models.EmergencyCallShortResponse{
 			Id:        call.ID,
 			CreatedAt: call.CreatedAt.Format(time.RFC3339),
-			Status:    string(call.Status),
 			Phone:     call.Phone,
 			Priority:  call.Priority,
+			Type:      call.Type,
 			Address:   call.Address,
 		}
 	}
