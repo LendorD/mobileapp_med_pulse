@@ -80,7 +80,7 @@ type MedServiceRepository interface {
 
 	GetMedServiceByID(id uint) (entities.MedService, error)
 	GetMedServiceByName(name string) (entities.MedService, error)
-	GetAllMedServices() ([]entities.MedService, error)
+	GetAllMedServices() ([]entities.MedService, int64, error)
 }
 
 // updated to match the new structure

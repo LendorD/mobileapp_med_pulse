@@ -9,3 +9,8 @@ type FilterResponse[T any] struct {
 	TotalHits   int `json:"totalHits"`
 	HitsPerPage int `json:"hitsPerPage"`
 }
+
+type MedServicesListResponse struct {
+	Hits      []MedServicesResponse `json:"hits"`
+	TotalHits int                   `json:"totalHits"`
+}

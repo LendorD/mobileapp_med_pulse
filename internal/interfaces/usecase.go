@@ -9,13 +9,10 @@ import (
 )
 
 type Usecases interface {
-	AllergyUsecase
-	ContactInfoUsecase
 	DoctorUsecase
 	EmergencyCallUsecase
 	MedServiceUsecase
 	PatientUsecase
-	PersonalInfoUsecase
 	ReceptionHospitalUsecase
 	ReceptionSmpUsecase
 	MedCardUsecase
@@ -68,7 +65,9 @@ type EmergencyCallUsecase interface {
 	) (models.FilterResponse[[]models.EmergencyCallShortResponse], error)
 }
 
-type MedServiceUsecase interface{}
+type MedServiceUsecase interface {
+	GetAllMedServices() (models.MedServicesListResponse, *errors.AppError)
+}
 
 type PatientUsecase interface {
 	CreatePatient(input *models.CreatePatientRequest) (entities.Patient, *errors.AppError)

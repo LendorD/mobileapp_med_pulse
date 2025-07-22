@@ -9,7 +9,7 @@ import (
 )
 
 // GetMedCardByPatientID godoc
-// @Summary Получить медкарту по ID пациента
+// @Summary Получить медкарту пациента по его ID
 // @Description Возвращает полную информацию из медицинской карты пациента
 // @Tags Medcard
 // @Accept json
@@ -17,7 +17,7 @@ import (
 // @Param pat_id path uint true "ID пациента"
 // @Success 200 {object} models.MedCardResponse "Медицинская карта пациента"
 // @Failure 400 {object} ResultError "Некорректный ID пациента"
-// @Failure 404 {object} ResultError "Медкарта не найдена"
+// @Failure 404 {object} ResultError "Медицинская карта не найдена"
 // @Failure 500 {object} ResultError "Внутренняя ошибка сервера"
 // @Router /medcard/{pat_id} [get]
 func (h *Handler) GetMedCardByPatientID(c *gin.Context) {
@@ -36,16 +36,16 @@ func (h *Handler) GetMedCardByPatientID(c *gin.Context) {
 }
 
 // UpdateMedCard godoc
-// @Summary Обновить данные медицинской карты
-// @Description Обновляет информацию в медицинской карте пациента
+// @Summary Обновить медицинскую карту пациента
+// @Description Обновляет данные в медицинской карте по ID пациента
 // @Tags Medcard
 // @Accept json
 // @Produce json
 // @Param pat_id path uint true "ID пациента"
 // @Param input body models.UpdateMedCardRequest true "Данные для обновления медкарты"
-// @Success 201 {object} models.MedCardResponse "Обновленная медицинская карта"
+// @Success 201 {object} models.MedCardResponse "Обновлённая медицинская карта"
 // @Failure 400 {object} ResultError "Некорректный запрос"
-// @Failure 404 {object} ResultError "Медкарта не найдена"
+// @Failure 404 {object} ResultError "Медицинская карта не найдена"
 // @Failure 422 {object} ResultError "Ошибка валидации данных"
 // @Failure 500 {object} ResultError "Внутренняя ошибка сервера"
 // @Router /medcard/{pat_id} [put]
