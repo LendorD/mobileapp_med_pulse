@@ -193,12 +193,22 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorID(doc_id uint, 
 		parameters = params
 	}
 
+	// Сортировка по умолчанию по статусу и дате-времени
 	if len(order) > 0 {
 		subQuery, err := u.FilterBuilder.ParseOrderString(order, entityFields)
 		if err != nil {
 			return empty, errors.NewAppError(errors.InternalServerErrorCode, fmt.Sprintf("invalid order syntax: %s", err.Error()), nil, false)
 		}
-		queryOrder = subQuery
+		queryOrder = subQuery + `, 
+		CASE status
+			WHEN 'scheduled' THEN 0
+			ELSE 1
+		END, date ASC`
+	} else {
+		queryOrder = `CASE status
+		WHEN 'scheduled' THEN 0
+		ELSE 1
+	END, date ASC`
 	}
 
 	// Получение пациентов

@@ -80,17 +80,3 @@ type PatientUsecase interface {
 }
 
 type PersonalInfoUsecase interface{}
-
-// ReceptionService определяет контракт для работы с записями на прием
-type ReceptionUsecase interface {
-	// CreateReception(reception *models.Reception) error
-	// UpdateReception(reception *models.Reception) error
-	// CancelReception(id uint, reason string) error
-	// CompleteReow(id uint) error
-	// GetReceptiception(id uint, diagnosis string, recommendations string) error
-	//	// MarkAsNoShonByID(id uint) (*models.Reception, error)
-	// GetDoctorReceptions(doctorID uint, date *time.Time) ([]models.Reception, error)
-	// GetPatientReceptions(patientID uint) ([]models.Reception, error)
-	// GetReceptionsByStatus(status entities.ReceptionStatus) ([]models.Reception, error)
-	GetReceptionsByDoctorAndDate(doctorID uint, date time.Time, page int) ([]models.ReceptionShortResponse, error)
-}
