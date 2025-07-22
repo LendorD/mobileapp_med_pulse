@@ -28,6 +28,7 @@ func (h *Handler) GetReceptionsSMPByCallId(c *gin.Context) {
 	callIDStr := c.Param("call_id")
 	callID, err := strconv.ParseUint(callIDStr, 10, 32)
 	if err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'call_id' must be an integer", false)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid call ID"})
 		return
 	}
@@ -36,6 +37,7 @@ func (h *Handler) GetReceptionsSMPByCallId(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
+		h.ErrorResponse(c, err, http.StatusBadRequest, "page must be a positive integer", false)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "page must be a positive integer"})
 		return
 	}
@@ -44,6 +46,7 @@ func (h *Handler) GetReceptionsSMPByCallId(c *gin.Context) {
 	perPageStr := c.DefaultQuery("perPage", "5")
 	perPage, err := strconv.Atoi(perPageStr)
 	if err != nil || perPage < 5 {
+		h.ErrorResponse(c, err, http.StatusBadRequest, "page must be a positive integer", false)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "perPage must be a positive integer > 5"})
 		return
 	}
@@ -51,11 +54,10 @@ func (h *Handler) GetReceptionsSMPByCallId(c *gin.Context) {
 	// Вызываем usecase
 	receptions, err := h.usecase.GetReceptionsSMPByEmergencyCall(uint(callID), page, perPage)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		h.ErrorResponse(c, err, http.StatusBadRequest, "error get refeptions SMP by Emergency Call", false)
 		return
 	}
-
-	c.JSON(http.StatusOK, receptions)
+	h.ResultResponse(c, "Success ger reception with med services", Object, receptions)
 }
 
 // GetReceptionWithMedServices godoc
@@ -89,14 +91,10 @@ func (h *Handler) GetReceptionWithMedServices(c *gin.Context) {
 	// Вызов usecase
 	reception, err := h.usecase.GetReceptionWithMedServicesByID(uint(smp_id), uint(call_id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "Reception not found",
-			"code":  "reception_not_found",
-		})
+		h.ErrorResponse(c, err, http.StatusBadRequest, "Reception not found", false)
 		return
 	}
-
-	c.JSON(http.StatusOK, reception)
+	h.ResultResponse(c, "Success ger reception with med services", Object, reception)
 }
 
 // Примеры JSON
