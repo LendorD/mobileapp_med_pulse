@@ -49,7 +49,7 @@ func (u *MedCardUsecase) GetMedCardByPatientID(id uint) (models.MedCardResponse,
 		)
 	}
 
-	contactInfo, err := u.contactInfoRepo.GetContactInfoByPatientID(id)
+	contactInfo, err := u.contactInfoRepo.GetContactInfoByID(*patient.ContactInfoID)
 	if err != nil {
 		return models.MedCardResponse{}, errors.NewAppError(
 			errors.InternalServerErrorCode,
@@ -129,19 +129,58 @@ func (u *MedCardUsecase) UpdateMedCard(input *models.UpdateMedCardRequest) (mode
 		)
 	}
 
+	patient, err := u.patientRepo.GetPatientByID(input.Patient.ID)
+	if err != nil {
+		return models.MedCardResponse{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get patient data",
+			err,
+			true,
+		)
+	}
 	// 3. Обновляем ContactInfo
 	contactInfoUpdate := map[string]interface{}{
 		"phone":   input.ContactInfo.Phone,
 		"email":   input.ContactInfo.Email,
 		"address": input.ContactInfo.Address,
 	}
-	if _, err := u.contactInfoRepo.UpdateContactInfoByPatientID(input.Patient.ID, contactInfoUpdate); err != nil {
-		return models.MedCardResponse{}, errors.NewAppError(
-			errors.InternalServerErrorCode,
-			"failed to update contact info",
-			err,
-			true,
-		)
+	if patient.ContactInfoID != nil {
+		if _, err := u.contactInfoRepo.UpdateContactInfo(*patient.ContactInfoID, contactInfoUpdate); err != nil {
+			return models.MedCardResponse{}, errors.NewAppError(
+				errors.InternalServerErrorCode,
+				"failed to update contact info",
+				err,
+				true,
+			)
+		}
+	} else {
+		newContact := entities.ContactInfo{
+			Phone:   input.ContactInfo.Phone,
+			Email:   input.ContactInfo.Email,
+			Address: input.ContactInfo.Address,
+		}
+
+		// Создаем запись и получаем ID
+		contactID, err := u.contactInfoRepo.CreateContactInfo(newContact)
+		if err != nil {
+			return models.MedCardResponse{}, errors.NewAppError(
+				errors.InternalServerErrorCode,
+				"failed to create contact info",
+				err,
+				true,
+			)
+		}
+
+		// Привязываем к пациенту
+		updateMap := map[string]interface{}{"contact_info_id": contactID}
+		if _, err := u.patientRepo.UpdatePatient(input.Patient.ID, updateMap); err != nil {
+			return models.MedCardResponse{}, errors.NewAppError(
+				errors.InternalServerErrorCode,
+				"failed to link contact info to patient",
+				err,
+				true,
+			)
+		}
 	}
 
 	// 4. Обновляем Allergy (если переданы)
@@ -213,7 +252,7 @@ func (u *MedCardUsecase) UpdateMedCard(input *models.UpdateMedCardRequest) (mode
 		}
 	}
 	// Получаем обновленные данные для формирования ответа
-	patient, err := u.patientRepo.GetPatientByID(input.Patient.ID)
+	patient, err = u.patientRepo.GetPatientByID(input.Patient.ID)
 	if err != nil {
 		return models.MedCardResponse{}, errors.NewAppError(
 			errors.InternalServerErrorCode,
@@ -233,7 +272,7 @@ func (u *MedCardUsecase) UpdateMedCard(input *models.UpdateMedCardRequest) (mode
 		)
 	}
 
-	contactInfo, err := u.contactInfoRepo.GetContactInfoByPatientID(input.Patient.ID)
+	contactInfo, err := u.contactInfoRepo.GetContactInfoByID(*patient.ContactInfoID)
 	if err != nil {
 		return models.MedCardResponse{}, errors.NewAppError(
 			errors.InternalServerErrorCode,
