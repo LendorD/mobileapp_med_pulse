@@ -249,7 +249,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UpdateReceptionHospitalRequest"
+                            "$ref": "#/definitions/models.UpdateSmpReceptionRequest"
                         }
                     }
                 ],
@@ -1100,9 +1100,6 @@ const docTemplate = `{
         "entities.MedService": {
             "type": "object",
             "properties": {
-                "created_at": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
                 },
@@ -1113,15 +1110,6 @@ const docTemplate = `{
                 "price": {
                     "type": "integer",
                     "example": 100
-                },
-                "receptionSMP": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.ReceptionSMP"
-                    }
-                },
-                "updated_at": {
-                    "type": "string"
                 }
             }
         },
@@ -1881,6 +1869,47 @@ const docTemplate = `{
                         }
                     ],
                     "example": "scheduled"
+                }
+            }
+        },
+        "models.UpdateSmpReceptionRequest": {
+            "type": "object",
+            "required": [
+                "doctor_id",
+                "emergency_call_id",
+                "patient_id",
+                "reception_smp_id"
+            ],
+            "properties": {
+                "diagnosis": {
+                    "type": "string",
+                    "example": "ОРВИ"
+                },
+                "doctor_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "emergency_call_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "med_services": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.MedService"
+                    }
+                },
+                "patient_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "reception_smp_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "recommendations": {
+                    "type": "string",
+                    "example": "Постельный режим"
                 }
             }
         }
