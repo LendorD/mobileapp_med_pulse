@@ -23,7 +23,7 @@ import (
 // @Failure 401 {object} IncorrectDataError "Некорректный ID вызова"
 // @Failure 422 {object} ValidationError "Ошибка валидации"
 // @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
-// @Router /emergency/{doctor_id}/receptions [get]
+// @Router /emergency/{doctor_id}/{recep_id} [get]
 func (h *Handler) GetReceptionsSMPByCallId(c *gin.Context) {
 
 	// Получаем doctor_id из URL
@@ -74,7 +74,7 @@ func (h *Handler) GetReceptionsSMPByCallId(c *gin.Context) {
 // @Failure 401 {object} IncorrectDataError "Некорректный ID вызова"
 // @Failure 422 {object} ValidationError "Ошибка валидации"
 // @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
-// @Router /emergency/{smp_id} [get]
+// @Router /emergency/{doctor_id}/{recep_id}/{smp_id} [get]
 func (h *Handler) GetReceptionWithMedServices(c *gin.Context) {
 	// Парсинг ID
 	smp_id, err := h.service.ParseUintString(c.Param("smp_id"))

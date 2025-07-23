@@ -778,7 +778,7 @@ paths:
       summary: Получить экстренные приёмы врача по дате
       tags:
       - SMP
-  /emergency/{doctor_id}/receptions:
+  /emergency/{doctor_id}/{recep_id}:
     get:
       consumes:
       - application/json
@@ -828,7 +828,7 @@ paths:
       summary: Получить СМП приёмы врача по дате
       tags:
       - SMP
-  /emergency/{smp_id}:
+  /emergency/{doctor_id}/{recep_id}/{smp_id}:
     get:
       consumes:
       - application/json

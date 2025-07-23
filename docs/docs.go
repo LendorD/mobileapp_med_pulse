@@ -350,7 +350,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/emergency/{doctor_id}/receptions": {
+        "/emergency/{doctor_id}/{recep_id}": {
             "get": {
                 "description": "Возвращает список приёмов скорой медицинской помощи для указанного врача с пагинацией",
                 "consumes": [
@@ -423,7 +423,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/emergency/{smp_id}": {
+        "/emergency/{doctor_id}/{recep_id}/{smp_id}": {
             "get": {
                 "description": "Возвращает информацию о приёме скорой медицинской помощи вместе со списком медицинских услуг",
                 "consumes": [
