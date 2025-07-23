@@ -52,19 +52,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Неверный формат запроса",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.IncorrectFormatError"
                         }
                     },
                     "401": {
                         "description": "Неверные учётные данные",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.IncorrectDataError"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.InternalServerError"
                         }
                     }
                 }
@@ -102,19 +102,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Некорректный ID",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.IncorrectDataError"
                         }
                     },
                     "404": {
                         "description": "Врач не найден",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.NotFoundError"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.InternalServerError"
                         }
                     }
                 }
@@ -152,25 +152,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Некорректный запрос",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.IncorrectFormatError"
                         }
                     },
                     "404": {
                         "description": "Врач не найден",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.NotFoundError"
                         }
                     },
                     "422": {
                         "description": "Ошибка валидации",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.ValidationError"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.InternalServerError"
                         }
                     }
                 }
@@ -191,27 +191,21 @@ const docTemplate = `{
                 "summary": "Создать заключение на скорой",
                 "responses": {
                     "200": {
-                        "description": "Заключение для пациента",
+                        "description": "Создание заключения для пациента",
                         "schema": {
                             "$ref": "#/definitions/entities.ReceptionSMP"
                         }
                     },
                     "400": {
-                        "description": "Некорректный ID",
+                        "description": "Неверный формат запроса",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    },
-                    "404": {
-                        "description": "Переданные данные некорекктны",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.IncorrectFormatError"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.InternalServerError"
                         }
                     }
                 }
@@ -259,15 +253,27 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Bad Request",
+                        "description": "Неверный формат запроса",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.IncorrectFormatError"
+                        }
+                    },
+                    "401": {
+                        "description": "Некорректный ID приёма",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.IncorrectDataError"
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка валидации",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ValidationError"
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.InternalServerError"
                         }
                     }
                 }
@@ -320,15 +326,15 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Некорректный запрос или параметры",
+                        "description": "Некорректный запрос",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.IncorrectFormatError"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.InternalServerError"
                         }
                     }
                 }
@@ -381,15 +387,27 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Некорректные параметры запроса",
+                        "description": "Неверный формат запроса",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.IncorrectFormatError"
+                        }
+                    },
+                    "401": {
+                        "description": "Некорректный ID вызова",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.IncorrectDataError"
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка валидации",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ValidationError"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.InternalServerError"
                         }
                     }
                 }
@@ -425,21 +443,27 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Некорректный ID",
+                        "description": "Неверный формат запроса",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.IncorrectFormatError"
                         }
                     },
-                    "404": {
-                        "description": "Приём не найден",
+                    "401": {
+                        "description": "Некорректный ID вызова",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.IncorrectDataError"
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка валидации",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ValidationError"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.InternalServerError"
                         }
                     }
                 }
@@ -499,15 +523,27 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Некорректные данные",
+                        "description": "Неверный формат запроса",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.IncorrectFormatError"
+                        }
+                    },
+                    "401": {
+                        "description": "Некорректный ID пациента",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.IncorrectDataError"
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка валидации",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ValidationError"
                         }
                     },
                     "500": {
-                        "description": "Внутренняя ошибка",
+                        "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.InternalServerError"
                         }
                     }
                 }
@@ -567,15 +603,27 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Некорректные данные запроса",
+                        "description": "Неверный формат запроса",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.IncorrectFormatError"
+                        }
+                    },
+                    "401": {
+                        "description": "Некорректный ID доктора",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.IncorrectDataError"
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка валидации",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ValidationError"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.InternalServerError"
                         }
                     }
                 }
@@ -620,21 +668,27 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Ошибка разбора тела запроса или некорректные данные",
+                        "description": "Неверный формат запроса",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.IncorrectFormatError"
+                        }
+                    },
+                    "401": {
+                        "description": "Некорректный ID приёма",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.IncorrectDataError"
                         }
                     },
                     "422": {
-                        "description": "Ошибка валидации входных данных",
+                        "description": "Ошибка валидации",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.ValidationError"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.InternalServerError"
                         }
                     }
                 }
@@ -670,21 +724,27 @@ const docTemplate = `{
                         }
                     },
                     "400": {
+                        "description": "Некорректный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.IncorrectFormatError"
+                        }
+                    },
+                    "401": {
                         "description": "Некорректный ID пациента",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.IncorrectDataError"
                         }
                     },
                     "404": {
                         "description": "Медицинская карта не найдена",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.NotFoundError"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.InternalServerError"
                         }
                     }
                 }
@@ -729,31 +789,31 @@ const docTemplate = `{
                     "400": {
                         "description": "Некорректный запрос",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.IncorrectFormatError"
                         }
                     },
                     "404": {
                         "description": "Медицинская карта не найдена",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.NotFoundError"
                         }
                     },
                     "422": {
-                        "description": "Ошибка валидации данных",
+                        "description": "Ошибка валидации",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.ValidationError"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.InternalServerError"
                         }
                     }
                 }
             }
         },
-        "/medservices/{pat_id}": {
+        "/medservices/": {
             "get": {
                 "description": "Возвращает список платных услуг",
                 "consumes": [
@@ -773,10 +833,16 @@ const docTemplate = `{
                             "$ref": "#/definitions/models.MedServicesListResponse"
                         }
                     },
+                    "400": {
+                        "description": "Некорректный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.IncorrectFormatError"
+                        }
+                    },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.InternalServerError"
                         }
                     }
                 }
@@ -814,21 +880,21 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Некорректный запрос",
+                        "description": "Неверный формат запроса",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.IncorrectFormatError"
                         }
                     },
                     "422": {
-                        "description": "Ошибка валидации данных",
+                        "description": "Ошибка валидации",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.ValidationError"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.InternalServerError"
                         }
                     }
                 }
@@ -878,22 +944,22 @@ const docTemplate = `{
                             ]
                         }
                     },
-                    "400": {
+                    "401": {
                         "description": "Некорректный ID врача",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.IncorrectDataError"
                         }
                     },
                     "404": {
                         "description": "Врач не найден",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.NotFoundError"
                         }
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
+                            "$ref": "#/definitions/handlers.InternalServerError"
                         }
                     }
                 }
@@ -1256,27 +1322,95 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.ResultError": {
+        "handlers.IncorrectDataError": {
             "type": "object",
             "properties": {
                 "response": {
                     "type": "object",
                     "properties": {
                         "code": {
-                            "description": "[RULE]: must be one of codes from table (Check DEV.PAGE)",
                             "type": "integer",
-                            "example": 400
+                            "example": 401
                         },
                         "message": {
                             "type": "string",
-                            "example": "Bad request"
+                            "example": "Некорректные данные"
                         }
                     }
                 },
                 "status": {
                     "description": "error",
                     "type": "string",
-                    "example": "error"
+                    "example": "IncorrectDataError"
+                }
+            }
+        },
+        "handlers.IncorrectFormatError": {
+            "type": "object",
+            "properties": {
+                "response": {
+                    "type": "object",
+                    "properties": {
+                        "code": {
+                            "type": "integer",
+                            "example": 400
+                        },
+                        "message": {
+                            "type": "string",
+                            "example": "Неверный формат запроса"
+                        }
+                    }
+                },
+                "status": {
+                    "description": "error",
+                    "type": "string",
+                    "example": "IncorrectFormatError"
+                }
+            }
+        },
+        "handlers.InternalServerError": {
+            "type": "object",
+            "properties": {
+                "response": {
+                    "type": "object",
+                    "properties": {
+                        "code": {
+                            "type": "integer",
+                            "example": 500
+                        },
+                        "message": {
+                            "type": "string",
+                            "example": "Внутренняя ошибка сервера"
+                        }
+                    }
+                },
+                "status": {
+                    "description": "error",
+                    "type": "string",
+                    "example": "InternalServerError"
+                }
+            }
+        },
+        "handlers.NotFoundError": {
+            "type": "object",
+            "properties": {
+                "response": {
+                    "type": "object",
+                    "properties": {
+                        "code": {
+                            "type": "integer",
+                            "example": 404
+                        },
+                        "message": {
+                            "type": "string",
+                            "example": "Данные не найдены"
+                        }
+                    }
+                },
+                "status": {
+                    "description": "error",
+                    "type": "string",
+                    "example": "NotFoundError"
                 }
             }
         },
@@ -1304,6 +1438,29 @@ const docTemplate = `{
                     "description": "ok",
                     "type": "string",
                     "example": "ok"
+                }
+            }
+        },
+        "handlers.ValidationError": {
+            "type": "object",
+            "properties": {
+                "response": {
+                    "type": "object",
+                    "properties": {
+                        "code": {
+                            "type": "integer",
+                            "example": 422
+                        },
+                        "message": {
+                            "type": "string",
+                            "example": "Ошибка валидации"
+                        }
+                    }
+                },
+                "status": {
+                    "description": "error",
+                    "type": "string",
+                    "example": "ValidationError"
                 }
             }
         },
