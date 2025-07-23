@@ -84,6 +84,7 @@ definitions:
   entities.MedService:
     properties:
       id:
+        example: 1
         type: integer
       name:
         example: EKG
@@ -113,6 +114,7 @@ definitions:
         example: Смирнов Алексей Петрович
         type: string
       id:
+        example: 1
         type: integer
       is_male:
         example: true
@@ -167,6 +169,7 @@ definitions:
         example: 1
         type: integer
       id:
+        example: 1
         type: integer
       patient_id:
         example: 1
@@ -558,6 +561,43 @@ definitions:
         example: Постельный режим
         type: string
     type: object
+  models.ReceptionSMPResponse:
+    properties:
+      diagnosis:
+        example: ОРВИ
+        type: string
+      id:
+        type: integer
+      med_services:
+        items:
+          $ref: '#/definitions/models.MedServicesResponse'
+        type: array
+      patient_name:
+        example: Иванов Иван
+        type: string
+      recommendations:
+        example: Постельный режим
+        type: string
+      specialization:
+        example: Терапевт
+        type: string
+      specialization_data: {}
+    type: object
+  models.ReceptionSMPResponseList:
+    properties:
+      currentPage:
+        type: integer
+      hits:
+        items:
+          $ref: '#/definitions/models.ReceptionSMPResponse'
+        type: array
+      hitsPerPage:
+        type: integer
+      totalHits:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
   models.ShortPatientResponse:
     description: Сокращенные данные пациента
     properties:
@@ -571,6 +611,7 @@ definitions:
         type: string
       id:
         description: ID пациента
+        example: 1
         type: integer
       is_male:
         description: Пол (true - мужской)
@@ -620,6 +661,7 @@ definitions:
         example: Грипп
         type: string
       id:
+        example: 1
         type: integer
       recommendations:
         example: Постельный режим
@@ -781,7 +823,7 @@ paths:
       parameters:
       - description: ID врача
         in: path
-        name: doctor_id
+        name: doc_id
         required: true
         type: integer
       - description: Дата в формате YYYY-MM-DD
@@ -792,6 +834,11 @@ paths:
         description: Номер страницы
         in: query
         name: page
+        type: integer
+      - default: 5
+        description: Количество записей на страницу
+        in: query
+        name: perPage
         type: integer
       produces:
       - application/json
@@ -813,7 +860,7 @@ paths:
       summary: Получить экстренные приёмы врача по дате
       tags:
       - SMP
-  /emergency/{doc_id}/{call_id}:
+  /emergency/calls/{call_id}:
     get:
       consumes:
       - application/json
@@ -842,7 +889,7 @@ paths:
           description: Информация о приёме скорой помощи
           schema:
             items:
-              $ref: '#/definitions/entities.ReceptionSMP'
+              $ref: '#/definitions/models.ReceptionSMPResponseList'
             type: array
         "400":
           description: Неверный формат запроса
@@ -860,45 +907,7 @@ paths:
           description: Внутренняя ошибка сервера
           schema:
             $ref: '#/definitions/handlers.InternalServerError'
-      summary: Получить СМП приёмы врача по дате
-      tags:
-      - SMP
-  /emergency/{doctor_id}/{recep_id}/{smp_id}:
-    get:
-      consumes:
-      - application/json
-      description: Возвращает информацию о приёме скорой медицинской помощи вместе
-        со списком медицинских услуг
-      parameters:
-      - description: ID приёма СМП
-        in: path
-        name: smp_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Информация о приёме и медуслугах
-          schema:
-            $ref: '#/definitions/entities.MedService'
-        "400":
-          description: Неверный формат запроса
-          schema:
-            $ref: '#/definitions/handlers.IncorrectFormatError'
-        "401":
-          description: Некорректный ID вызова
-          schema:
-            $ref: '#/definitions/handlers.IncorrectDataError'
-        "422":
-          description: Ошибка валидации
-          schema:
-            $ref: '#/definitions/handlers.ValidationError'
-        "500":
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/handlers.InternalServerError'
-      summary: Получить приём СМП с медуслугами по ID
+      summary: Получить СМП приём по ID
       tags:
       - SMP
   /emergency/receptions:
@@ -974,6 +983,49 @@ paths:
           schema:
             $ref: '#/definitions/handlers.InternalServerError'
       summary: Обновить приём в больнице
+      tags:
+      - SMP
+  /emergency/smps/{call_id}/{smp_id}:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о приёме скорой медицинской помощи вместе
+        со списком медицинских услуг
+      parameters:
+      - description: ID вызова
+        in: path
+        name: call_id
+        required: true
+        type: integer
+      - description: ID приёма СМП
+        in: path
+        name: smp_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о приёме и медуслугах
+          schema:
+            $ref: '#/definitions/models.ReceptionSMPResponse'
+        "400":
+          description: Неверный формат запроса
+          schema:
+            $ref: '#/definitions/handlers.IncorrectFormatError'
+        "401":
+          description: Некорректный ID вызова
+          schema:
+            $ref: '#/definitions/handlers.IncorrectDataError'
+        "422":
+          description: Ошибка валидации
+          schema:
+            $ref: '#/definitions/handlers.ValidationError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.InternalServerError'
+      summary: Получить приём СМП с медуслугами по ID
       tags:
       - SMP
   /hospital/receptions/{doc_id}:

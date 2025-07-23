@@ -14,9 +14,10 @@ import (
 // @Tags SMP
 // @Accept json
 // @Produce json
-// @Param doctor_id path uint true "ID врача"
+// @Param doc_id path uint true "ID врача"
 // @Param date query string false "Дата в формате YYYY-MM-DD"
 // @Param page query int false "Номер страницы" default(1)
+// @Param perPage query int false "Количество записей на страницу" default(5)
 // @Success 200 {array} entities.EmergencyCall "Список приёмов"
 // @Failure 400 {object} IncorrectFormatError "Некорректный запрос"
 // @Failure 500 {object} InternalServerError "Внутренняя ошибка"

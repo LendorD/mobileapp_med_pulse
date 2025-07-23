@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetReceptionsSMPByDoctorAndDate godoc
-// @Summary Получить СМП приёмы врача по дате
+// GetReceptionsSMPByCallId godoc
+// @Summary Получить СМП приём по ID
 // @Description Возвращает список приёмов скорой медицинской помощи для указанного врача с пагинацией
 // @Tags SMP
 // @Accept json
@@ -18,12 +18,12 @@ import (
 // @Param call_id path uint true "ID вызова"
 // @Param page query int false "Номер страницы" default(1)
 // @Param perPage query int false "Количество записей на страницу" default(5)
-// @Success 200 {array} entities.ReceptionSMP "Информация о приёме скорой помощи"
+// @Success 200 {array} models.ReceptionSMPResponseList "Информация о приёме скорой помощи"
 // @Failure 400 {object} IncorrectFormatError "Неверный формат запроса"
 // @Failure 401 {object} IncorrectDataError "Некорректный ID вызова"
 // @Failure 422 {object} ValidationError "Ошибка валидации"
 // @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
-// @Router /emergency/{doc_id}/{call_id} [get]
+// @Router /emergency/calls/{call_id} [get]
 func (h *Handler) GetReceptionsSMPByCallId(c *gin.Context) {
 
 	// Получаем doctor_id из URL
@@ -68,13 +68,14 @@ func (h *Handler) GetReceptionsSMPByCallId(c *gin.Context) {
 // @Tags SMP
 // @Accept json
 // @Produce json
+// @Param call_id path uint true "ID вызова"
 // @Param smp_id path uint true "ID приёма СМП"
-// @Success 200 {object} entities.MedService "Информация о приёме и медуслугах"
+// @Success 200 {object} models.ReceptionSMPResponse "Информация о приёме и медуслугах"
 // @Failure 400 {object} IncorrectFormatError "Неверный формат запроса"
 // @Failure 401 {object} IncorrectDataError "Некорректный ID вызова"
 // @Failure 422 {object} ValidationError "Ошибка валидации"
 // @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
-// @Router /emergency/{doctor_id}/{recep_id}/{smp_id} [get]
+// @Router /emergency/smps/{call_id}/{smp_id} [get]
 func (h *Handler) GetReceptionWithMedServices(c *gin.Context) {
 	// Парсинг ID
 	smp_id, err := h.service.ParseUintString(c.Param("smp_id"))
@@ -92,7 +93,7 @@ func (h *Handler) GetReceptionWithMedServices(c *gin.Context) {
 	}
 
 	// Вызов usecase
-	reception, err := h.usecase.GetReceptionWithMedServicesByID(uint(smp_id), uint(call_id))
+	reception, err := h.usecase.GetReceptionWithMedServicesByID(smp_id, call_id)
 	if err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "Reception not found", false)
 		return
