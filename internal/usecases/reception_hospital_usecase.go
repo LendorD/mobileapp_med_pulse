@@ -254,8 +254,9 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorID(doc_id uint, 
 			Diagnosis:   reception.Diagnosis,
 			Address:     reception.Address,
 			Doctor: models.DoctorShortResponse{
-				ID:       reception.Doctor.ID,
-				FullName: reception.Doctor.FullName,
+				ID:             reception.Doctor.ID,
+				FullName:       reception.Doctor.FullName,
+				Specialization: reception.Doctor.Specialization.Title,
 				// TODO: добавить специализацию если нужно
 			},
 			Recommendations:    reception.Recommendations,

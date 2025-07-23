@@ -356,7 +356,7 @@ func (r *ReceptionHospitalRepositoryImpl) GetAllHospitalReceptionsByDoctorID(doc
 	}
 
 	// Получаем приёмы с preload'ом пациента
-	if err := db.Preload("Patient").Preload("Doctor").Find(&receptions).Error; err != nil {
+	if err := db.Preload("Patient").Preload("Doctor.Specialization").Find(&receptions).Error; err != nil {
 		return nil, 0, errors.NewDBError(op, err)
 	}
 	return receptions, total, nil
