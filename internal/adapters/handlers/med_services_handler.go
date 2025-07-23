@@ -11,8 +11,9 @@ import (
 // @Accept json
 // @Produce json
 // @Success 200 {object} models.MedServicesListResponse "Медицинская карта пациента"
-// @Failure 500 {object} ResultError "Внутренняя ошибка сервера"
-// @Router /medservices/{pat_id} [get]
+// @Failure 400 {object} IncorrectFormatError "Некорректный запрос"
+// @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
+// @Router /medservices/ [get]
 func (h *Handler) GetAllMedServices(c *gin.Context) {
 
 	medServices, eerr := h.usecase.GetAllMedServices()
