@@ -352,6 +352,18 @@ definitions:
         example: Пыльца
         type: string
     type: object
+  models.ContactInfoData:
+    properties:
+      address:
+        example: г. Москва, ул. Ленина, д. 10
+        type: string
+      email:
+        example: user@example.com
+        type: string
+      phone:
+        example: "+79991234567"
+        type: string
+    type: object
   models.ContactInfoResponse:
     description: Контактная информация пациента
     properties:
@@ -367,6 +379,23 @@ definitions:
         description: Номер телефона
         example: "+79991234567"
         type: string
+    type: object
+  models.CreateEmergencyRequest:
+    properties:
+      doctor_id:
+        example: 1
+        type: integer
+      emergency_call_id:
+        example: 1
+        type: integer
+      patient:
+        $ref: '#/definitions/models.PatientData'
+      patient_id:
+        example: 1
+        type: integer
+    required:
+    - doctor_id
+    - emergency_call_id
     type: object
   models.CreatePatientRequest:
     description: Данные для создания нового пациента
@@ -460,6 +489,22 @@ definitions:
       price:
         example: 100
         type: integer
+    type: object
+  models.PatientData:
+    properties:
+      birth_date:
+        example: "1980-05-15T00:00:00Z"
+        type: string
+      contact_info:
+        allOf:
+        - $ref: '#/definitions/models.ContactInfoData'
+        description: Опциональные контактные данные
+      full_name:
+        example: Иванов Иван Иванович
+        type: string
+      is_male:
+        example: true
+        type: boolean
     type: object
   models.PersonalInfoResponse:
     description: Документы и идентификационные данные пациента
@@ -707,7 +752,6 @@ paths:
       - description: Дата в формате YYYY-MM-DD
         in: query
         name: date
-        required: true
         type: string
       - default: 1
         description: Номер страницы
@@ -827,6 +871,13 @@ paths:
       consumes:
       - application/json
       description: Возвращает созданное заключение
+      parameters:
+      - description: Данные для создания заключения
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateEmergencyRequest'
       produces:
       - application/json
       responses:
@@ -1114,7 +1165,7 @@ paths:
         name: pat_id
         required: true
         type: integer
-      - description: Данные для обновления медкарты
+      - description: Данные для обновления мед карты
         in: body
         name: input
         required: true

@@ -189,6 +189,17 @@ const docTemplate = `{
                     "SMP"
                 ],
                 "summary": "Создать заключение на скорой",
+                "parameters": [
+                    {
+                        "description": "Данные для создания заключения",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateEmergencyRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Создание заключения для пациента",
@@ -304,8 +315,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Дата в формате YYYY-MM-DD",
                         "name": "date",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "integer",
@@ -770,7 +780,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Данные для обновления медкарты",
+                        "description": "Данные для обновления мед карты",
                         "name": "input",
                         "in": "body",
                         "required": true,
@@ -1475,6 +1485,23 @@ const docTemplate = `{
                 }
             }
         },
+        "models.ContactInfoData": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "г. Москва, ул. Ленина, д. 10"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "phone": {
+                    "type": "string",
+                    "example": "+79991234567"
+                }
+            }
+        },
         "models.ContactInfoResponse": {
             "description": "Контактная информация пациента",
             "type": "object",
@@ -1493,6 +1520,30 @@ const docTemplate = `{
                     "description": "Номер телефона",
                     "type": "string",
                     "example": "+79991234567"
+                }
+            }
+        },
+        "models.CreateEmergencyRequest": {
+            "type": "object",
+            "required": [
+                "doctor_id",
+                "emergency_call_id"
+            ],
+            "properties": {
+                "doctor_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "emergency_call_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "patient": {
+                    "$ref": "#/definitions/models.PatientData"
+                },
+                "patient_id": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -1630,6 +1681,31 @@ const docTemplate = `{
                 "price": {
                     "type": "integer",
                     "example": 100
+                }
+            }
+        },
+        "models.PatientData": {
+            "type": "object",
+            "properties": {
+                "birth_date": {
+                    "type": "string",
+                    "example": "1980-05-15T00:00:00Z"
+                },
+                "contact_info": {
+                    "description": "Опциональные контактные данные",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.ContactInfoData"
+                        }
+                    ]
+                },
+                "full_name": {
+                    "type": "string",
+                    "example": "Иванов Иван Иванович"
+                },
+                "is_male": {
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
