@@ -21,7 +21,7 @@ import (
 // @Success 200 {array} entities.ReceptionSMP "Информация о приёме скорой помощи"
 // @Failure 400 {object} ResultError "Некорректные параметры запроса"
 // @Failure 500 {object} ResultError "Внутренняя ошибка сервера"
-// @Router /smp/{doctor_id}/receptions [get]
+// @Router /emergency/{doctor_id}/receptions [get]
 func (h *Handler) GetReceptionsSMPByCallId(c *gin.Context) {
 
 	// Получаем doctor_id из URL
@@ -69,9 +69,9 @@ func (h *Handler) GetReceptionsSMPByCallId(c *gin.Context) {
 // @Param smp_id path uint true "ID приёма СМП"
 // @Success 200 {object} entities.MedService "Информация о приёме и медуслугах"
 // @Failure 400 {object} ResultError "Некорректный ID"
-// @Failure 404 {object} map[string]string "Приём не найден"
-// @Failure 500 {object} map[string]string "Внутренняя ошибка сервера"
-// @Router /smp/{smp_id} [get]
+// @Failure 404 {object} ResultError "Приём не найден"
+// @Failure 500 {object} ResultError "Внутренняя ошибка сервера"
+// @Router /emergency/{smp_id} [get]
 func (h *Handler) GetReceptionWithMedServices(c *gin.Context) {
 	// Парсинг ID
 	smp_id, err := h.service.ParseUintString(c.Param("smp_id"))
@@ -117,8 +117,8 @@ func (h *Handler) GetReceptionWithMedServices(c *gin.Context) {
 //	  "doctor_id": 2,
 //	  "patient_id": 42
 //	}
-//
-// CreateSmReception godoc
+
+// CreateSMPReception godoc
 // @Summary Создать заключение на скорой
 // @Description Возвращает созданное заключение
 // @Tags SMP
@@ -126,10 +126,10 @@ func (h *Handler) GetReceptionWithMedServices(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} entities.ReceptionSMP "Заключение для пациента"
 // @Failure 400 {object} ResultError "Некорректный ID"
-// @Failure 404 {object} map[string]string "Переданные данные некорекктны"
-// @Failure 500 {object} map[string]string "Внутренняя ошибка сервера"
-// @Router /smp/{smp_id} [put]
-func (h *Handler) CreateSmpReception(c *gin.Context) {
+// @Failure 404 {object} ResultError "Переданные данные некорекктны"
+// @Failure 500 {object} ResultError "Внутренняя ошибка сервера"
+// @Router /emergency/receptions [post]
+func (h *Handler) CreateSMPReception(c *gin.Context) {
 	var input models.CreateEmergencyRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
@@ -150,7 +150,7 @@ func (h *Handler) CreateSmpReception(c *gin.Context) {
 	h.ResultResponse(c, "Success emergency reception create", Object, emergency)
 }
 
-// UpdateReceptionHospitalByReceptionID godoc
+// UpdateReceptionSMPByReceptionID godoc
 // @Summary Обновить приём в больнице
 // @Description Обновляет информацию о приёе в больнице
 // @Tags Reception
@@ -159,10 +159,10 @@ func (h *Handler) CreateSmpReception(c *gin.Context) {
 // @Param recep_id path uint true "ID приёма"
 // @Param info body models.UpdateReceptionHospitalRequest true "Данные для обновления"
 // @Success 200 {array} entities.ReceptionHospital
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /hospital/{recep_id} [put]
-func (h *Handler) UpdateReceptionSmpByReceptionID(c *gin.Context) {
+// @Failure 400 {object} ResultError
+// @Failure 500 {object} ResultError
+// @Router /emergency/receptions/{recep_id} [put]
+func (h *Handler) UpdateReceptionSMPByReceptionID(c *gin.Context) {
 	var input models.UpdateSmpReceptionRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "Error create ReceptionHospitalRequest", true)
