@@ -110,19 +110,6 @@ func (r *ReceptionHospitalRepositoryImpl) GetReceptionsHospitalByDateRange(start
 	return receptions, nil
 }
 
-func getReceptionPriority(status entities.ReceptionStatus) int {
-	switch status {
-	case entities.StatusScheduled:
-		return 1
-	case entities.StatusCompleted:
-		return 2
-	case entities.StatusCancelled, entities.StatusNoShow:
-		return 3
-	default:
-		return 4
-	}
-}
-
 func getOrderByStatusAndDate() string {
 	return `
         CASE 
@@ -168,34 +155,9 @@ func (r *ReceptionHospitalRepositoryImpl) GetReceptionsHospitalByDoctorAndDate(d
 
 	// Декодируем JSONB данные для каждого приема
 	for i := range receptions {
-		if receptions[i].SpecializationData.Status == pgtype.Present && receptions[i].Doctor.Specialization.Title != "" {
-			var specData interface{}
-
-			switch receptions[i].Doctor.Specialization.Title {
-			// case "Терапевт":
-			// 	specData = &entities.TherapistData{}
-			// case "Кардиолог":
-			// 	specData = &entities.CardiologistData{}
-			case "Невролог":
-				specData = &entities.NeurologistData{}
-			case "Травматолог":
-				specData = &entities.TraumatologistData{}
-			default:
-				// Для неизвестных специализаций используем generic map
-				var genericData map[string]interface{}
-				if err := receptions[i].SpecializationData.AssignTo(&genericData); err == nil {
-					receptions[i].SpecializationDataDecoded = genericData
-				}
-				continue
-			}
-
-			if err := receptions[i].SpecializationData.AssignTo(specData); err == nil {
-				receptions[i].SpecializationDataDecoded = specData
-			} else {
-				// log.Printf("Failed to decode specialization data for reception %d: %v",
-				//     receptions[i].ID, err)
-				errors.NewDBError(op, err)
-			}
+		receptions[i].SpecializationDataDecoded = pgtype.JSONB{
+			Bytes:  []byte(`{"key":"value"}`),
+			Status: pgtype.Present,
 		}
 	}
 

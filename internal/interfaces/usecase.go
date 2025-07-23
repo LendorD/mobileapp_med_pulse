@@ -21,7 +21,7 @@ type Usecases interface {
 type ReceptionHospitalUsecase interface {
 	GetHospitalReceptionsByPatientID(patientId uint, page, count int, filter, order string) (models.FilterResponse[[]models.ReceptionHospitalResponse], *errors.AppError)
 	UpdateReceptionHospital(input *models.UpdateReceptionHospitalRequest) (models.ReceptionHospitalResponse, *errors.AppError)
-	GetHospitalReceptionsByDoctorID(doc_id uint, page, count int, filter, order string) (models.FilterResponse[[]models.ReceptionFullResponse], *errors.AppError)
+	GetHospitalReceptionsByDoctorID(doc_id uint, page, count int, filter, order string) (models.FilterResponse[[]models.ReceptionHospitalResponse], *errors.AppError)
 	GetHospitalPatientsByDoctorID(doc_id uint, page, count int, filter, order string) (models.FilterResponse[[]entities.Patient], *errors.AppError)
 	GetReceptionHospitalByID(hospID uint) (models.ReceptionFullResponse, error)
 }
@@ -30,7 +30,7 @@ type ReceptionSmpUsecase interface {
 	CreateReceptionSMP(input *models.CreateEmergencyRequest) (entities.ReceptionSMP, *errors.AppError)
 	UpdateReceptionSmp(input *models.UpdateSmpReceptionRequest) (entities.ReceptionSMP, *errors.AppError)
 	GetReceptionWithMedServicesByID(smp_id uint, call_id uint) (models.ReceptionSMPResponse, error)
-	GetReceptionsSMPByEmergencyCall(call_id uint, page, perPage int) (*models.FilterResponse[[]models.ReceptionSMPResponse], error)
+	GetReceptionsSMPByEmergencyCall(call_id uint, page, perPage int) (*models.FilterResponse[[]models.ReceptionSmpShortResponse], error)
 }
 
 type MedCardUsecase interface {
