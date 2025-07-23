@@ -79,6 +79,7 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	// Пациенты
 	patientGroup := baseRouter.Group("/patients")
 	patientGroup.GET("/:doc_id/", h.GetAllPatientsByDoctorID) // Список пациентов доктора
+	patientGroup.POST("/", h.CreatePatient)
 
 	// Медкарты
 	medCardGroup := baseRouter.Group("/medcard")
@@ -89,16 +90,9 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	hospitalGroup := baseRouter.Group("/hospital")
 	hospitalGroup.GET("/receptions/patients/:pat_id", h.GetAllHospitalReceptionsByPatientID) // Все приемы пациента
 	hospitalGroup.GET("/receptions/:doc_id", h.GetReceptionsHospitalByDoctorID)              // Все приемы доктора
-
 	hospitalGroup.PUT("/receptions/:recep_id", h.UpdateReceptionHospitalByReceptionID)
 
-	// МАКСИМ ДУДКО СЧИТАЕТ ЭТО НЕ НУЖНОЙ ГРУППОЙ ПУСКАЙ ВСЕ БУДЕТ В EMERGENCY
-	// Приёмы СМП
-	// smpGroup := baseRouter.Group("/smp")
-	// smpGroup.GET("/:smp_id", h.GetReceptionWithMedServices)
-	// smpGroup.POST("/receptions", h.CreateSmpReception)
-	// smpGroup.PUT("/receptions/:recep_id", h.UpdateReceptionSmpByReceptionID)
-
+	// Медуслуги
 	medServicesGroup := baseRouter.Group("/med_services")
 	medServicesGroup.GET("/", h.GetAllMedServices)
 

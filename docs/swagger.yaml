@@ -262,6 +262,25 @@ definitions:
         example: error
         type: string
     type: object
+  handlers.ResultResponse:
+    properties:
+      response:
+        properties:
+          data:
+            description: '[AVALIABLE]: object, array of objects, empty'
+          message:
+            example: Success operation
+            type: string
+          type:
+            description: '[AVALIABLE]: object, array, empty'
+            example: object
+            type: string
+        type: object
+      status:
+        description: ok
+        example: ok
+        type: string
+    type: object
   models.AllergyResponse:
     description: Ответ с названием аллергии
     properties:
@@ -286,6 +305,25 @@ definitions:
         example: "+79991234567"
         type: string
     type: object
+<<<<<<< HEAD
+=======
+  models.CreatePatientRequest:
+    description: Данные для создания нового пациента
+    properties:
+      birth_date:
+        description: Дата рождения
+        example: "1980-05-15"
+        type: string
+      full_name:
+        description: ФИО пациента
+        example: Смирнов Алексей Петрович
+        type: string
+      is_male:
+        description: Пол (true - мужской)
+        example: true
+        type: boolean
+    type: object
+>>>>>>> 4b772bb (fix(patients): create handler returned)
   models.DoctorAuthResponse:
     description: Ответ с данными авторизованного врача
     properties:
@@ -343,6 +381,7 @@ definitions:
         - $ref: '#/definitions/models.PersonalInfoResponse'
         description: Персональная информация
     type: object
+<<<<<<< HEAD
   models.MedServicesListResponse:
     properties:
       hits:
@@ -376,6 +415,8 @@ definitions:
       totalPages:
         type: integer
     type: object
+=======
+>>>>>>> 4b772bb (fix(patients): create handler returned)
   models.PersonalInfoResponse:
     description: Документы и идентификационные данные пациента
     properties:
@@ -916,67 +957,80 @@ paths:
       summary: Обновить медицинскую карту пациента
       tags:
       - Medcard
+  /patients:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пациента с персональными и контактными данными
+      parameters:
+      - description: Данные пациента
+        in: body
+        name: info
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatePatientRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Созданный пациент
+          schema:
+            $ref: '#/definitions/entities.Patient'
+        "400":
+          description: Некорректный запрос
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "422":
+          description: Ошибка валидации данных
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Создать нового пациента
+      tags:
+      - Patient
   /patients/{doc_id}:
     get:
       consumes:
       - application/json
-      description: |-
-        Возвращает список уникальных пациентов, посетивших указанного доктора
-
-        По умолчанию кидать запрос с фильтром 'on_treatment.eq.true' - пациенты на лечении
-        и сортировкой по алфавиту 'full_name.asc'
+      description: Возвращает список всех пациентов, привязанных к указанному врачу
       parameters:
-      - description: ID доктора
+      - description: ID врача
         in: path
         name: doc_id
         required: true
         type: integer
-      - description: |-
-          Номер страницы
-          (по умолчанию 1)
-        in: query
-        name: page
-        type: integer
-      - description: |-
-          Количество записей на странице
-          (по умолчанию 0 — без ограничения)
-        in: query
-        name: count
-        type: integer
-      - description: |-
-          Фильтр в формате field.operation.value.
-          Примеры:
-          full_name.like.Иван - имя содержит 'Иван',
-          birth_date.eq.1988-07-14 - точная дата рождения
-        in: query
-        name: filter
-        type: string
-      - description: |-
-          Сортировка в формате field.direction.
-          Примеры:
-          full_name.asc - по алфавиту,
-          id.desc - по убыванию ID пациента
-        in: query
-        name: order
-        type: string
       produces:
       - application/json
       responses:
         "200":
           description: Список пациентов
           schema:
-            $ref: '#/definitions/models.PatientsListResponse'
+            allOf:
+            - $ref: '#/definitions/handlers.ResultResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/entities.Patient'
+                  type: array
+              type: object
         "400":
-          description: Некорректные данные
+          description: Некорректный ID врача
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "404":
+          description: Врач не найден
           schema:
             $ref: '#/definitions/handlers.ResultError'
         "500":
-          description: Внутренняя ошибка
+          description: Внутренняя ошибка сервера
           schema:
             $ref: '#/definitions/handlers.ResultError'
-      summary: Получить список пациентов по ID доктора
+      summary: Получить всех пациентов по ID врача
       tags:
-      - Patients
+      - Patient
   /smp/{doctor_id}/receptions:
     get:
       consumes:
