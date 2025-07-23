@@ -348,3 +348,46 @@ func (u *ReceptionHospitalUsecase) GetHospitalPatientsByDoctorID(doc_id uint, pa
 		TotalPages:  totalPages,
 	}, nil
 }
+
+func (u *ReceptionHospitalUsecase) GetReceptionHospitalByID(
+	hospID uint,
+) (models.ReceptionFullResponse, error) {
+	// Получаем данные из репозитория
+	reception, err := u.repo.GetReceptionHospitalByID(hospID)
+	if err != nil {
+		return models.ReceptionFullResponse{}, fmt.Errorf("failed to get reception: %w", err)
+	}
+
+	doctor := models.DoctorShortResponse{
+		ID:             reception.Doctor.ID,
+		FullName:       reception.Doctor.FullName,
+		Specialization: reception.CachedSpecialization,
+	}
+
+	// Формируем специализированные данные
+	var specData interface{}
+	if reception.SpecializationDataDecoded != nil {
+		specData = reception.SpecializationDataDecoded
+	} else if reception.SpecializationData.Status == pgtype.Present {
+		// Если данные не декодированы, но есть в JSONB
+		var rawData map[string]interface{}
+		if err := reception.SpecializationData.AssignTo(&rawData); err == nil {
+			specData = rawData
+		}
+	}
+
+	response := models.ReceptionFullResponse{
+		ID:                 reception.ID,
+		Date:               reception.Date.Format("02.01.2006 15:04"),
+		Status:             getStatusText(reception.Status),
+		PatientName:        reception.Patient.FullName,
+		PatientID:          reception.Patient.ID,
+		Diagnosis:          reception.Diagnosis,
+		Address:            reception.Address,
+		Doctor:             doctor,
+		Recommendations:    reception.Recommendations,
+		SpecializationData: specData,
+	}
+
+	return response, nil
+}

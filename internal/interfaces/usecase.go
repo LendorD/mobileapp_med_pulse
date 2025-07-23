@@ -23,6 +23,7 @@ type ReceptionHospitalUsecase interface {
 	UpdateReceptionHospital(input *models.UpdateReceptionHospitalRequest) (models.ReceptionHospitalResponse, *errors.AppError)
 	GetHospitalReceptionsByDoctorID(doc_id uint, page, count int, filter, order string) (models.FilterResponse[[]models.ReceptionFullResponse], *errors.AppError)
 	GetHospitalPatientsByDoctorID(doc_id uint, page, count int, filter, order string) (models.FilterResponse[[]entities.Patient], *errors.AppError)
+	GetReceptionHospitalByID(hospID uint) (models.ReceptionFullResponse, error)
 }
 
 type ReceptionSmpUsecase interface {

@@ -90,6 +90,7 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	hospitalGroup := baseRouter.Group("/hospital")
 	hospitalGroup.GET("/receptions/patients/:pat_id", h.GetAllHospitalReceptionsByPatientID) // Все приемы пациента
 	hospitalGroup.GET("/receptions/:doc_id", h.GetReceptionsHospitalByDoctorID)              // Все приемы доктора
+	hospitalGroup.GET("/receptions/:doc_id/:hosp_id", h.GetReceptionHosptalById)
 	hospitalGroup.PUT("/receptions/:recep_id", h.UpdateReceptionHospitalByReceptionID)
 
 	// Медуслуги
@@ -99,8 +100,8 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	// Звонки СМП
 	emergencyGroup := baseRouter.Group("/emergency")
 	emergencyGroup.GET("/:doc_id", h.GetEmergencyCallsByDoctorAndDate)
-	emergencyGroup.GET("/:doc_id/:call_id", h.GetReceptionsSMPByCallId)
-	emergencyGroup.GET("/:doc_id/:call_id/:smp_id", h.GetReceptionWithMedServices)
+	emergencyGroup.GET("/calls/:call_id", h.GetReceptionsSMPByCallId)
+	emergencyGroup.GET("/smps/:call_id/:smp_id", h.GetReceptionWithMedServices)
 	emergencyGroup.POST("/receptions", h.CreateSMPReception)
 	emergencyGroup.PUT("/receptions/:recep_id", h.UpdateReceptionSMPByReceptionID)
 

@@ -275,9 +275,6 @@ func decodeSpecializationData(data pgtype.JSONB, specialization string) (interfa
 		return nil, nil
 	}
 
-	// Логгирование сырых данных
-	log.Printf("Raw JSON data: %s", string(data.Bytes))
-
 	var result interface{}
 	switch specialization {
 	case "Невролог":
