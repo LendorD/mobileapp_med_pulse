@@ -9,6 +9,7 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
+	"github.com/jackc/pgtype"
 )
 
 type ReceptionSmpUsecase struct {
@@ -88,8 +89,12 @@ func (u *ReceptionSmpUsecase) CreateReceptionSMP(input *models.CreateEmergencyRe
 		EmergencyCallID: input.EmergencyCallID,
 		DoctorID:        input.DoctorID,
 		PatientID:       patient.ID,
-		Diagnosis:       "", // Можно оставить пустым или установить дефолтное значение
-		Recommendations: "", // Будет заполнено позже
+		Diagnosis:       "",
+		Recommendations: "",
+		SpecializationData: pgtype.JSONB{
+			Bytes:  []byte(`{"key":"value"}`),
+			Status: pgtype.Present,
+		},
 	}
 
 	createdReceptionID, createErr := u.recepSmpRepo.CreateReceptionSmp(reception)
