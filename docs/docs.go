@@ -290,7 +290,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/emergency/{doctor_id}": {
+        "/emergency/{doc_id}": {
             "get": {
                 "description": "Возвращает список экстренных приёмов, назначенных врачу на указанную дату, с пагинацией",
                 "consumes": [
@@ -350,7 +350,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/emergency/{doctor_id}/{recep_id}": {
+        "/emergency/{doc_id}/{call_id}": {
             "get": {
                 "description": "Возвращает список приёмов скорой медицинской помощи для указанного врача с пагинацией",
                 "consumes": [
@@ -366,8 +366,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "ID врача",
-                        "name": "doctor_id",
+                        "description": "ID вызова",
+                        "name": "call_id",
                         "in": "path",
                         "required": true
                     },
@@ -912,7 +912,7 @@ const docTemplate = `{
         },
         "/patients/{doc_id}": {
             "get": {
-                "description": "Возвращает список всех пациентов, привязанных к указанному врачу",
+                "description": "Возвращает список уникальных пациентов, посетивших указанного доктора\n\nПо умолчанию кидать запрос с фильтром 'on_treatment.eq.true' - пациенты на лечении\nи сортировкой по алфавиту 'full_name.asc'",
                 "consumes": [
                     "application/json"
                 ],
@@ -922,54 +922,57 @@ const docTemplate = `{
                 "tags": [
                     "Patient"
                 ],
-                "summary": "Получить всех пациентов по ID врача",
+                "summary": "Получить список пациентов по ID доктора",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "ID врача",
+                        "description": "ID доктора",
                         "name": "doc_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Номер страницы\n(по умолчанию 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Количество записей на странице\n(по умолчанию 0 — без ограничения)",
+                        "name": "count",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Фильтр в формате field.operation.value.\nПримеры:\nfull_name.like.Иван - имя содержит 'Иван',\nbirth_date.eq.1988-07-14 - точная дата рождения",
+                        "name": "filter",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Сортировка в формате field.direction.\nПримеры:\nfull_name.asc - по алфавиту,\nid.desc - по убыванию ID пациента",
+                        "name": "order",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "Список пациентов",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/handlers.ResultResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/entities.Patient"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/models.PatientsListResponse"
                         }
                     },
-                    "401": {
-                        "description": "Некорректный ID врача",
+                    "400": {
+                        "description": "Некорректные данные",
                         "schema": {
-                            "$ref": "#/definitions/handlers.IncorrectDataError"
-                        }
-                    },
-                    "404": {
-                        "description": "Врач не найден",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.NotFoundError"
+                            "$ref": "#/definitions/handlers.ResultError"
                         }
                     },
                     "500": {
-                        "description": "Внутренняя ошибка сервера",
+                        "description": "Внутренняя ошибка",
                         "schema": {
-                            "$ref": "#/definitions/handlers.InternalServerError"
+                            "$ref": "#/definitions/handlers.ResultError"
                         }
                     }
                 }
@@ -1424,30 +1427,27 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.ResultResponse": {
+        "handlers.ResultError": {
             "type": "object",
             "properties": {
                 "response": {
                     "type": "object",
                     "properties": {
-                        "data": {
-                            "description": "[AVALIABLE]: object, array of objects, empty"
+                        "code": {
+                            "description": "[RULE]: must be one of codes from table (Check DEV.PAGE)",
+                            "type": "integer",
+                            "example": 400
                         },
                         "message": {
                             "type": "string",
-                            "example": "Success operation"
-                        },
-                        "type": {
-                            "description": "[AVALIABLE]: object, array, empty",
-                            "type": "string",
-                            "example": "object"
+                            "example": "Bad request"
                         }
                     }
                 },
                 "status": {
-                    "description": "ok",
+                    "description": "error",
                     "type": "string",
-                    "example": "ok"
+                    "example": "error"
                 }
             }
         },
@@ -1706,6 +1706,29 @@ const docTemplate = `{
                 "is_male": {
                     "type": "boolean",
                     "example": true
+                }
+            }
+        },
+        "models.PatientsListResponse": {
+            "type": "object",
+            "properties": {
+                "currentPage": {
+                    "type": "integer"
+                },
+                "hits": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Patient"
+                    }
+                },
+                "hitsPerPage": {
+                    "type": "integer"
+                },
+                "totalHits": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
                 }
             }
         },

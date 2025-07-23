@@ -309,23 +309,21 @@ definitions:
         example: NotFoundError
         type: string
     type: object
-  handlers.ResultResponse:
+  handlers.ResultError:
     properties:
       response:
         properties:
-          data:
-            description: '[AVALIABLE]: object, array of objects, empty'
+          code:
+            description: '[RULE]: must be one of codes from table (Check DEV.PAGE)'
+            example: 400
+            type: integer
           message:
-            example: Success operation
-            type: string
-          type:
-            description: '[AVALIABLE]: object, array, empty'
-            example: object
+            example: Bad request
             type: string
         type: object
       status:
-        description: ok
-        example: ok
+        description: error
+        example: error
         type: string
     type: object
   handlers.ValidationError:
@@ -505,6 +503,21 @@ definitions:
       is_male:
         example: true
         type: boolean
+    type: object
+  models.PatientsListResponse:
+    properties:
+      currentPage:
+        type: integer
+      hits:
+        items:
+          $ref: '#/definitions/entities.Patient'
+        type: array
+      hitsPerPage:
+        type: integer
+      totalHits:
+        type: integer
+      totalPages:
+        type: integer
     type: object
   models.PersonalInfoResponse:
     description: Документы и идентификационные данные пациента
@@ -737,7 +750,7 @@ paths:
       summary: Обновить данные врача
       tags:
       - Doctor
-  /emergency/{doctor_id}:
+  /emergency/{doc_id}:
     get:
       consumes:
       - application/json
@@ -778,16 +791,16 @@ paths:
       summary: Получить экстренные приёмы врача по дате
       tags:
       - SMP
-  /emergency/{doctor_id}/{recep_id}:
+  /emergency/{doc_id}/{call_id}:
     get:
       consumes:
       - application/json
       description: Возвращает список приёмов скорой медицинской помощи для указанного
         врача с пагинацией
       parameters:
-      - description: ID врача
+      - description: ID вызова
         in: path
-        name: doctor_id
+        name: call_id
         required: true
         type: integer
       - default: 1
@@ -1258,40 +1271,61 @@ paths:
     get:
       consumes:
       - application/json
-      description: Возвращает список всех пациентов, привязанных к указанному врачу
+      description: |-
+        Возвращает список уникальных пациентов, посетивших указанного доктора
+
+        По умолчанию кидать запрос с фильтром 'on_treatment.eq.true' - пациенты на лечении
+        и сортировкой по алфавиту 'full_name.asc'
       parameters:
-      - description: ID врача
+      - description: ID доктора
         in: path
         name: doc_id
         required: true
         type: integer
+      - description: |-
+          Номер страницы
+          (по умолчанию 1)
+        in: query
+        name: page
+        type: integer
+      - description: |-
+          Количество записей на странице
+          (по умолчанию 0 — без ограничения)
+        in: query
+        name: count
+        type: integer
+      - description: |-
+          Фильтр в формате field.operation.value.
+          Примеры:
+          full_name.like.Иван - имя содержит 'Иван',
+          birth_date.eq.1988-07-14 - точная дата рождения
+        in: query
+        name: filter
+        type: string
+      - description: |-
+          Сортировка в формате field.direction.
+          Примеры:
+          full_name.asc - по алфавиту,
+          id.desc - по убыванию ID пациента
+        in: query
+        name: order
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: Список пациентов
           schema:
-            allOf:
-            - $ref: '#/definitions/handlers.ResultResponse'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/entities.Patient'
-                  type: array
-              type: object
-        "401":
-          description: Некорректный ID врача
+            $ref: '#/definitions/models.PatientsListResponse'
+        "400":
+          description: Некорректные данные
           schema:
-            $ref: '#/definitions/handlers.IncorrectDataError'
-        "404":
-          description: Врач не найден
-          schema:
-            $ref: '#/definitions/handlers.NotFoundError'
+            $ref: '#/definitions/handlers.ResultError'
         "500":
-          description: Внутренняя ошибка сервера
+          description: Внутренняя ошибка
           schema:
-            $ref: '#/definitions/handlers.InternalServerError'
-      summary: Получить всех пациентов по ID врача
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Получить список пациентов по ID доктора
       tags:
       - Patient
 swagger: "2.0"
