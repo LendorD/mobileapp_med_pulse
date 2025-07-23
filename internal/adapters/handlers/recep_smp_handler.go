@@ -15,7 +15,7 @@ import (
 // @Tags SMP
 // @Accept json
 // @Produce json
-// @Param doctor_id path uint true "ID врача"
+// @Param call_id path uint true "ID вызова"
 // @Param page query int false "Номер страницы" default(1)
 // @Param perPage query int false "Количество записей на страницу" default(5)
 // @Success 200 {array} entities.ReceptionSMP "Информация о приёме скорой помощи"
@@ -23,7 +23,7 @@ import (
 // @Failure 401 {object} IncorrectDataError "Некорректный ID вызова"
 // @Failure 422 {object} ValidationError "Ошибка валидации"
 // @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
-// @Router /emergency/{doctor_id}/{recep_id} [get]
+// @Router /emergency/{doc_id}/{call_id} [get]
 func (h *Handler) GetReceptionsSMPByCallId(c *gin.Context) {
 
 	// Получаем doctor_id из URL
