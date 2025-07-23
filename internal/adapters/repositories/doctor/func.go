@@ -34,7 +34,21 @@ func (r *DoctorRepository) GetDoctorByID(id uint) (entities.Doctor, error) {
 }
 
 func (r *DoctorRepository) UpdateDoctor(id uint, updateMap map[string]interface{}) (uint, error) {
-	op := "repo.BookingMaterial.UpdateBookingMaterial"
+	op := "repo.Doctor.UpdateDoctor"
+	delete(updateMap, "password")
+
+	allowedFields := map[string]bool{
+		"full_name":         true,
+		"login":             true,
+		"password_hash":     true,
+		"specialization_id": true,
+	}
+
+	for key := range updateMap {
+		if !allowedFields[key] {
+			delete(updateMap, key)
+		}
+	}
 
 	var updatedDoctor entities.Doctor
 	result := r.db.

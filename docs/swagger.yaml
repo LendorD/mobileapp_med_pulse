@@ -305,8 +305,6 @@ definitions:
         example: "+79991234567"
         type: string
     type: object
-<<<<<<< HEAD
-=======
   models.CreatePatientRequest:
     description: Данные для создания нового пациента
     properties:
@@ -323,7 +321,6 @@ definitions:
         example: true
         type: boolean
     type: object
->>>>>>> 4b772bb (fix(patients): create handler returned)
   models.DoctorAuthResponse:
     description: Ответ с данными авторизованного врача
     properties:
@@ -381,7 +378,6 @@ definitions:
         - $ref: '#/definitions/models.PersonalInfoResponse'
         description: Персональная информация
     type: object
-<<<<<<< HEAD
   models.MedServicesListResponse:
     properties:
       hits:
@@ -393,6 +389,8 @@ definitions:
     type: object
   models.MedServicesResponse:
     properties:
+      id:
+        type: integer
       name:
         example: EKG
         type: string
@@ -400,23 +398,6 @@ definitions:
         example: 100
         type: integer
     type: object
-  models.PatientsListResponse:
-    properties:
-      currentPage:
-        type: integer
-      hits:
-        items:
-          $ref: '#/definitions/entities.Patient'
-        type: array
-      hitsPerPage:
-        type: integer
-      totalHits:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-=======
->>>>>>> 4b772bb (fix(patients): create handler returned)
   models.PersonalInfoResponse:
     description: Документы и идентификационные данные пациента
     properties:
@@ -487,23 +468,15 @@ definitions:
     description: Используется для изменения информации о враче
     properties:
       full_name:
-        description: Новое ФИО
         example: Иванов Иван Иванович
         type: string
       id:
-        description: ID врача для обновления
         example: 1
         type: integer
       login:
-        description: Новый логин
         example: "+79123456789"
         type: string
-      password:
-        description: Новый пароль
-        example: newpassword123
-        type: string
       specialization_id:
-        description: Новая специализация
         example: 1
         type: integer
     type: object
@@ -697,12 +670,115 @@ paths:
             $ref: '#/definitions/handlers.ResultError'
       summary: Получить экстренные приёмы врача по дате
       tags:
-      - EmergencyCall
-  /hospital/{recep_id}:
+      - SMP
+  /emergency/{doctor_id}/receptions:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список приёмов скорой медицинской помощи для указанного
+        врача с пагинацией
+      parameters:
+      - description: ID врача
+        in: path
+        name: doctor_id
+        required: true
+        type: integer
+      - default: 1
+        description: Номер страницы
+        in: query
+        name: page
+        type: integer
+      - default: 5
+        description: Количество записей на страницу
+        in: query
+        name: perPage
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о приёме скорой помощи
+          schema:
+            items:
+              $ref: '#/definitions/entities.ReceptionSMP'
+            type: array
+        "400":
+          description: Некорректные параметры запроса
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Получить СМП приёмы врача по дате
+      tags:
+      - SMP
+  /emergency/{smp_id}:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о приёме скорой медицинской помощи вместе
+        со списком медицинских услуг
+      parameters:
+      - description: ID приёма СМП
+        in: path
+        name: smp_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о приёме и медуслугах
+          schema:
+            $ref: '#/definitions/entities.MedService'
+        "400":
+          description: Некорректный ID
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "404":
+          description: Приём не найден
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Получить приём СМП с медуслугами по ID
+      tags:
+      - SMP
+  /emergency/receptions:
+    post:
+      consumes:
+      - application/json
+      description: Возвращает созданное заключение
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Заключение для пациента
+          schema:
+            $ref: '#/definitions/entities.ReceptionSMP'
+        "400":
+          description: Некорректный ID
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "404":
+          description: Переданные данные некорекктны
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Создать заключение на скорой
+      tags:
+      - SMP
+  /emergency/receptions/{recep_id}:
     put:
       consumes:
       - application/json
-      description: Обновляет информацию о приёе в больнице
+      description: Обновляет информацию о приёvе в больнице
       parameters:
       - description: ID приёма
         in: path
@@ -727,18 +803,14 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ResultError'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ResultError'
       summary: Обновить приём в больнице
       tags:
-      - Reception
+      - SMP
   /hospital/receptions/{doc_id}:
     get:
       consumes:
@@ -900,21 +972,35 @@ paths:
     get:
       consumes:
       - application/json
-      description: Возвращает список платных услуг
+      description: Возвращает полную информацию из медицинской карты пациента
+      parameters:
+      - description: ID пациента
+        in: path
+        name: pat_id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: Медицинская карта пациента
           schema:
-            $ref: '#/definitions/models.MedServicesListResponse'
+            $ref: '#/definitions/models.MedCardResponse'
+        "400":
+          description: Некорректный ID пациента
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "404":
+          description: Медицинская карта не найдена
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
         "500":
           description: Внутренняя ошибка сервера
           schema:
             $ref: '#/definitions/handlers.ResultError'
-      summary: Получить все доступные платные услуги
+      summary: Получить медкарту пациента по его ID
       tags:
-      - MedServices
+      - Medcard
     put:
       consumes:
       - application/json
@@ -957,6 +1043,25 @@ paths:
       summary: Обновить медицинскую карту пациента
       tags:
       - Medcard
+  /medservices/{pat_id}:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список платных услуг
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Медицинская карта пациента
+          schema:
+            $ref: '#/definitions/models.MedServicesListResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Получить все доступные платные услуги
+      tags:
+      - MedServices
   /patients:
     post:
       consumes:
@@ -1031,114 +1136,4 @@ paths:
       summary: Получить всех пациентов по ID врача
       tags:
       - Patient
-  /smp/{doctor_id}/receptions:
-    get:
-      consumes:
-      - application/json
-      description: Возвращает список приёмов скорой медицинской помощи для указанного
-        врача с пагинацией
-      parameters:
-      - description: ID врача
-        in: path
-        name: doctor_id
-        required: true
-        type: integer
-      - default: 1
-        description: Номер страницы
-        in: query
-        name: page
-        type: integer
-      - default: 5
-        description: Количество записей на страницу
-        in: query
-        name: perPage
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Информация о приёме скорой помощи
-          schema:
-            items:
-              $ref: '#/definitions/entities.ReceptionSMP'
-            type: array
-        "400":
-          description: Некорректные параметры запроса
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "500":
-          description: Внутренняя ошибка сервера
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-      summary: Получить СМП приёмы врача по дате
-      tags:
-      - SMP
-  /smp/{smp_id}:
-    get:
-      consumes:
-      - application/json
-      description: Возвращает информацию о приёме скорой медицинской помощи вместе
-        со списком медицинских услуг
-      parameters:
-      - description: ID приёма СМП
-        in: path
-        name: smp_id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Информация о приёме и медуслугах
-          schema:
-            $ref: '#/definitions/entities.MedService'
-        "400":
-          description: Некорректный ID
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "404":
-          description: Приём не найден
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Внутренняя ошибка сервера
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Получить приём СМП с медуслугами по ID
-      tags:
-      - SMP
-    put:
-      consumes:
-      - application/json
-      description: Возвращает созданное заключение
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Заключение для пациента
-          schema:
-            $ref: '#/definitions/entities.ReceptionSMP'
-        "400":
-          description: Некорректный ID
-          schema:
-            $ref: '#/definitions/handlers.ResultError'
-        "404":
-          description: Переданные данные некорекктны
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Внутренняя ошибка сервера
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      summary: Создать заключение на скорой
-      tags:
-      - SMP
 swagger: "2.0"

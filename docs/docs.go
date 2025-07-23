@@ -176,6 +176,103 @@ const docTemplate = `{
                 }
             }
         },
+        "/emergency/receptions": {
+            "post": {
+                "description": "Возвращает созданное заключение",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SMP"
+                ],
+                "summary": "Создать заключение на скорой",
+                "responses": {
+                    "200": {
+                        "description": "Заключение для пациента",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ReceptionSMP"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный ID",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "404": {
+                        "description": "Переданные данные некорекктны",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    }
+                }
+            }
+        },
+        "/emergency/receptions/{recep_id}": {
+            "put": {
+                "description": "Обновляет информацию о приёvе в больнице",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SMP"
+                ],
+                "summary": "Обновить приём в больнице",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID приёма",
+                        "name": "recep_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные для обновления",
+                        "name": "info",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateReceptionHospitalRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entities.ReceptionHospital"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    }
+                }
+            }
+        },
         "/emergency/{doctor_id}": {
             "get": {
                 "description": "Возвращает список экстренных приёмов, назначенных врачу на указанную дату, с пагинацией",
@@ -186,7 +283,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "EmergencyCall"
+                    "SMP"
                 ],
                 "summary": "Получить экстренные приёмы врача по дате",
                 "parameters": [
@@ -230,6 +327,117 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Внутренняя ошибка",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    }
+                }
+            }
+        },
+        "/emergency/{doctor_id}/receptions": {
+            "get": {
+                "description": "Возвращает список приёмов скорой медицинской помощи для указанного врача с пагинацией",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SMP"
+                ],
+                "summary": "Получить СМП приёмы врача по дате",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID врача",
+                        "name": "doctor_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Номер страницы",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 5,
+                        "description": "Количество записей на страницу",
+                        "name": "perPage",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Информация о приёме скорой помощи",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entities.ReceptionSMP"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректные параметры запроса",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    }
+                }
+            }
+        },
+        "/emergency/{smp_id}": {
+            "get": {
+                "description": "Возвращает информацию о приёме скорой медицинской помощи вместе со списком медицинских услуг",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SMP"
+                ],
+                "summary": "Получить приём СМП с медуслугами по ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID приёма СМП",
+                        "name": "smp_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Информация о приёме и медуслугах",
+                        "schema": {
+                            "$ref": "#/definitions/entities.MedService"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный ID",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "404": {
+                        "description": "Приём не найден",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
                         "schema": {
                             "$ref": "#/definitions/handlers.ResultError"
                         }
@@ -432,9 +640,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/hospital/{recep_id}": {
-            "put": {
-                "description": "Обновляет информацию о приёе в больнице",
+        "/medcard/{pat_id}": {
+            "get": {
+                "description": "Возвращает полную информацию из медицинской карты пациента",
                 "consumes": [
                     "application/json"
                 ],
@@ -442,76 +650,35 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Reception"
+                    "Medcard"
                 ],
-                "summary": "Обновить приём в больнице",
+                "summary": "Получить медкарту пациента по его ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "ID приёма",
-                        "name": "recep_id",
+                        "description": "ID пациента",
+                        "name": "pat_id",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "Данные для обновления",
-                        "name": "info",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.UpdateReceptionHospitalRequest"
-                        }
                     }
                 ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entities.ReceptionHospital"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/medcard/{pat_id}": {
-            "get": {
-                "description": "Возвращает список платных услуг",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "MedServices"
-                ],
-                "summary": "Получить все доступные платные услуги",
                 "responses": {
                     "200": {
                         "description": "Медицинская карта пациента",
                         "schema": {
-                            "$ref": "#/definitions/models.MedServicesListResponse"
+                            "$ref": "#/definitions/models.MedCardResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный ID пациента",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "404": {
+                        "description": "Медицинская карта не найдена",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
                         }
                     },
                     "500": {
@@ -575,6 +742,35 @@ const docTemplate = `{
                         "description": "Ошибка валидации данных",
                         "schema": {
                             "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    }
+                }
+            }
+        },
+        "/medservices/{pat_id}": {
+            "get": {
+                "description": "Возвращает список платных услуг",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MedServices"
+                ],
+                "summary": "Получить все доступные платные услуги",
+                "responses": {
+                    "200": {
+                        "description": "Медицинская карта пациента",
+                        "schema": {
+                            "$ref": "#/definitions/models.MedServicesListResponse"
                         }
                     },
                     "500": {
@@ -698,168 +894,6 @@ const docTemplate = `{
                         "description": "Внутренняя ошибка сервера",
                         "schema": {
                             "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    }
-                }
-            }
-        },
-        "/smp/{doctor_id}/receptions": {
-            "get": {
-                "description": "Возвращает список приёмов скорой медицинской помощи для указанного врача с пагинацией",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "SMP"
-                ],
-                "summary": "Получить СМП приёмы врача по дате",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID врача",
-                        "name": "doctor_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "Номер страницы",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 5,
-                        "description": "Количество записей на страницу",
-                        "name": "perPage",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Информация о приёме скорой помощи",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entities.ReceptionSMP"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Некорректные параметры запроса",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    },
-                    "500": {
-                        "description": "Внутренняя ошибка сервера",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    }
-                }
-            }
-        },
-        "/smp/{smp_id}": {
-            "get": {
-                "description": "Возвращает информацию о приёме скорой медицинской помощи вместе со списком медицинских услуг",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "SMP"
-                ],
-                "summary": "Получить приём СМП с медуслугами по ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID приёма СМП",
-                        "name": "smp_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Информация о приёме и медуслугах",
-                        "schema": {
-                            "$ref": "#/definitions/entities.MedService"
-                        }
-                    },
-                    "400": {
-                        "description": "Некорректный ID",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    },
-                    "404": {
-                        "description": "Приём не найден",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Внутренняя ошибка сервера",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Возвращает созданное заключение",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "SMP"
-                ],
-                "summary": "Создать заключение на скорой",
-                "responses": {
-                    "200": {
-                        "description": "Заключение для пациента",
-                        "schema": {
-                            "$ref": "#/definitions/entities.ReceptionSMP"
-                        }
-                    },
-                    "400": {
-                        "description": "Некорректный ID",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ResultError"
-                        }
-                    },
-                    "404": {
-                        "description": "Переданные данные некорекктны",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Внутренняя ошибка сервера",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
                         }
                     }
                 }
@@ -1305,8 +1339,6 @@ const docTemplate = `{
                 }
             }
         },
-<<<<<<< HEAD
-=======
         "models.CreatePatientRequest": {
             "description": "Данные для создания нового пациента",
             "type": "object",
@@ -1328,7 +1360,6 @@ const docTemplate = `{
                 }
             }
         },
->>>>>>> 4b772bb (fix(patients): create handler returned)
         "models.DoctorAuthResponse": {
             "description": "Ответ с данными авторизованного врача",
             "type": "object",
@@ -1415,7 +1446,6 @@ const docTemplate = `{
                 }
             }
         },
-<<<<<<< HEAD
         "models.MedServicesListResponse": {
             "type": "object",
             "properties": {
@@ -1433,6 +1463,9 @@ const docTemplate = `{
         "models.MedServicesResponse": {
             "type": "object",
             "properties": {
+                "id": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string",
                     "example": "EKG"
@@ -1443,31 +1476,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.PatientsListResponse": {
-            "type": "object",
-            "properties": {
-                "currentPage": {
-                    "type": "integer"
-                },
-                "hits": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.Patient"
-                    }
-                },
-                "hitsPerPage": {
-                    "type": "integer"
-                },
-                "totalHits": {
-                    "type": "integer"
-                },
-                "totalPages": {
-                    "type": "integer"
-                }
-            }
-        },
-=======
->>>>>>> 4b772bb (fix(patients): create handler returned)
         "models.PersonalInfoResponse": {
             "description": "Документы и идентификационные данные пациента",
             "type": "object",
@@ -1565,27 +1573,18 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "full_name": {
-                    "description": "Новое ФИО",
                     "type": "string",
                     "example": "Иванов Иван Иванович"
                 },
                 "id": {
-                    "description": "ID врача для обновления",
                     "type": "integer",
                     "example": 1
                 },
                 "login": {
-                    "description": "Новый логин",
                     "type": "string",
                     "example": "+79123456789"
                 },
-                "password": {
-                    "description": "Новый пароль",
-                    "type": "string",
-                    "example": "newpassword123"
-                },
                 "specialization_id": {
-                    "description": "Новая специализация",
                     "type": "integer",
                     "example": 1
                 }

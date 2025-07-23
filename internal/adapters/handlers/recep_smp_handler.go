@@ -152,8 +152,8 @@ func (h *Handler) CreateSMPReception(c *gin.Context) {
 
 // UpdateReceptionSMPByReceptionID godoc
 // @Summary Обновить приём в больнице
-// @Description Обновляет информацию о приёе в больнице
-// @Tags Reception
+// @Description Обновляет информацию о приёvе в больнице
+// @Tags SMP
 // @Accept json
 // @Produce json
 // @Param recep_id path uint true "ID приёма"

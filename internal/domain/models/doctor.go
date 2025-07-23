@@ -29,11 +29,11 @@ type CreateDoctorRequest struct {
 // UpdateDoctorRequest - запрос на обновление данных врача
 // @Description Используется для изменения информации о враче
 type UpdateDoctorRequest struct {
-	ID               uint   `json:"id" example:"1"`                           // ID врача для обновления
-	FullName         string `json:"full_name" example:"Иванов Иван Иванович"` // Новое ФИО
-	Login            string `json:"login" example:"+79123456789"`             // Новый логин
-	Password         string `json:"password" example:"newpassword123"`        // Новый пароль
-	SpecializationID uint   `json:"specialization_id" example:"1"`            // Новая специализация
+	ID               uint   `json:"id" example:"1"`
+	FullName         string `json:"full_name" example:"Иванов Иван Иванович"`
+	Login            string `json:"login" example:"+79123456789"`
+	PasswordHash     string `json:"-"` // Убрали из JSON, чтобы не принималось извне
+	SpecializationID uint   `json:"specialization_id" example:"1"`
 }
 
 // DoctorShortResponse - краткая информация о враче

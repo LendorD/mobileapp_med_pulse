@@ -93,7 +93,7 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	hospitalGroup.PUT("/receptions/:recep_id", h.UpdateReceptionHospitalByReceptionID)
 
 	// Медуслуги
-	medServicesGroup := baseRouter.Group("/med_services")
+	medServicesGroup := baseRouter.Group("/medservices")
 	medServicesGroup.GET("/", h.GetAllMedServices)
 
 	// Звонки СМП
