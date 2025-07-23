@@ -160,7 +160,7 @@ func (h *Handler) CreateSMPReception(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param recep_id path uint true "ID приёма"
-// @Param info body models.UpdateReceptionHospitalRequest true "Данные для обновления"
+// @Param info body models.UpdateSmpReceptionRequest true "Данные для обновления"
 // @Success 200 {array} entities.ReceptionHospital
 // @Failure 400 {object} IncorrectFormatError "Неверный формат запроса"
 // @Failure 401 {object} IncorrectDataError "Некорректный ID приёма"

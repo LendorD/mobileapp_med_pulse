@@ -83,8 +83,6 @@ definitions:
     type: object
   entities.MedService:
     properties:
-      created_at:
-        type: string
       id:
         type: integer
       name:
@@ -93,12 +91,6 @@ definitions:
       price:
         example: 100
         type: integer
-      receptionSMP:
-        items:
-          $ref: '#/definitions/entities.ReceptionSMP'
-        type: array
-      updated_at:
-        type: string
     type: object
   entities.Patient:
     properties:
@@ -624,6 +616,36 @@ definitions:
         - $ref: '#/definitions/entities.ReceptionStatus'
         example: scheduled
     type: object
+  models.UpdateSmpReceptionRequest:
+    properties:
+      diagnosis:
+        example: ОРВИ
+        type: string
+      doctor_id:
+        example: 1
+        type: integer
+      emergency_call_id:
+        example: 1
+        type: integer
+      med_services:
+        items:
+          $ref: '#/definitions/entities.MedService'
+        type: array
+      patient_id:
+        example: 1
+        type: integer
+      reception_smp_id:
+        example: 1
+        type: integer
+      recommendations:
+        example: Постельный режим
+        type: string
+    required:
+    - doctor_id
+    - emergency_call_id
+    - patient_id
+    - reception_smp_id
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -912,7 +934,7 @@ paths:
         name: info
         required: true
         schema:
-          $ref: '#/definitions/models.UpdateReceptionHospitalRequest'
+          $ref: '#/definitions/models.UpdateSmpReceptionRequest'
       produces:
       - application/json
       responses:
