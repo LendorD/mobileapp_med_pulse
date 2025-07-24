@@ -105,5 +105,8 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	emergencyGroup.POST("/receptions", h.CreateSMPReception)
 	emergencyGroup.PUT("/receptions/:recep_id", h.UpdateReceptionSMPByReceptionID)
 
+	// TODO: Обновление статусов у Reception Hospital (PUT запрос)
+	// Поправить пациента на транзакцию
+
 	return r
 }
