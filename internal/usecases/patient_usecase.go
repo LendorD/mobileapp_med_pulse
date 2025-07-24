@@ -141,6 +141,7 @@ func (u *PatientUsecase) GetAllPatients(page, count int, filter string) (models.
 	if count == 0 {
 		// Если count == 0, то пагинация отключена, и все записи возвращаются на одной странице
 		totalPages = 1
+		page = 1
 	} else {
 		// Вычисляем количество страниц с округлением вверх
 		totalPages = int(math.Ceil(float64(totalRows) / float64(count)))

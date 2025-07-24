@@ -288,7 +288,12 @@ func getStatusText(status entities.ReceptionStatus) string {
 	}
 }
 
-func (u *ReceptionHospitalUsecase) GetHospitalPatientsByDoctorID(doc_id uint, page, count int, filter, order string) (models.FilterResponse[[]entities.Patient], *errors.AppError) {
+func (u *ReceptionHospitalUsecase) GetHospitalPatientsByDoctorID(
+	doc_id uint,
+	page, count int,
+	filter, order string) (
+	models.FilterResponse[[]entities.Patient], *errors.AppError) {
+
 	var queryFilter string
 	var queryOrder string
 	var parameters []interface{}

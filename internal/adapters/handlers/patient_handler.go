@@ -82,5 +82,4 @@ func (h *Handler) CreatePatient(c *gin.Context) {
 		return
 	}
 	h.ResultResponse(c, "Success patient create", Object, patient)
-
 }
