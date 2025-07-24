@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"time"
@@ -13,8 +14,10 @@ import (
 )
 
 type ReceptionSmpUsecase struct {
-	recepSmpRepo interfaces.ReceptionSmpRepository
-	patientRepo  interfaces.PatientRepository
+	recepSmpRepo      interfaces.ReceptionSmpRepository
+	patientRepo       interfaces.PatientRepository
+	doctorRepo        interfaces.DoctorRepository
+	emergencyCallRepo interfaces.EmergencyCallRepository
 }
 
 func NewReceptionSmpUsecase(recepRepo interfaces.ReceptionSmpRepository, patientRepo interfaces.PatientRepository) interfaces.ReceptionSmpUsecase {
@@ -26,8 +29,50 @@ func NewReceptionSmpUsecase(recepRepo interfaces.ReceptionSmpRepository, patient
 
 func (u *ReceptionSmpUsecase) CreateReceptionSMP(input *models.CreateEmergencyRequest) (entities.ReceptionSMP, *errors.AppError) {
 	var patient entities.Patient
+	var emergencyCall entities.EmergencyCall // Для связи с вызовом
+	var doctor entities.Doctor               // Для получения специализации
 	var err error
-	//Если передан id пациента
+
+	// --- НАЧАЛО: Обработка EmergencyCall ---
+	if input.EmergencyCallID > 0 {
+		// 1. Получаем существующий EmergencyCall
+		emergencyCall, err = u.emergencyCallRepo.GetEmergencyCallByID(input.EmergencyCallID)
+		if err != nil {
+			// Предполагается, что repo возвращает errors.AppError
+			return entities.ReceptionSMP{}, errors.NewAppError(
+				errors.InternalServerErrorCode,
+				"Failed to create emergency reception",
+				fmt.Errorf("DB create error: %w", err),
+				false,
+			)
+		}
+		// 2. Получаем информацию о враче из вызова
+		doctor = emergencyCall.Doctor
+		if doctor.ID == 0 {
+			// Если Doctor не был предзагружен, получаем его отдельно
+			doctor, err = u.doctorRepo.GetDoctorByID(emergencyCall.DoctorID)
+			if err != nil {
+				return entities.ReceptionSMP{}, errors.NewAppError(
+					errors.InternalServerErrorCode,
+					"Failed to get doctor for emergency call",
+					err,
+					false,
+				)
+			}
+		}
+
+	} else {
+		// Требуем наличие EmergencyCallID
+		return entities.ReceptionSMP{}, errors.NewAppError(
+			errors.InvalidDataCode,
+			"emergency_call_id must be provided and valid",
+			nil,
+			true,
+		)
+	}
+	// --- КОНЕЦ: Обработка EmergencyCall ---
+
+	// --- НАЧАЛО: Обработка Patient ---
 	if input.PatientID != nil {
 		patient, err = u.patientRepo.GetPatientByID(*input.PatientID)
 		if err != nil {
@@ -84,17 +129,224 @@ func (u *ReceptionSmpUsecase) CreateReceptionSMP(input *models.CreateEmergencyRe
 			true,
 		)
 	}
+	// --- КОНЕЦ: Обработка Patient ---
 
+	// --- НАЧАЛО: Формирование SpecializationData ---
+	var specDocument entities.SpecializationDataDocument
+	specializationTitle := doctor.Specialization.Title
+
+	// Используем switch-case по специализации врача, как в функциях автоматического заполнения
+	// и вызываем ToDocumentWithValues() для соответствующих структур данных.
+	switch specializationTitle {
+	case "Невролог":
+		// Создаем начальные/пустые данные для Невролога
+		data := entities.NeurologistData{
+			Reflexes:         make(map[string]string),
+			MuscleStrength:   make(map[string]int),
+			Sensitivity:      "",
+			CoordinationTest: "",
+			Gait:             "",
+			Speech:           "",
+			Memory:           "",
+			CranialNerves:    "",
+			Complaints:       []string{},
+			Diagnosis:        "",
+			Recommendations:  "",
+		}
+		specDocument = data.ToDocumentWithValues()
+
+	case "Травматолог":
+		data := entities.TraumatologistData{
+			InjuryType:       "",
+			InjuryMechanism:  "",
+			Localization:     "",
+			XRayResults:      "",
+			CTResults:        "",
+			MRIResults:       "",
+			Fracture:         false,
+			Dislocation:      false,
+			Sprain:           false,
+			Contusion:        false,
+			WoundDescription: "",
+			TreatmentPlan:    "",
+		}
+		specDocument = data.ToDocumentWithValues()
+
+	case "Психиатр":
+		data := entities.PsychiatristData{
+			MentalStatus:   "",
+			Mood:           "",
+			Affect:         "",
+			ThoughtProcess: "",
+			ThoughtContent: "",
+			Perception:     "",
+			Cognition:      "",
+			Insight:        "",
+			Judgment:       "",
+			RiskAssessment: struct {
+				Suicide  bool `json:"suicide"`
+				SelfHarm bool `json:"self_harm"`
+				Violence bool `json:"violence"`
+			}{
+				Suicide:  false,
+				SelfHarm: false,
+				Violence: false,
+			},
+			DiagnosisICD: "",
+			TherapyPlan:  "",
+		}
+		specDocument = data.ToDocumentWithValues()
+
+	case "Уролог":
+		data := entities.UrologistData{
+			Complaints: []string{},
+			Urinalysis: struct {
+				Color        string `json:"color"`
+				Transparency string `json:"transparency"`
+				Protein      string `json:"protein"`
+				Glucose      string `json:"glucose"`
+				Leukocytes   string `json:"leukocytes"`
+				Erythrocytes string `json:"erythrocytes"`
+			}{
+				Color:        "",
+				Transparency: "",
+				Protein:      "",
+				Glucose:      "",
+				Leukocytes:   "",
+				Erythrocytes: "",
+			},
+			Ultrasound:          "",
+			ProstateExamination: "",
+			Diagnosis:           "",
+			Treatment:           "",
+		}
+		specDocument = data.ToDocumentWithValues()
+
+	case "Проктолог":
+		data := entities.ProctologistData{
+			Complaints:         []string{},
+			DigitalExamination: "",
+			Rectoscopy:         "",
+			Colonoscopy:        "",
+			Hemorrhoids:        false,
+			AnalFissure:        false,
+			Paraproctitis:      false,
+			Tumor:              false,
+			Diagnosis:          "",
+			Recommendations:    "",
+		}
+		specDocument = data.ToDocumentWithValues()
+
+	case "Оториноларинголог":
+		data := entities.OtolaryngologistData{
+			Complaints:         []string{},
+			NoseExamination:    "",
+			ThroatExamination:  "",
+			EarExamination:     "",
+			HearingTest:        "",
+			Audiometry:         "",
+			VestibularFunction: "",
+			Endoscopy:          "",
+			Diagnosis:          "",
+			Recommendations:    "",
+		}
+		specDocument = data.ToDocumentWithValues()
+
+	case "Аллерголог":
+		data := entities.AllergologistData{
+			Complaints:      []string{},
+			AllergenHistory: "",
+			SkinTests: []struct {
+				Allergen string `json:"allergen"`
+				Reaction string `json:"reaction"`
+			}{},
+			IgELevel:        0.0,
+			Immunotherapy:   false,
+			Diagnosis:       "",
+			Recommendations: "",
+		}
+		specDocument = data.ToDocumentWithValues()
+
+	default:
+		// Для неизвестных специализаций создаем базовый документ
+		// аналогично функции createHospitalReceptions
+		specDocument = entities.SpecializationDataDocument{
+			DocumentType: "general_smp",
+			Fields: []entities.CustomField{
+				{
+					Name:         "notes",
+					Type:         "string",
+					Required:     false,
+					Description:  "Заметки",
+					DefaultValue: "",
+					Value:        fmt.Sprintf("Проведен общий осмотр для специализации: %s", specializationTitle),
+				},
+				{
+					Name:         "diagnosis",
+					Type:         "string",
+					Required:     false,
+					Description:  "Диагноз",
+					DefaultValue: "",
+					Value:        "Практически здоров",
+				},
+				{
+					Name:         "recommendations",
+					Type:         "string",
+					Required:     false,
+					Description:  "Рекомендации",
+					DefaultValue: "",
+					Value:        "Плановое наблюдение",
+				},
+			},
+		}
+	}
+
+	// Устанавливаем тип документа на основе специализации
+	if specDocument.DocumentType == "" || specDocument.DocumentType == "general_smp" {
+		specDocument.DocumentType = fmt.Sprintf("smp_%s", specializationTitle)
+	}
+
+	// Преобразуем документ в JSON
+	jsonData, marshalErr := json.Marshal(specDocument)
+	if marshalErr != nil {
+		return entities.ReceptionSMP{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"Failed to marshal specialization data",
+			fmt.Errorf("JSON marshal error: %w", marshalErr),
+			false,
+		)
+	}
+
+	// Извлекаем диагноз и рекомендации из документа для полей сущности
+	diagnosis := ""
+	recommendations := ""
+	for _, field := range specDocument.Fields {
+		if field.Name == "diagnosis" && field.Value != nil {
+			if diagStr, ok := field.Value.(string); ok && diagStr != "" {
+				diagnosis = diagStr
+			}
+		}
+		if field.Name == "recommendations" && field.Value != nil {
+			if recStr, ok := field.Value.(string); ok && recStr != "" {
+				recommendations = recStr
+			}
+		}
+	}
+	// --- КОНЕЦ: Формирование SpecializationData ---
+
+	// --- СОЗДАНИЕ ReceptionSMP ---
 	reception := entities.ReceptionSMP{
-		EmergencyCallID: input.EmergencyCallID,
-		DoctorID:        input.DoctorID,
-		PatientID:       patient.ID,
-		Diagnosis:       "",
-		Recommendations: "",
+		EmergencyCallID:      emergencyCall.ID,
+		DoctorID:             doctor.ID,
+		PatientID:            patient.ID,
+		Diagnosis:            diagnosis,
+		Recommendations:      recommendations,
+		CachedSpecialization: specializationTitle,
 		SpecializationData: pgtype.JSONB{
-			Bytes:  []byte(`{"key":"value"}`),
+			Bytes:  jsonData,
 			Status: pgtype.Present,
 		},
+		// Заполните другие необходимые поля
 	}
 
 	createdReceptionID, createErr := u.recepSmpRepo.CreateReceptionSmp(reception)
@@ -102,7 +354,7 @@ func (u *ReceptionSmpUsecase) CreateReceptionSMP(input *models.CreateEmergencyRe
 		return entities.ReceptionSMP{}, errors.NewAppError(
 			errors.InternalServerErrorCode,
 			"Failed to create emergency reception",
-			createErr,
+			fmt.Errorf("DB create error: %w", createErr),
 			false,
 		)
 	}
@@ -112,12 +364,88 @@ func (u *ReceptionSmpUsecase) CreateReceptionSMP(input *models.CreateEmergencyRe
 		return entities.ReceptionSMP{}, errors.NewAppError(
 			errors.InternalServerErrorCode,
 			"Failed to get created reception",
-			err,
+			fmt.Errorf("DB get error: %w", err),
 			false,
 		)
 	}
 
 	return fullReception, nil
+
+	// --- Возможная реализация полиморфизма ---
+	// Вместо switch-case можно было бы реализовать полиморфизм, например:
+	// 1. Интерфейс:
+	// type SpecializationDataProvider interface {
+	//     CreateInitialDocument() entities.SpecializationDataDocument
+	//     GetSpecializationTitle() string
+	// }
+	//
+	// 2. Фабрика:
+	// var specializationDataProviders = map[string]func() SpecializationDataProvider{
+	//     "Невролог": func() SpecializationDataProvider { return &NeurologistDataProvider{} },
+	//     "Травматолог": func() SpecializationDataProvider { return &TraumatologistDataProvider{} },
+	//     // ... другие специализации
+	// }
+	//
+	// 3. Использование:
+	// if providerFactory, ok := specializationDataProviders[specializationTitle]; ok {
+	//     provider := providerFactory()
+	//     specDocument = provider.CreateInitialDocument()
+	// } else {
+	//     // Обработка default случая
+	// }
+	//
+	// Это уменьшило бы дублирование кода switch-case и сделало бы систему более расширяемой.
+	// Однако, это требует создания дополнительных структур и интерфейсов.
+}
+
+func (u *ReceptionSmpUsecase) UpdateReceptionSmp(input *models.UpdateSmpReceptionRequest) (entities.ReceptionSMP, *errors.AppError) {
+	existingReception, err := u.recepSmpRepo.GetReceptionSmpByID(input.ReceptionId)
+	if err != nil {
+		return entities.ReceptionSMP{}, errors.NewAppError(
+			errors.NotFoundErrorCode,
+			"reception SMP not found",
+			err,
+			true,
+		)
+	}
+
+	recepSmpUpdate := map[string]interface{}{
+		"doctor_id":       input.DoctorID,
+		"patient_id":      input.PatientID,
+		"diagnosis":       input.Diagnosis,
+		"recommendations": input.Recommendations,
+	}
+
+	if _, err := u.recepSmpRepo.UpdateReceptionSmp(existingReception.ID, recepSmpUpdate); err != nil {
+		return entities.ReceptionSMP{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to update reception SMP data",
+			err,
+			true,
+		)
+	}
+
+	if input.MedServices != nil {
+		if err := u.recepSmpRepo.UpdateReceptionSmpMedServices(existingReception.ID, input.MedServices); err != nil {
+			return entities.ReceptionSMP{}, errors.NewAppError(
+				errors.InternalServerErrorCode,
+				"failed to update reception SMP medical services",
+				err,
+				true,
+			)
+		}
+	}
+
+	updatedReception, err := u.recepSmpRepo.GetReceptionSmpByID(existingReception.ID)
+	if err != nil {
+		return entities.ReceptionSMP{}, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get updated reception SMP",
+			err,
+			true,
+		)
+	}
+	return updatedReception, nil
 }
 
 func (u *ReceptionSmpUsecase) GetReceptionsSMPByEmergencyCall(
@@ -227,53 +555,3 @@ func (u *ReceptionSmpUsecase) GetReceptionWithMedServicesByID(
 // 	}
 // 	return result
 // }
-
-func (u *ReceptionSmpUsecase) UpdateReceptionSmp(input *models.UpdateSmpReceptionRequest) (entities.ReceptionSMP, *errors.AppError) {
-	existingReception, err := u.recepSmpRepo.GetReceptionSmpByID(input.ReceptionId)
-	if err != nil {
-		return entities.ReceptionSMP{}, errors.NewAppError(
-			errors.NotFoundErrorCode,
-			"reception SMP not found",
-			err,
-			true,
-		)
-	}
-
-	recepSmpUpdate := map[string]interface{}{
-		"doctor_id":       input.DoctorID,
-		"patient_id":      input.PatientID,
-		"diagnosis":       input.Diagnosis,
-		"recommendations": input.Recommendations,
-	}
-
-	if _, err := u.recepSmpRepo.UpdateReceptionSmp(existingReception.ID, recepSmpUpdate); err != nil {
-		return entities.ReceptionSMP{}, errors.NewAppError(
-			errors.InternalServerErrorCode,
-			"failed to update reception SMP data",
-			err,
-			true,
-		)
-	}
-
-	if input.MedServices != nil {
-		if err := u.recepSmpRepo.UpdateReceptionSmpMedServices(existingReception.ID, input.MedServices); err != nil {
-			return entities.ReceptionSMP{}, errors.NewAppError(
-				errors.InternalServerErrorCode,
-				"failed to update reception SMP medical services",
-				err,
-				true,
-			)
-		}
-	}
-
-	updatedReception, err := u.recepSmpRepo.GetReceptionSmpByID(existingReception.ID)
-	if err != nil {
-		return entities.ReceptionSMP{}, errors.NewAppError(
-			errors.InternalServerErrorCode,
-			"failed to get updated reception SMP",
-			err,
-			true,
-		)
-	}
-	return updatedReception, nil
-}
