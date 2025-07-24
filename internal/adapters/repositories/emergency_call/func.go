@@ -54,14 +54,14 @@ func (r *EmergencyCallRepositoryImpl) DeleteEmergencyCall(id uint) error {
 func (r *EmergencyCallRepositoryImpl) GetEmergencyCallByID(id uint) (entities.EmergencyCall, error) {
 	op := "repo.EmergencyCall.GetEmergencyCallByID"
 
-	var er entities.EmergencyCall
-	if err := r.db.First(&er, id).Error; err != nil {
+	var call entities.EmergencyCall
+	if err := r.db.Preload("Doctor.Specialization").First(&call, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return entities.EmergencyCall{}, errors.NewNotFoundError("emergency reception not found")
 		}
 		return entities.EmergencyCall{}, errors.NewDBError(op, err)
 	}
-	return er, nil
+	return call, nil
 }
 
 func (r *EmergencyCallRepositoryImpl) GetEmergencyCallsByDoctorID(doctorID uint) ([]entities.EmergencyCall, error) {

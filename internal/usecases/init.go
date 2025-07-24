@@ -30,7 +30,7 @@ func NewUsecases(r interfaces.Repository, s interfaces.Service, conf *config.Con
 		NewMedServiceUsecase(r),
 		NewPatientUsecase(r, r, r, s),
 		NewReceptionHospitalUsecase(r, s),
-		NewReceptionSmpUsecase(r, r),
+		NewReceptionSmpUsecase(r, r, r),
 		NewMedCardUsecase(r, r, r, r, r),
 		NewAuthUsecase(r, conf.JWTSecret),
 	}

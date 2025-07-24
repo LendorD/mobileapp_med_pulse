@@ -20,14 +20,15 @@ type ReceptionSmpUsecase struct {
 	emergencyCallRepo interfaces.EmergencyCallRepository
 }
 
-func NewReceptionSmpUsecase(recepRepo interfaces.ReceptionSmpRepository, patientRepo interfaces.PatientRepository) interfaces.ReceptionSmpUsecase {
+func NewReceptionSmpUsecase(recepRepo interfaces.ReceptionSmpRepository, patientRepo interfaces.PatientRepository, emergencyCallRepo interfaces.EmergencyCallRepository) interfaces.ReceptionSmpUsecase {
 	return &ReceptionSmpUsecase{
-		recepSmpRepo: recepRepo,
-		patientRepo:  patientRepo,
+		recepSmpRepo:      recepRepo,
+		patientRepo:       patientRepo,
+		emergencyCallRepo: emergencyCallRepo,
 	}
 }
 
-func (u *ReceptionSmpUsecase) CreateReceptionSMP(input *models.CreateEmergencyRequest) (entities.ReceptionSMP, *errors.AppError) {
+func (u *ReceptionSmpUsecase) CreateReceptionSMP(input *models.CreateReceptionSmp) (entities.ReceptionSMP, *errors.AppError) {
 	var patient entities.Patient
 	var emergencyCall entities.EmergencyCall // Для связи с вызовом
 	var doctor entities.Doctor               // Для получения специализации

@@ -13,13 +13,6 @@ type EmergencyCallShortResponse struct {
 	Phone     string `json:"phone" example:"+79991234567"`               // Телефон для связи
 }
 
-type CreateEmergencyRequest struct {
-	EmergencyCallID uint         `json:"emergency_call_id" validate:"required" example:"1"`
-	DoctorID        uint         `json:"doctor_id" validate:"required" example:"1"`
-	Patient         *PatientData `json:"patient,omitempty"`
-	PatientID       *uint        `json:"patient_id,omitempty" example:"1"`
-}
-
 type UpdateSmpReceptionRequest struct {
 	ReceptionId     uint                  `json:"reception_smp_id" validate:"required" example:"1"`
 	EmergencyCallId uint                  `json:"emergency_call_id" validate:"required" example:"1"`

@@ -16,3 +16,9 @@ type ReceptionSmpShortResponse struct {
 	Diagnosis       string               `json:"diagnosis" example:"ОРВИ"`
 	Recommendations string               `json:"recommendations" example:"Постельный режим"`
 }
+
+type CreateReceptionSmp struct {
+	EmergencyCallID uint         `json:"emergency_call_id" validate:"required" example:"1"`
+	Patient         *PatientData `json:"patient,omitempty"`
+	PatientID       *uint        `json:"patient_id,omitempty" example:"1"`
+}
