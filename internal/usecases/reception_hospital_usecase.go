@@ -285,6 +285,9 @@ func (u *ReceptionHospitalUsecase) GetHospitalPatientsByDoctorID(
 	var parameters []interface{}
 	empty := models.FilterResponse[[]entities.Patient]{}
 
+	if doc_id <= 0 {
+		return empty, errors.NewAppError(errors.InternalServerErrorCode, "invalid doc_id", nil, true)
+	}
 	// Статические поля модели (имя таблицы/колонки и их типы)
 	entityFields, err := getFieldTypes(entities.Patient{})
 	if err != nil {

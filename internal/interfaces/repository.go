@@ -108,6 +108,7 @@ type ReceptionHospitalRepository interface {
 	GetAllPatientsFromHospitalByDoctorID(doc_id uint, page, count int, queryFilter string, queryOrder string, parameters []interface{}) ([]entities.Patient, int64, error)
 	GetAllHospitalReceptionsByDoctorID(doc_id uint, page, count int, queryFilter string, queryOrder string, parameters []interface{}) ([]entities.ReceptionHospital, int64, error)
 	GetAllHospitalReceptionsByPatientID(patientID uint, page, count int, queryFilter string, queryOrder string, parameters []interface{}) ([]entities.ReceptionHospital, int64, error)
+	//GetAllPatients(page, count int, queryFilter string, queryOrder string, parameters []interface{}) ([]entities.Patient, int64, error)
 
 	GetReceptionHospitalByID(id uint) (entities.ReceptionHospital, error)
 	GetHospitalReceptionByID(hospID uint) (entities.ReceptionHospital, error)
@@ -119,7 +120,7 @@ type PatientRepository interface {
 	UpdatePatient(id uint, updateMap map[string]interface{}) (uint, error)
 	DeletePatient(id uint) error
 	GetPatientByID(id uint) (entities.Patient, error)
-	GetAllPatients(page, count int, filterQuery string, filterParams []interface{}) ([]entities.Patient, int64, error)
+	GetAllPatients(page, count int, queryFilter string, queryOrder string, filterParams []interface{}) ([]entities.Patient, int64, error)
 	GetPatientsByFullName(name string) ([]entities.Patient, error)
 	GetPatientAllergiesByID(id uint) ([]entities.Allergy, error)
 	GetPatientByIDWithTx(tx *gorm.DB, id uint) (*entities.Patient, error)
