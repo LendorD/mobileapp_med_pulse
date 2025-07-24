@@ -68,7 +68,7 @@ type EmergencyCallUsecase interface {
 		page int,
 		perPage int,
 	) (models.FilterResponse[[]models.EmergencyCallShortResponse], error)
-
+	CloseEmergencyCall(id uint) (entities.EmergencyCall, error)
 	UpdateEmergencyCallStatusByID(id uint, newStatus string) (entities.EmergencyCall, error)
 }
 
