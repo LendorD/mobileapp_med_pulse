@@ -41,20 +41,6 @@ func (r *PatientRepositoryImpl) UpdatePatientWithTx(tx *gorm.DB, id uint, update
 func (r *PatientRepositoryImpl) CreatePatient(patient entities.Patient) (uint, error) {
 	op := "repo.Patient.CreatePatient"
 
-	if patient.PersonalInfo != nil {
-		if err := r.db.Create(patient.PersonalInfo).Error; err != nil {
-			return 0, errors.NewDBError(op, fmt.Errorf("failed to create PersonalInfo: %w", err))
-		}
-		patient.PersonalInfoID = &patient.PersonalInfo.ID
-	}
-
-	if patient.ContactInfo != nil {
-		if err := r.db.Create(patient.ContactInfo).Error; err != nil {
-			return 0, errors.NewDBError(op, fmt.Errorf("failed to create ContactInfo: %w", err))
-		}
-		patient.ContactInfoID = &patient.ContactInfo.ID
-	}
-
 	if err := r.db.Create(&patient).Error; err != nil {
 		return 0, errors.NewDBError(op, fmt.Errorf("failed to create Patient: %w", err))
 	}
