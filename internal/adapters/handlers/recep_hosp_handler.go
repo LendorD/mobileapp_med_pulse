@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"net/http"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
@@ -155,4 +156,46 @@ func (h *Handler) GetReceptionHosptalById(c *gin.Context) {
 		return
 	}
 	h.ResultResponse(c, "Success get reception", Object, reception)
+}
+
+// UpdateReceptionHospitalStatusByID godoc
+// @Summary Обновить статус приема
+// @Description Изменяет статус приёма по ID
+// @Tags HospitalReception
+// @Accept json
+// @Produce json
+// @Param recep_id path uint true "ID приёма"
+// @Success 200 {object} entities.ReceptionHospital "Приём с обновленным статусом"
+// @Failure 400 {object} IncorrectFormatError "Неверный формат запроса"
+// @Failure 401 {object} IncorrectDataError "Некорректный ID приёма"
+// @Failure 422 {object} ValidationError "Ошибка валидации"
+// @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
+// @Router /hospital/receptions/{recep_id} [patch]
+func (h *Handler) UpdateReceptionHospitalStatusByID(c *gin.Context) {
+	var input entities.StatusUpdateInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid or missing status field"})
+		return
+	}
+
+	if !entities.IsValidHospitalReceptionStatus(input.Status) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid status value. Allowed: pending, approved, rejected, canceled",
+		})
+		return
+	}
+
+	recepID, err := h.service.ParseUintString(c.Param("recep_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid reception ID"})
+		return
+	}
+
+	updatedReception, err := h.usecase.UpdateReceptionHospitalStatus(recepID, input.Status)
+	if err != nil {
+		h.ErrorResponse(c, err, http.StatusInternalServerError, "Error updating reception hospital status", true)
+		return
+	}
+
+	h.ResultResponse(c, "Success reception hospital status update", Object, updatedReception)
 }
