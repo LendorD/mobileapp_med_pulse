@@ -23,7 +23,9 @@ func NewReceptionHospitalUsecase(repo interfaces.ReceptionHospitalRepository, s 
 }
 
 func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByPatientID(patientId uint, page, count int, filter, order string) (models.FilterResponse[[]models.ReceptionHospitalResponse], *errors.AppError) {
-	empty := models.FilterResponse[[]models.ReceptionHospitalResponse]{}
+	empty := models.FilterResponse[[]models.ReceptionHospitalResponse]{
+		Hits: []models.ReceptionHospitalResponse{},
+	}
 
 	if patientId == 0 {
 		return empty, errors.NewAppError(
