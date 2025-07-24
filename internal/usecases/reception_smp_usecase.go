@@ -181,6 +181,18 @@ func (u *ReceptionSmpUsecase) GetReceptionWithMedServicesByID(
 		return models.ReceptionSMPResponse{}, fmt.Errorf("failed to get reception: %w", err)
 	}
 
+	// Формируем специализированные данные
+	var specData interface{}
+	if reception.SpecializationDataDecoded != nil {
+		specData = reception.SpecializationDataDecoded
+	} else if reception.SpecializationData.Status == pgtype.Present {
+		// Если данные не декодированы, но есть в JSONB
+		var rawData map[string]interface{}
+		if err := reception.SpecializationData.AssignTo(&rawData); err == nil {
+			specData = rawData
+		}
+	}
+
 	// Преобразуем медицинские услуги
 	medServices := make([]models.MedServicesResponse, len(reception.MedServices))
 	for i, svc := range reception.MedServices {
@@ -197,7 +209,7 @@ func (u *ReceptionSmpUsecase) GetReceptionWithMedServicesByID(
 		Diagnosis:          reception.Diagnosis,
 		Recommendations:    reception.Recommendations,
 		Specialization:     reception.Doctor.Specialization.Title,
-		SpecializationData: reception.SpecializationDataDecoded,
+		SpecializationData: specData,
 		MedServices:        medServices,
 	}
 

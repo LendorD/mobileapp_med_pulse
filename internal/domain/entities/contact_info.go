@@ -6,7 +6,7 @@ import (
 
 // ContactInfo представляет контактную информацию пациента
 type ContactInfo struct {
-	ID        uint      `gorm:"primarykey" json:"id"`
+	ID        uint      `gorm:"primarykey;autoincrement" json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 
