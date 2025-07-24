@@ -375,7 +375,7 @@ func createHospitalReceptions(db *gorm.DB,
 	doctors []*entities.Doctor,
 	patients []*entities.Patient,
 	dates []time.Time,
-	statuses []entities.ReceptionStatus,
+	statuses []entities.HospitalReceptionStatus,
 	addresses []string) error {
 
 	for i := 0; i < 50; i++ {

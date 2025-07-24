@@ -180,7 +180,7 @@ func (h *Handler) UpdateReceptionHospitalStatusByID(c *gin.Context) {
 
 	if !entities.IsValidHospitalReceptionStatus(input.Status) {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid status value. Allowed: pending, approved, rejected, canceled",
+			"error": "invalid status value. Allowed: scheduled, completed, cancelled, no_show",
 		})
 		return
 	}
