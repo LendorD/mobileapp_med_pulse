@@ -17,7 +17,7 @@ type ReceptionHospitalResponse struct {
 }
 
 type UpdateReceptionHospitalRequest struct {
-	ID              uint                     `json:"id"`
+	ID              uint                     `json:"id" example:"1"`
 	Diagnosis       string                   `json:"diagnosis" example:"Грипп" rus:"Диагноз"`
 	Recommendations string                   `json:"recommendations" example:"Постельный режим" rus:"Рекомендации"`
 	Status          entities.ReceptionStatus `gorm:"not null" json:"status" example:"scheduled" rus:"Статус госпитализации"`

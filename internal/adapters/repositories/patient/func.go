@@ -41,20 +41,6 @@ func (r *PatientRepositoryImpl) UpdatePatientWithTx(tx *gorm.DB, id uint, update
 func (r *PatientRepositoryImpl) CreatePatient(patient entities.Patient) (uint, error) {
 	op := "repo.Patient.CreatePatient"
 
-	if patient.PersonalInfo != nil {
-		if err := r.db.Create(patient.PersonalInfo).Error; err != nil {
-			return 0, errors.NewDBError(op, fmt.Errorf("failed to create PersonalInfo: %w", err))
-		}
-		patient.PersonalInfoID = &patient.PersonalInfo.ID
-	}
-
-	if patient.ContactInfo != nil {
-		if err := r.db.Create(patient.ContactInfo).Error; err != nil {
-			return 0, errors.NewDBError(op, fmt.Errorf("failed to create ContactInfo: %w", err))
-		}
-		patient.ContactInfoID = &patient.ContactInfo.ID
-	}
-
 	if err := r.db.Create(&patient).Error; err != nil {
 		return 0, errors.NewDBError(op, fmt.Errorf("failed to create Patient: %w", err))
 	}
@@ -154,38 +140,6 @@ func (r *PatientRepositoryImpl) GetPatientByID(id uint) (entities.Patient, error
 	return patient, nil
 }
 
-func (r *PatientRepositoryImpl) GetAllPatients(page, count int, queryFilter string, parameters []interface{}) ([]entities.Patient, int64, error) {
-	op := "repo.Patient.GetAllPatients"
-	// Создаем базовый запрос
-	query := r.db.Model(&entities.Patient{})
-
-	// Применяем фильтрацию
-	if queryFilter != "" {
-		query = query.Where(queryFilter, parameters...)
-	}
-
-	// Подсчитываем общее количество записей
-	var totalRecords int64
-	if err := query.Count(&totalRecords).Error; err != nil {
-		return nil, 0, errors.NewDBError(op, err)
-	}
-
-	// Применяем пагинацию
-	if page > 0 && count > 0 {
-		offset := (page - 1) * count
-		query = query.Offset(offset).Limit(count)
-	}
-
-	// Получаем записи
-	var patients []entities.Patient
-	result := query.Find(&patients)
-	if result.Error != nil {
-		return nil, 0, errors.NewDBError(op, result.Error)
-	}
-
-	return patients, totalRecords, nil
-}
-
 func (r *PatientRepositoryImpl) GetPatientsByFullName(name string) ([]entities.Patient, error) {
 	op := "repo.Patient.GetPatientsByFullName"
 
@@ -219,4 +173,42 @@ func (r *PatientRepositoryImpl) GetPatientAllergiesByID(patientID uint) ([]entit
 	}
 
 	return patient.Allergy, nil
+}
+
+func (r *PatientRepositoryImpl) GetAllPatients(page, count int, queryFilter string, queryOrder string, parameters []interface{}) ([]entities.Patient, int64, error) {
+	op := "repo.Patient.GetAllPatients"
+
+	// Создаем базовый запрос
+	query := r.db.Model(&entities.Patient{})
+
+	// Применяем фильтрацию
+	if queryFilter != "" {
+		query = query.Where(queryFilter, parameters...)
+	}
+
+	// Применяем сортировку
+	if queryOrder != "" {
+		query = query.Order(queryOrder)
+	}
+
+	// Подсчитываем общее количество записей
+	var totalRecords int64
+	if err := query.Count(&totalRecords).Error; err != nil {
+		return nil, 0, errors.NewDBError(op, err)
+	}
+
+	// Применяем пагинацию
+	if page > 0 && count > 0 {
+		offset := (page - 1) * count
+		query = query.Offset(offset).Limit(count)
+	}
+
+	// Получаем записи
+	var patients []entities.Patient
+	result := query.Find(&patients)
+	if result.Error != nil {
+		return nil, 0, errors.NewDBError(op, result.Error)
+	}
+
+	return patients, totalRecords, nil
 }
