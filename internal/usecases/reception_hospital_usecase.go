@@ -259,15 +259,15 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByDoctorID(doc_id uint, 
 	}, nil
 }
 
-func getStatusText(status entities.ReceptionStatus) string {
+func getStatusText(status entities.HospitalReceptionStatus) string {
 	switch status {
-	case entities.StatusScheduled:
+	case entities.HospitalReceptionStatusScheduled:
 		return "Запланирован"
-	case entities.StatusCompleted:
+	case entities.HospitalReceptionStatusCompleted:
 		return "Завершен"
-	case entities.StatusCancelled:
+	case entities.HospitalReceptionStatusCancelled:
 		return "Отменен"
-	case entities.StatusNoShow:
+	case entities.HospitalReceptionStatusNoShow:
 		return "Не явился"
 	default:
 		return string(status)
@@ -384,4 +384,36 @@ func (u *ReceptionHospitalUsecase) GetReceptionHospitalByID(
 	}
 
 	return response, nil
+}
+
+func (u *ReceptionHospitalUsecase) UpdateReceptionHospitalStatus(id uint, newStatus string) (entities.ReceptionHospital, error) {
+	empty := entities.ReceptionHospital{}
+
+	// Обновление статуса в базе
+	updateFields := map[string]interface{}{
+		"status": newStatus,
+	}
+
+	if _, err := u.repo.UpdateReceptionHospital(id, updateFields); err != nil {
+		return empty, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to update reception hospital status",
+			err,
+			true,
+		)
+	}
+
+	// Получение обновлённой записи
+	reception, err := u.repo.GetReceptionHospitalByID(id)
+	if err != nil {
+		return empty, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get updated reception hospital record",
+			err,
+			true,
+		)
+	}
+
+	return reception, nil
+
 }

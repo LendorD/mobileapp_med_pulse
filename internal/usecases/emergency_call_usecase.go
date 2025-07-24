@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"math"
 	"time"
 
@@ -122,4 +123,35 @@ func (u *EmergencyCallUsecase) GetEmergencyCallsByDoctorAndDate(
 		TotalHits:   int(total),
 		HitsPerPage: perPage,
 	}, nil
+}
+
+func (u *EmergencyCallUsecase) UpdateEmergencyCallStatusByID(id uint, newStatus string) (entities.EmergencyCall, error) {
+	empty := entities.EmergencyCall{}
+
+	// Обновление статуса в базе
+	updateFields := map[string]interface{}{
+		"status": newStatus,
+	}
+
+	if _, err := u.repo.UpdateEmergencyCall(id, updateFields); err != nil {
+		return empty, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to update reception hospital status",
+			err,
+			true,
+		)
+	}
+
+	// Получение обновлённой записи
+	reception, err := u.repo.GetEmergencyCallByID(id)
+	if err != nil {
+		return empty, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to get updated reception hospital record",
+			err,
+			true,
+		)
+	}
+
+	return reception, nil
 }
