@@ -13,5 +13,5 @@ type MedService struct {
 	Name  string `gorm:"not null" json:"name" example:"EKG"`
 	Price uint   `gorm:"not null" json:"price" example:"100"`
 
-	ReceptionSMP []ReceptionSMP `gorm:"many2many:reception_med_services;" json:"-"`
+	ReceptionSMP []ReceptionSMP `gorm:"many2many:reception_smp_med_services;" json:"-"`
 }

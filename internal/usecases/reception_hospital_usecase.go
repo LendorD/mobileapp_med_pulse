@@ -274,12 +274,20 @@ func getStatusText(status entities.ReceptionStatus) string {
 	}
 }
 
-func (u *ReceptionHospitalUsecase) GetHospitalPatientsByDoctorID(doc_id uint, page, count int, filter, order string) (models.FilterResponse[[]entities.Patient], *errors.AppError) {
+func (u *ReceptionHospitalUsecase) GetHospitalPatientsByDoctorID(
+	doc_id uint,
+	page, count int,
+	filter, order string) (
+	models.FilterResponse[[]entities.Patient], *errors.AppError) {
+
 	var queryFilter string
 	var queryOrder string
 	var parameters []interface{}
 	empty := models.FilterResponse[[]entities.Patient]{}
 
+	if doc_id <= 0 {
+		return empty, errors.NewAppError(errors.InternalServerErrorCode, "invalid doc_id", nil, true)
+	}
 	// Статические поля модели (имя таблицы/колонки и их типы)
 	entityFields, err := getFieldTypes(entities.Patient{})
 	if err != nil {

@@ -170,48 +170,29 @@ func (r *ReceptionHospitalRepositoryImpl) GetAllPatientsFromHospitalByDoctorID(d
 	var db *gorm.DB
 	var countDb *gorm.DB
 
-	if docID > 0 {
-		// JOIN через приёмы
-		db = r.db.
-			Table("reception_hospitals AS r").
-			Select("DISTINCT p.*").
-			Joins("JOIN patients p ON p.id = r.patient_id").
-			Where("r.doctor_id = ?", docID)
+	// JOIN через приёмы
+	db = r.db.
+		Table("reception_hospitals AS r").
+		Select("DISTINCT p.*").
+		Joins("JOIN patients p ON p.id = r.patient_id").
+		Where("r.doctor_id = ?", docID)
 
-		if queryFilter != "" {
-			db = db.Where(queryFilter, parameters...)
-		}
+	if queryFilter != "" {
+		db = db.Where(queryFilter, parameters...)
+	}
 
-		// Отдельный запрос на подсчёт уникальных пациентов
-		countDb = r.db.
-			Table("reception_hospitals AS r").
-			Joins("JOIN patients p ON p.id = r.patient_id").
-			Where("r.doctor_id = ?", docID)
+	// Отдельный запрос на подсчёт уникальных пациентов
+	countDb = r.db.
+		Table("reception_hospitals AS r").
+		Joins("JOIN patients p ON p.id = r.patient_id").
+		Where("r.doctor_id = ?", docID)
 
-		if queryFilter != "" {
-			countDb = countDb.Where(queryFilter, parameters...)
-		}
+	if queryFilter != "" {
+		countDb = countDb.Where(queryFilter, parameters...)
+	}
 
-		if err := countDb.Select("COUNT(DISTINCT p.id)").Scan(&total).Error; err != nil {
-			return nil, 0, errors.NewDBError(op, err)
-		}
-	} else {
-		// Все пациенты напрямую без приёмов
-		db = r.db.Model(&entities.Patient{})
-
-		if queryFilter != "" {
-			db = db.Where(queryFilter, parameters...)
-		}
-
-		countDb = r.db.Model(&entities.Patient{})
-
-		if queryFilter != "" {
-			countDb = countDb.Where(queryFilter, parameters...)
-		}
-
-		if err := countDb.Count(&total).Error; err != nil {
-			return nil, 0, errors.NewDBError(op, err)
-		}
+	if err := countDb.Select("COUNT(DISTINCT p.id)").Scan(&total).Error; err != nil {
+		return nil, 0, errors.NewDBError(op, err)
 	}
 
 	// Применяем сортировку

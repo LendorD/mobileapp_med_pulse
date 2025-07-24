@@ -105,10 +105,11 @@ func (u *PatientUsecase) DeletePatient(id uint) *errors.AppError {
 	return nil
 }
 
-func (u *PatientUsecase) GetAllPatients(page, count int, filter string) (models.FilterResponse[[]entities.Patient], *errors.AppError) {
+func (u *PatientUsecase) GetAllPatients(page, count int, filter string, order string) (models.FilterResponse[[]models.ShortPatientResponse], *errors.AppError) {
 	var queryFilter string
+	var queryOrder string
 	var parameters []interface{}
-	empty := models.FilterResponse[[]entities.Patient]{}
+	empty := models.FilterResponse[[]models.ShortPatientResponse]{}
 
 	// Статические поля модели (имя таблицы/колонки и их типы)
 	entityFields, err := getFieldTypes(entities.Patient{})
@@ -131,8 +132,16 @@ func (u *PatientUsecase) GetAllPatients(page, count int, filter string) (models.
 		parameters = params
 	}
 
+	if len(order) > 0 {
+		subQuery, err := u.FilterBuilder.ParseOrderString(order, entityFields)
+		if err != nil {
+			return empty, errors.NewAppError(errors.InternalServerErrorCode, fmt.Sprintf("invalid order syntax: %s", err.Error()), nil, false)
+		}
+		queryOrder = subQuery
+	}
+
 	// Получение пациентов
-	patients, totalRows, err := u.repo.GetAllPatients(page, count, queryFilter, parameters)
+	patients, totalRows, err := u.repo.GetAllPatients(page, count, queryFilter, queryOrder, parameters)
 	if err != nil {
 		return empty, errors.NewAppError(errors.InternalServerErrorCode, "failed to get patients", err, true)
 	}
@@ -141,16 +150,32 @@ func (u *PatientUsecase) GetAllPatients(page, count int, filter string) (models.
 	if count == 0 {
 		// Если count == 0, то пагинация отключена, и все записи возвращаются на одной странице
 		totalPages = 1
+		page = 1
 	} else {
 		// Вычисляем количество страниц с округлением вверх
 		totalPages = int(math.Ceil(float64(totalRows) / float64(count)))
 	}
 
-	return models.FilterResponse[[]entities.Patient]{
-		Hits:        patients,
+	var resp_models []models.ShortPatientResponse
+	for _, patient := range patients {
+		model := mapPatientEntityToModel(patient)
+		resp_models = append(resp_models, model)
+	}
+
+	return models.FilterResponse[[]models.ShortPatientResponse]{
+		Hits:        resp_models,
 		CurrentPage: page,
-		HitsPerPage: len(patients),
+		HitsPerPage: len(resp_models),
 		TotalHits:   int(totalRows),
 		TotalPages:  totalPages,
 	}, nil
+}
+
+func mapPatientEntityToModel(entity entities.Patient) models.ShortPatientResponse {
+	return models.ShortPatientResponse{
+		ID:        entity.ID,
+		FullName:  entity.FullName,
+		BirthDate: entity.BirthDate,
+		IsMale:    entity.IsMale,
+	}
 }

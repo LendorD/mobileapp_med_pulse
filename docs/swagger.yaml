@@ -1245,6 +1245,60 @@ paths:
       tags:
       - MedServices
   /patients:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Возвращает список всех существующих пациентов
+
+        Работает фильтрация, сортировка и пагинация
+      parameters:
+      - description: |-
+          Номер страницы
+          (по умолчанию 1)
+        in: query
+        name: page
+        type: integer
+      - description: |-
+          Количество записей на странице
+          (по умолчанию 0 — без ограничения)
+        in: query
+        name: count
+        type: integer
+      - description: |-
+          Фильтр в формате field.operation.value.
+          Примеры:
+          full_name.like.Иван - имя содержит 'Иван',
+          birth_date.eq.1988-07-14 - точная дата рождения
+        in: query
+        name: filter
+        type: string
+      - description: |-
+          Сортировка в формате field.direction.
+          Примеры:
+          full_name.asc - по алфавиту,
+          id.desc - по убыванию ID пациента
+        in: query
+        name: order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список пациентов
+          schema:
+            $ref: '#/definitions/models.PatientsListResponse'
+        "400":
+          description: Некорректные данные
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      summary: Получить список пациентов
+      tags:
+      - Patient
     post:
       consumes:
       - application/json

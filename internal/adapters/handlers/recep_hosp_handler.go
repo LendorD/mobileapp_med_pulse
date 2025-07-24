@@ -141,7 +141,6 @@ func (h *Handler) GetAllHospitalReceptionsByPatientID(c *gin.Context) {
 }
 
 func (h *Handler) GetReceptionHosptalById(c *gin.Context) {
-	// Парсинг ID
 	hosp_id, err := h.service.ParseUintString(c.Param("hosp_id"))
 
 	if err != nil {
@@ -150,10 +149,10 @@ func (h *Handler) GetReceptionHosptalById(c *gin.Context) {
 	}
 
 	// Вызов usecase
-	reception, err := h.usecase.GetReceptionHospitalByID(uint(hosp_id))
+	reception, err := h.usecase.GetReceptionHospitalByID(hosp_id)
 	if err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "Reception not found", false)
 		return
 	}
-	h.ResultResponse(c, "Success ger reception with med services", Object, reception)
+	h.ResultResponse(c, "Success get reception", Object, reception)
 }
