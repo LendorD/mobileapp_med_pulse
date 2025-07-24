@@ -1,36 +1,5 @@
 basePath: /api/v1
 definitions:
-  entities.Allergy:
-    properties:
-      created_at:
-        type: string
-      id:
-        type: integer
-      name:
-        example: Пенициллин
-        type: string
-      patient:
-        items:
-          $ref: '#/definitions/entities.Patient'
-        type: array
-      updated_at:
-        type: string
-    type: object
-  entities.ContactInfo:
-    properties:
-      address:
-        type: string
-      created_at:
-        type: string
-      email:
-        type: string
-      id:
-        type: integer
-      phone:
-        type: string
-      updated_at:
-        type: string
-    type: object
   entities.Doctor:
     properties:
       created_at:
@@ -63,6 +32,9 @@ definitions:
       doctor_id:
         example: 1
         type: integer
+      emergency:
+        example: true
+        type: boolean
       id:
         type: integer
       phone:
@@ -75,9 +47,6 @@ definitions:
         items:
           $ref: '#/definitions/entities.ReceptionSMP'
         type: array
-      type:
-        example: true
-        type: boolean
       updated_at:
         type: string
     type: object
@@ -95,21 +64,11 @@ definitions:
     type: object
   entities.Patient:
     properties:
-      allergy:
-        items:
-          $ref: '#/definitions/entities.Allergy'
-        type: array
       birth_date:
         example: "1980-05-15T00:00:00Z"
         type: string
-      contact_info:
-        $ref: '#/definitions/entities.ContactInfo'
       created_at:
         type: string
-      emergency_receptions:
-        items:
-          $ref: '#/definitions/entities.ReceptionSMP'
-        type: array
       full_name:
         example: Смирнов Алексей Петрович
         type: string
@@ -122,33 +81,6 @@ definitions:
       on_treatment:
         example: false
         type: boolean
-      personal_info:
-        $ref: '#/definitions/entities.PersonalInfo'
-      receptions:
-        items:
-          $ref: '#/definitions/entities.ReceptionHospital'
-        type: array
-      updated_at:
-        type: string
-    type: object
-  entities.PersonalInfo:
-    properties:
-      created_at:
-        type: string
-      id:
-        type: integer
-      oms:
-        example: "1234567890123456"
-        type: string
-      passport_series:
-        example: 4510 123456
-        type: string
-      patient_id:
-        example: 1
-        type: integer
-      snils:
-        example: 123-456-789 00
-        type: string
       updated_at:
         type: string
     type: object
@@ -425,7 +357,7 @@ definitions:
         example: Иванов Иван Иванович
         type: string
       specialization:
-        $ref: '#/definitions/entities.Specialization'
+        type: string
     type: object
   models.DoctorLoginRequest:
     description: Запрос для входа врача в систему
@@ -555,10 +487,15 @@ definitions:
         type: string
       doctor:
         $ref: '#/definitions/models.DoctorInfoResponse'
+      id:
+        type: integer
       patient:
         $ref: '#/definitions/models.ShortPatientResponse'
       recommendations:
         example: Постельный режим
+        type: string
+      status:
+        example: scheduled
         type: string
     type: object
   models.ReceptionSMPResponse:

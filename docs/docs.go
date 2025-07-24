@@ -994,53 +994,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "entities.Allergy": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "Пенициллин"
-                },
-                "patient": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.Patient"
-                    }
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "entities.ContactInfo": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "phone": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
         "entities.Doctor": {
             "type": "object",
             "properties": {
@@ -1088,6 +1041,10 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
+                "emergency": {
+                    "type": "boolean",
+                    "example": true
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1104,10 +1061,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/entities.ReceptionSMP"
                     }
-                },
-                "type": {
-                    "type": "boolean",
-                    "example": true
                 },
                 "updated_at": {
                     "type": "string"
@@ -1134,27 +1087,12 @@ const docTemplate = `{
         "entities.Patient": {
             "type": "object",
             "properties": {
-                "allergy": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.Allergy"
-                    }
-                },
                 "birth_date": {
                     "type": "string",
                     "example": "1980-05-15T00:00:00Z"
                 },
-                "contact_info": {
-                    "$ref": "#/definitions/entities.ContactInfo"
-                },
                 "created_at": {
                     "type": "string"
-                },
-                "emergency_receptions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.ReceptionSMP"
-                    }
                 },
                 "full_name": {
                     "type": "string",
@@ -1171,45 +1109,6 @@ const docTemplate = `{
                 "on_treatment": {
                     "type": "boolean",
                     "example": false
-                },
-                "personal_info": {
-                    "$ref": "#/definitions/entities.PersonalInfo"
-                },
-                "receptions": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.ReceptionHospital"
-                    }
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
-        "entities.PersonalInfo": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "oms": {
-                    "type": "string",
-                    "example": "1234567890123456"
-                },
-                "passport_series": {
-                    "type": "string",
-                    "example": "4510 123456"
-                },
-                "patient_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "snils": {
-                    "type": "string",
-                    "example": "123-456-789 00"
                 },
                 "updated_at": {
                     "type": "string"
@@ -1598,7 +1497,7 @@ const docTemplate = `{
                     "example": "Иванов Иван Иванович"
                 },
                 "specialization": {
-                    "$ref": "#/definitions/entities.Specialization"
+                    "type": "string"
                 }
             }
         },
@@ -1795,12 +1694,19 @@ const docTemplate = `{
                 "doctor": {
                     "$ref": "#/definitions/models.DoctorInfoResponse"
                 },
+                "id": {
+                    "type": "integer"
+                },
                 "patient": {
                     "$ref": "#/definitions/models.ShortPatientResponse"
                 },
                 "recommendations": {
                     "type": "string",
                     "example": "Постельный режим"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "scheduled"
                 }
             }
         },

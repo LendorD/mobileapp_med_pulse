@@ -1,6 +1,8 @@
 package interfaces
 
 import (
+	"context"
+
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
@@ -16,6 +18,7 @@ type Usecases interface {
 	ReceptionHospitalUsecase
 	ReceptionSmpUsecase
 	MedCardUsecase
+	AuthUsecase
 }
 
 type ReceptionHospitalUsecase interface {
@@ -80,3 +83,7 @@ type PatientUsecase interface {
 }
 
 type PersonalInfoUsecase interface{}
+
+type AuthUsecase interface {
+	LoginDoctor(ctx context.Context, login, password string) (uint, string, *errors.AppError)
+}

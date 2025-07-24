@@ -16,14 +16,14 @@ type Patient struct {
 
 	OnTreatment bool `gorm:"default:null" json:"on_treatment" example:"false"`
 
-	PersonalInfo   *PersonalInfo `gorm:"foreignKey:PersonalInfoID" json:"personal_info"`
+	PersonalInfo   *PersonalInfo `gorm:"foreignKey:PersonalInfoID" json:"-"`
 	PersonalInfoID *uint         `gorm:"default:null" json:"-"`
 
-	ContactInfo   *ContactInfo `gorm:"foreignKey:ContactInfoID" json:"contact_info"`
+	ContactInfo   *ContactInfo `gorm:"foreignKey:ContactInfoID" json:"-"`
 	ContactInfoID *uint        `gorm:"default:null" json:"-"`
 
-	ReceptionsHospital []ReceptionHospital `gorm:"foreignKey:PatientID" json:"receptions"`
-	ReceptionSMP       []ReceptionSMP      `gorm:"many2many:receptions_smp_patients;" json:"emergency_receptions"`
+	ReceptionsHospital []ReceptionHospital `gorm:"foreignKey:PatientID" json:"-"`
+	ReceptionSMP       []ReceptionSMP      `gorm:"many2many:receptions_smp_patients;" json:"-"`
 
-	Allergy []Allergy `gorm:"many2many:patient_allergy;default:null;" json:"allergy"`
+	Allergy []Allergy `gorm:"many2many:patient_allergy;default:null;" json:"-"`
 }
