@@ -169,18 +169,25 @@ func (h *Handler) CreateSMPReception(c *gin.Context) {
 // @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
 // @Router /emergency/receptions/{recep_id} [put]
 func (h *Handler) UpdateReceptionSMPByReceptionID(c *gin.Context) {
-	var input models.UpdateSmpReceptionRequest
+	smp_id, err := h.service.ParseUintString(c.Param("recep_id"))
+
+	if err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'smp_id' must be an integer", false)
+		return
+	}
+
+	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "Error create ReceptionHospitalRequest", true)
+		h.ErrorResponse(c, err, http.StatusBadRequest, "Error create ReceptionSMPRequest", true)
 		return
 	}
 
-	if err := validate.Struct(input); err != nil {
-		h.ErrorResponse(c, err, 422, "Error validate ReceptionHospitalRequest", true)
-		return
-	}
+	// if err := validate.Struct(input); err != nil {
+	// 	h.ErrorResponse(c, err, 422, "Error validate ReceptionSMPRequest", true)
+	// 	return
+	// }
 
-	recepResponse, eerr := h.usecase.UpdateReceptionSmp(&input)
+	recepResponse, eerr := h.usecase.UpdateReceptionSMP(smp_id, input)
 	if eerr != nil {
 		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
 		return
