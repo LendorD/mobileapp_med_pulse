@@ -134,7 +134,7 @@ func (h *Handler) GetReceptionWithMedServices(c *gin.Context) {
 // @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
 // @Router /emergency/receptions [post]
 func (h *Handler) CreateSMPReception(c *gin.Context) {
-	var input models.CreateEmergencyRequest
+	var input models.CreateReceptionSmp
 	if err := c.ShouldBindJSON(&input); err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
 		return
