@@ -517,7 +517,7 @@ func (u *ReceptionSmpUsecase) GetReceptionsSMPByEmergencyCall(
 		}
 
 		patient := models.ShortPatientResponse{
-			ID:        rec.Doctor.ID,
+			ID:        rec.PatientID,
 			FullName:  rec.Patient.FullName,
 			BirthDate: rec.Patient.BirthDate,
 			IsMale:    rec.Patient.IsMale,
