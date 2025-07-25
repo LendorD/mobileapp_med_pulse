@@ -161,8 +161,8 @@ func (h *Handler) CreateSMPReception(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param recep_id path uint true "ID приёма"
-// @Param info body models.UpdateSmpReceptionRequest true "Данные для обновления"
-// @Success 200 {array} entities.ReceptionHospital
+// @Param info body map[string]interface{} true "JSON с полями: status, diagnosis, recommendations" example({"status":"approved","diagnosis":"Гипертония","recommendations":"Покой"})
+// @Success 200 {array} entities.ReceptionSMP
 // @Failure 400 {object} IncorrectFormatError "Неверный формат запроса"
 // @Failure 401 {object} IncorrectDataError "Некорректный ID приёма"
 // @Failure 422 {object} ValidationError "Ошибка валидации"
@@ -178,7 +178,7 @@ func (h *Handler) UpdateReceptionSMPByReceptionID(c *gin.Context) {
 
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "Error create ReceptionSMPRequest", true)
+		h.ErrorResponse(c, err, http.StatusBadRequest, "Error update ReceptionSMPRequest", true)
 		return
 	}
 

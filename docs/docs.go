@@ -317,12 +317,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Данные для обновления",
+                        "description": "JSON с полями: status, diagnosis, recommendations",
                         "name": "info",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UpdateSmpReceptionRequest"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     }
                 ],
@@ -332,7 +333,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/entities.ReceptionHospital"
+                                "$ref": "#/definitions/entities.ReceptionSMP"
                             }
                         }
                     },
@@ -426,6 +427,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/emergency/{call_id}": {
+            "patch": {
+                "description": "Возвращает экстренный вызов",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SMP"
+                ],
+                "summary": "Закрыть экстренный вызов",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID emergencyCall",
+                        "name": "call_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Экстренный вызов",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entities.EmergencyCall"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.IncorrectFormatError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.InternalServerError"
+                        }
+                    }
+                }
+            }
+        },
         "/emergency/{doc_id}": {
             "get": {
                 "description": "Возвращает список экстренных приёмов, назначенных врачу на указанную дату, с пагинацией",
@@ -466,51 +514,6 @@ const docTemplate = `{
                         "description": "Количество записей на страницу",
                         "name": "perPage",
                         "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Список приёмов",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entities.EmergencyCall"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Некорректный запрос",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.IncorrectFormatError"
-                        }
-                    },
-                    "500": {
-                        "description": "Внутренняя ошибка",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.InternalServerError"
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "description": "Возвращает экстренный приём",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "SMP"
-                ],
-                "summary": "Закрыть экстренный приём",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID emergencyCall",
-                        "name": "call_id",
-                        "in": "path",
-                        "required": true
                     }
                 ],
                 "responses": {
@@ -2020,47 +2023,6 @@ const docTemplate = `{
                 "status": {
                     "type": "string",
                     "example": "scheduled"
-                }
-            }
-        },
-        "models.UpdateSmpReceptionRequest": {
-            "type": "object",
-            "required": [
-                "doctor_id",
-                "emergency_call_id",
-                "patient_id",
-                "reception_smp_id"
-            ],
-            "properties": {
-                "diagnosis": {
-                    "type": "string",
-                    "example": "ОРВИ"
-                },
-                "doctor_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "emergency_call_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "med_services": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.MedService"
-                    }
-                },
-                "patient_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "reception_smp_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "recommendations": {
-                    "type": "string",
-                    "example": "Постельный режим"
                 }
             }
         }
