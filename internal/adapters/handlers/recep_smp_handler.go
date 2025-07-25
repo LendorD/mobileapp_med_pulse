@@ -12,7 +12,7 @@ import (
 // GetReceptionsSMPByCallId godoc
 // @Summary Получить СМП приём по ID
 // @Description Возвращает список приёмов скорой медицинской помощи для указанного врача с пагинацией
-// @Tags SMP
+// @Tags Calls
 // @Accept json
 // @Produce json
 // @Param call_id path uint true "ID вызова"
@@ -24,7 +24,7 @@ import (
 // @Failure 422 {object} ValidationError "Ошибка валидации"
 // @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
 // @Router /emergency/calls/{call_id} [get]
-func (h *Handler) GetReceptionsSMPByCallId(c *gin.Context) {
+func (h *Handler) GetReceptionsSMPByCallID(c *gin.Context) {
 
 	// Получаем doctor_id из URL
 	callIDStr := c.Param("call_id")

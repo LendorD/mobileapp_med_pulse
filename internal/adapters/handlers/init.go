@@ -93,15 +93,16 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	medServicesGroup := baseRouter.Group("/medservices")
 	medServicesGroup.GET("/", h.GetAllMedServices)
 
-	// Звонки СМП
+	// Скорая медицинская помощь
 	emergencyGroup := baseRouter.Group("/emergency")
-	emergencyGroup.GET("/:doc_id", h.GetEmergencyCallsByDoctorAndDate)
-	emergencyGroup.GET("/calls/:call_id", h.GetReceptionsSMPByCallId)
-
-	emergencyGroup.GET("/smps/:call_id/:smp_id", h.GetReceptionWithMedServices)
-
 	emergencyGroup.POST("/receptions", h.CreateSMPReception)
 	emergencyGroup.PUT("/receptions/:recep_id", h.UpdateReceptionSMPByReceptionID)
+	emergencyGroup.GET("/smps/:call_id/:smp_id", h.GetReceptionWithMedServices)
+
+	// Звонки (для удобства в тестинге Swagger разделили их)
+	// Маршрут оставляем тот же, просто для удобства
+	emergencyGroup.GET("/calls/:call_id", h.GetReceptionsSMPByCallID)
+	emergencyGroup.GET("/:doc_id", h.GetEmergencyCallsByDoctorAndDate)
 	emergencyGroup.PATCH("/:call_id", h.CloseEmergencyCall)
 
 	// TODO: Обновление статусов у Reception Hospital (PUT запрос)

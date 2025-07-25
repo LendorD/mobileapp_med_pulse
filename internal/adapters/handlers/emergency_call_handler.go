@@ -11,7 +11,7 @@ import (
 // GetEmergencyCallsByDoctorAndDate godoc
 // @Summary Получить экстренные приёмы врача по дате
 // @Description Возвращает список экстренных приёмов, назначенных врачу на указанную дату, с пагинацией
-// @Tags SMP
+// @Tags Calls
 // @Accept json
 // @Produce json
 // @Param doc_id path uint true "ID врача"
@@ -72,7 +72,7 @@ func (h *Handler) GetEmergencyCallsByDoctorAndDate(c *gin.Context) {
 // CloseEmergencyCall godoc
 // @Summary Закрыть экстренный вызов
 // @Description Возвращает экстренный вызов
-// @Tags SMP
+// @Tags Calls
 // @Accept json
 // @Produce json
 // @Param call_id path uint true "ID emergencyCall"
