@@ -22,3 +22,13 @@ type CreateReceptionSmp struct {
 	Patient         *PatientData `json:"patient,omitempty"`
 	PatientID       *uint        `json:"patient_id,omitempty" example:"1"`
 }
+
+// type UpdateSmpReceptionRequest struct {
+// 	ReceptionId     uint                  `json:"reception_smp_id" validate:"required" example:"1"`
+// 	EmergencyCallId uint                  `json:"emergency_call_id" validate:"required" example:"1"`
+// 	DoctorID        uint                  `json:"doctor_id" validate:"required" example:"1"`
+// 	PatientID       uint                  `json:"patient_id" validate:"required" example:"1"`
+// 	Diagnosis       string                `json:"diagnosis" example:"ОРВИ" rus:"Диагноз"`
+// 	Recommendations string                `json:"recommendations" example:"Постельный режим" rus:"Рекомендации"`
+// 	MedServices     []entities.MedService `json:"med_services" rus:"Медицинские услуги"`
+// }

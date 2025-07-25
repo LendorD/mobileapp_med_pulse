@@ -1,7 +1,5 @@
 package models
 
-import "github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
-
 // EmergencyCallShortResponse - краткая информация о срочном приеме
 // @Description Сокращенная информация о срочном приеме пациента
 type EmergencyCallShortResponse struct {
@@ -11,14 +9,4 @@ type EmergencyCallShortResponse struct {
 	Priority  *uint  `json:"priority" example:"1"`
 	Address   string `json:"address" example:"ул. Ленина, д. 5, кв. 12"` // Адрес вызова
 	Phone     string `json:"phone" example:"+79991234567"`               // Телефон для связи
-}
-
-type UpdateSmpReceptionRequest struct {
-	ReceptionId     uint                  `json:"reception_smp_id" validate:"required" example:"1"`
-	EmergencyCallId uint                  `json:"emergency_call_id" validate:"required" example:"1"`
-	DoctorID        uint                  `json:"doctor_id" validate:"required" example:"1"`
-	PatientID       uint                  `json:"patient_id" validate:"required" example:"1"`
-	Diagnosis       string                `json:"diagnosis" example:"ОРВИ" rus:"Диагноз"`
-	Recommendations string                `json:"recommendations" example:"Постельный режим" rus:"Рекомендации"`
-	MedServices     []entities.MedService `json:"med_services" rus:"Медицинские услуги"`
 }
