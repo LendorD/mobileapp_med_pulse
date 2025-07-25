@@ -128,7 +128,7 @@ func (h *Handler) GetReceptionWithMedServices(c *gin.Context) {
 // @Tags SMP
 // @Accept json
 // @Produce json
-// @Param input body models.CreateEmergencyRequest true "Данные для создания заключения"
+// @Param input body models.CreateReceptionSmp true "Данные для создания заключения"
 // @Success 200 {object} entities.ReceptionSMP "Создание заключения для пациента"
 // @Failure 400 {object} IncorrectFormatError "Неверный формат запроса"
 // @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"

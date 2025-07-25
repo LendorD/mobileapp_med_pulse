@@ -79,7 +79,7 @@ func (h *Handler) GetEmergencyCallsByDoctorAndDate(c *gin.Context) {
 // @Success 200 {array} entities.EmergencyCall "Список приёмов"
 // @Failure 400 {object} IncorrectFormatError "Некорректный запрос"
 // @Failure 500 {object} InternalServerError "Внутренняя ошибка"
-// @Router /emergency/{doc_id} [putch]
+// @Router /emergency/{doc_id} [patch]
 func (h *Handler) CloseEmergencyCall(c *gin.Context) {
 	callID, err := strconv.ParseUint(c.Param("call_id"), 10, 32)
 	if err != nil {

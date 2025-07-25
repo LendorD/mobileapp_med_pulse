@@ -50,6 +50,18 @@ definitions:
       updated_at:
         type: string
     type: object
+  entities.HospitalReceptionStatus:
+    enum:
+    - scheduled
+    - completed
+    - cancelled
+    - no_show
+    type: string
+    x-enum-varnames:
+    - HospitalReceptionStatusScheduled
+    - HospitalReceptionStatusCompleted
+    - HospitalReceptionStatusCancelled
+    - HospitalReceptionStatusNoShow
   entities.MedService:
     properties:
       id:
@@ -115,7 +127,7 @@ definitions:
       specialization_data_decoded: {}
       status:
         allOf:
-        - $ref: '#/definitions/entities.ReceptionStatus'
+        - $ref: '#/definitions/entities.HospitalReceptionStatus'
         example: scheduled
       updated_at:
         type: string
@@ -152,18 +164,6 @@ definitions:
       updated_at:
         type: string
     type: object
-  entities.ReceptionStatus:
-    enum:
-    - scheduled
-    - completed
-    - cancelled
-    - no_show
-    type: string
-    x-enum-varnames:
-    - StatusScheduled
-    - StatusCompleted
-    - StatusCancelled
-    - StatusNoShow
   entities.Specialization:
     properties:
       id:
@@ -305,23 +305,6 @@ definitions:
         example: "+79991234567"
         type: string
     type: object
-  models.CreateEmergencyRequest:
-    properties:
-      doctor_id:
-        example: 1
-        type: integer
-      emergency_call_id:
-        example: 1
-        type: integer
-      patient:
-        $ref: '#/definitions/models.PatientData'
-      patient_id:
-        example: 1
-        type: integer
-    required:
-    - doctor_id
-    - emergency_call_id
-    type: object
   models.CreatePatientRequest:
     description: Данные для создания нового пациента
     properties:
@@ -337,6 +320,19 @@ definitions:
         description: Пол (true - мужской)
         example: true
         type: boolean
+    type: object
+  models.CreateReceptionSmp:
+    properties:
+      emergency_call_id:
+        example: 1
+        type: integer
+      patient:
+        $ref: '#/definitions/models.PatientData'
+      patient_id:
+        example: 1
+        type: integer
+    required:
+    - emergency_call_id
     type: object
   models.DoctorAuthResponse:
     description: Ответ с данными авторизованного врача
@@ -604,9 +600,8 @@ definitions:
         example: Постельный режим
         type: string
       status:
-        allOf:
-        - $ref: '#/definitions/entities.ReceptionStatus'
         example: scheduled
+        type: string
     type: object
   models.UpdateSmpReceptionRequest:
     properties:
@@ -797,6 +792,36 @@ paths:
       summary: Получить экстренные приёмы врача по дате
       tags:
       - SMP
+    patch:
+      consumes:
+      - application/json
+      description: Возвращает экстренный приём
+      parameters:
+      - description: ID emergencyCall
+        in: path
+        name: call_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список приёмов
+          schema:
+            items:
+              $ref: '#/definitions/entities.EmergencyCall'
+            type: array
+        "400":
+          description: Некорректный запрос
+          schema:
+            $ref: '#/definitions/handlers.IncorrectFormatError'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/handlers.InternalServerError'
+      summary: Закрыть экстренный приём
+      tags:
+      - SMP
   /emergency/calls/{call_id}:
     get:
       consumes:
@@ -858,7 +883,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/models.CreateEmergencyRequest'
+          $ref: '#/definitions/models.CreateReceptionSmp'
       produces:
       - application/json
       responses:
@@ -881,7 +906,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: Обновляет информацию о приёvе в больнице
+      description: Обновляет информацию о приёме скорой
       parameters:
       - description: ID приёма
         in: path
@@ -919,7 +944,7 @@ paths:
           description: Внутренняя ошибка сервера
           schema:
             $ref: '#/definitions/handlers.InternalServerError'
-      summary: Обновить приём в больнице
+      summary: Обновить приём скорой
       tags:
       - SMP
   /emergency/smps/{call_id}/{smp_id}:
@@ -1034,6 +1059,42 @@ paths:
       tags:
       - HospitalReception
   /hospital/receptions/{recep_id}:
+    patch:
+      consumes:
+      - application/json
+      description: Изменяет статус приёма по ID
+      parameters:
+      - description: ID приёма
+        in: path
+        name: recep_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Приём с обновленным статусом
+          schema:
+            $ref: '#/definitions/entities.ReceptionHospital'
+        "400":
+          description: Неверный формат запроса
+          schema:
+            $ref: '#/definitions/handlers.IncorrectFormatError'
+        "401":
+          description: Некорректный ID приёма
+          schema:
+            $ref: '#/definitions/handlers.IncorrectDataError'
+        "422":
+          description: Ошибка валидации
+          schema:
+            $ref: '#/definitions/handlers.ValidationError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.InternalServerError'
+      summary: Обновить статус приема
+      tags:
+      - HospitalReception
     put:
       consumes:
       - application/json
@@ -1296,7 +1357,7 @@ paths:
           description: Внутренняя ошибка
           schema:
             $ref: '#/definitions/handlers.ResultError'
-      summary: Получить список пациентов
+      summary: Получить список всех пациентов
       tags:
       - Patient
     post:
