@@ -8,6 +8,9 @@ definitions:
         items:
           $ref: '#/definitions/entities.EmergencyCall'
         type: array
+      full_name:
+        example: Иванов Иван Иванович
+        type: string
       id:
         type: integer
       login:
@@ -130,6 +133,12 @@ definitions:
         - $ref: '#/definitions/entities.HospitalReceptionStatus'
         example: scheduled
       updated_at:
+        type: string
+    type: object
+  entities.ReceptionHospitalStatus:
+    properties:
+      status:
+        example: completed
         type: string
     type: object
   entities.ReceptionSMP:
@@ -746,7 +755,7 @@ paths:
             $ref: '#/definitions/handlers.InternalServerError'
       summary: Закрыть экстренный вызов
       tags:
-      - SMP
+      - Calls
   /emergency/{doc_id}:
     get:
       consumes:
@@ -842,7 +851,7 @@ paths:
             $ref: '#/definitions/handlers.InternalServerError'
       summary: Получить СМП приём по ID
       tags:
-      - SMP
+      - Calls
   /emergency/receptions:
     post:
       consumes:
@@ -961,7 +970,7 @@ paths:
             $ref: '#/definitions/handlers.InternalServerError'
       summary: Получить приём СМП с медуслугами по ID
       tags:
-      - SMP
+      - Calls
   /hospital/receptions/{doc_id}:
     get:
       consumes:
@@ -1041,6 +1050,11 @@ paths:
         name: recep_id
         required: true
         type: integer
+      - description: Статус приёма
+        in: body
+        name: info
+        schema:
+          $ref: '#/definitions/entities.ReceptionHospitalStatus'
       produces:
       - application/json
       responses:

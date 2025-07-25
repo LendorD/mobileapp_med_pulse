@@ -11,7 +11,7 @@ import (
 // GetEmergencyCallsByDoctorAndDate godoc
 // @Summary Получить экстренные приёмы врача по дате
 // @Description Возвращает список экстренных приёмов, назначенных врачу на указанную дату, с пагинацией
-// @Tags Calls
+// @Tags SMP
 // @Accept json
 // @Produce json
 // @Param doc_id path uint true "ID врача"

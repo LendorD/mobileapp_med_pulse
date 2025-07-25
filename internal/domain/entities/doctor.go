@@ -10,7 +10,7 @@ type Doctor struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 
-	FullName     string `gorm:"not null" json:"-" example:"Иванов Иван Иванович"`
+	FullName     string `gorm:"not null" json:"full_name" example:"Иванов Иван Иванович"`
 	Login        string `gorm:"unique;not null" json:"login" example:"doctor_ivanov"`
 	PasswordHash string `gorm:"not null" json:"-"`
 

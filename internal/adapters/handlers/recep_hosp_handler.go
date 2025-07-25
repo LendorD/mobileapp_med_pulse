@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"net/http"
+
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/gin-gonic/gin"
@@ -165,6 +166,7 @@ func (h *Handler) GetReceptionHosptalById(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param recep_id path uint true "ID приёма"
+// @Param info body entities.ReceptionHospitalStatus false "Статус приёма"
 // @Success 200 {object} entities.ReceptionHospital "Приём с обновленным статусом"
 // @Failure 400 {object} IncorrectFormatError "Неверный формат запроса"
 // @Failure 401 {object} IncorrectDataError "Некорректный ID приёма"

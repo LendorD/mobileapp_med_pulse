@@ -186,7 +186,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "SMP"
+                    "Calls"
                 ],
                 "summary": "Получить СМП приём по ID",
                 "parameters": [
@@ -374,7 +374,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "SMP"
+                    "Calls"
                 ],
                 "summary": "Получить приём СМП с медуслугами по ID",
                 "parameters": [
@@ -437,7 +437,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "SMP"
+                    "Calls"
                 ],
                 "summary": "Закрыть экстренный вызов",
                 "parameters": [
@@ -784,6 +784,14 @@ const docTemplate = `{
                         "name": "recep_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Статус приёма",
+                        "name": "info",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ReceptionHospitalStatus"
+                        }
                     }
                 ],
                 "responses": {
@@ -1167,6 +1175,10 @@ const docTemplate = `{
                         "$ref": "#/definitions/entities.EmergencyCall"
                     }
                 },
+                "full_name": {
+                    "type": "string",
+                    "example": "Иванов Иван Иванович"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1340,6 +1352,15 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "entities.ReceptionHospitalStatus": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "example": "completed"
                 }
             }
         },

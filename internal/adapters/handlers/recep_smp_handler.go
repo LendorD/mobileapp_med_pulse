@@ -65,7 +65,7 @@ func (h *Handler) GetReceptionsSMPByCallID(c *gin.Context) {
 // GetReceptionWithMedServices godoc
 // @Summary Получить приём СМП с медуслугами по ID
 // @Description Возвращает информацию о приёме скорой медицинской помощи вместе со списком медицинских услуг
-// @Tags SMP
+// @Tags Calls
 // @Accept json
 // @Produce json
 // @Param call_id path uint true "ID вызова"
