@@ -32,7 +32,7 @@ type ReceptionHospitalUsecase interface {
 
 type ReceptionSmpUsecase interface {
 	CreateReceptionSMP(input *models.CreateReceptionSmp) (entities.ReceptionSMP, *errors.AppError)
-	UpdateReceptionSmp(input *models.UpdateSmpReceptionRequest) (entities.ReceptionSMP, *errors.AppError)
+	UpdateReceptionSMP(id uint, updateData map[string]interface{}) (entities.ReceptionSMP, *errors.AppError)
 	GetReceptionWithMedServicesByID(smp_id uint, call_id uint) (models.ReceptionSMPResponse, error)
 	GetReceptionsSMPByEmergencyCall(call_id uint, page, perPage int) (*models.FilterResponse[[]models.ReceptionSmpShortResponse], error)
 }

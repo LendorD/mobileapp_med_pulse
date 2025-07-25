@@ -373,79 +373,122 @@ func (u *ReceptionSmpUsecase) CreateReceptionSMP(input *models.CreateReceptionSm
 	return fullReception, nil
 
 	// --- Возможная реализация полиморфизма ---
-	// Вместо switch-case можно было бы реализовать полиморфизм, например:
-	// 1. Интерфейс:
-	// type SpecializationDataProvider interface {
-	//     CreateInitialDocument() entities.SpecializationDataDocument
-	//     GetSpecializationTitle() string
-	// }
-	//
-	// 2. Фабрика:
-	// var specializationDataProviders = map[string]func() SpecializationDataProvider{
-	//     "Невролог": func() SpecializationDataProvider { return &NeurologistDataProvider{} },
-	//     "Травматолог": func() SpecializationDataProvider { return &TraumatologistDataProvider{} },
-	//     // ... другие специализации
-	// }
-	//
-	// 3. Использование:
-	// if providerFactory, ok := specializationDataProviders[specializationTitle]; ok {
-	//     provider := providerFactory()
-	//     specDocument = provider.CreateInitialDocument()
-	// } else {
-	//     // Обработка default случая
-	// }
-	//
-	// Это уменьшило бы дублирование кода switch-case и сделало бы систему более расширяемой.
-	// Однако, это требует создания дополнительных структур и интерфейсов.
+	// ЗАМЕНИТЬ НА ФАБРИКУ БЕЗ USE CASE
 }
 
-func (u *ReceptionSmpUsecase) UpdateReceptionSmp(input *models.UpdateSmpReceptionRequest) (entities.ReceptionSMP, *errors.AppError) {
-	existingReception, err := u.recepSmpRepo.GetReceptionSmpByID(input.ReceptionId)
+func (u *ReceptionSmpUsecase) UpdateReceptionSMP(id uint, updateData map[string]interface{}) (entities.ReceptionSMP, *errors.AppError) {
+
+	existingReception, err := u.recepSmpRepo.GetReceptionSmpByID(id)
 	if err != nil {
 		return entities.ReceptionSMP{}, errors.NewAppError(
-			errors.NotFoundErrorCode,
-			"reception SMP not found",
-			err,
-			true,
-		)
-	}
-
-	recepSmpUpdate := map[string]interface{}{
-		"doctor_id":       input.DoctorID,
-		"patient_id":      input.PatientID,
-		"diagnosis":       input.Diagnosis,
-		"recommendations": input.Recommendations,
-	}
-
-	if _, err := u.recepSmpRepo.UpdateReceptionSmp(existingReception.ID, recepSmpUpdate); err != nil {
-		return entities.ReceptionSMP{}, errors.NewAppError(
 			errors.InternalServerErrorCode,
-			"failed to update reception SMP data",
-			err,
-			true,
+			"Failed to get emergency reception",
+			fmt.Errorf("DB create error: %w", err),
+			false,
 		)
 	}
 
-	if input.MedServices != nil {
-		if err := u.recepSmpRepo.UpdateReceptionSmpMedServices(existingReception.ID, input.MedServices); err != nil {
+	updateMap := make(map[string]interface{})
+
+	if specUpdatesRaw, ok := updateData["specialization_data_updates"]; ok {
+		specUpdates, ok := specUpdatesRaw.(map[string]interface{})
+		if !ok {
 			return entities.ReceptionSMP{}, errors.NewAppError(
-				errors.InternalServerErrorCode,
-				"failed to update reception SMP medical services",
-				err,
+				errors.InvalidDataCode,
+				"specialization_data_updates must be a map[string]interface{}",
+				nil,
 				true,
 			)
 		}
+
+		var currentSpecDoc entities.SpecializationDataDocument
+		if err := json.Unmarshal(existingReception.SpecializationData.Bytes, &currentSpecDoc); err != nil {
+			return entities.ReceptionSMP{}, errors.NewAppError(
+				errors.InternalServerErrorCode,
+				"Failed to unmarshal existing specialization data",
+				fmt.Errorf("JSON unmarshal error: %w", err), // Обернуть для лучшей трассировки
+				false,
+			)
+		}
+
+		var newDiagnosis, newRecommendations *string // Указатели, чтобы отличить "не найдено" от ""
+
+		updated := false
+		for i := range currentSpecDoc.Fields {
+			fieldName := currentSpecDoc.Fields[i].Name
+			if newValue, exists := specUpdates[fieldName]; exists {
+				currentSpecDoc.Fields[i].Value = newValue
+				updated = true
+
+				if strVal, isString := newValue.(string); isString {
+					if fieldName == "diagnosis" {
+						newDiagnosis = &strVal // Сохраняем адрес строки
+					} else if fieldName == "recommendations" {
+						newRecommendations = &strVal // Сохраняем адрес строки
+					}
+				} else if newValue == nil {
+					emptyStr := ""
+					if fieldName == "diagnosis" {
+						newDiagnosis = &emptyStr
+					} else if fieldName == "recommendations" {
+						newRecommendations = &emptyStr
+					}
+				}
+			}
+		}
+
+		if updated {
+			updatedJsonData, marshalErr := json.Marshal(currentSpecDoc)
+			if marshalErr != nil {
+				return entities.ReceptionSMP{}, errors.NewAppError(
+					errors.InternalServerErrorCode,
+					"Failed to marshal updated specialization data",
+					fmt.Errorf("JSON marshal error: %w", marshalErr), // Обернуть для лучшей трассировки
+					false,
+				)
+			}
+			updateMap["specialization_data"] = pgtype.JSONB{
+				Bytes:  updatedJsonData,
+				Status: pgtype.Present,
+			}
+
+			if newDiagnosis != nil {
+				updateMap["diagnosis"] = *newDiagnosis
+			}
+			if newRecommendations != nil {
+				updateMap["recommendations"] = *newRecommendations
+			}
+		}
+
 	}
 
-	updatedReception, err := u.recepSmpRepo.GetReceptionSmpByID(existingReception.ID)
+	for key, value := range updateData {
+		if key != "specialization_data_updates" {
+			updateMap[key] = value
+		}
+	}
+
+	if len(updateMap) > 0 {
+		_, updateErr := u.recepSmpRepo.UpdateReceptionSmp(id, updateMap)
+		if updateErr != nil {
+			return entities.ReceptionSMP{}, errors.NewAppError(
+				errors.InternalServerErrorCode,
+				"Failed to update emergency reception",
+				fmt.Errorf("DB create error: %w", updateErr),
+				false,
+			)
+		}
+	}
+	updatedReception, err := u.recepSmpRepo.GetReceptionSmpByID(id)
 	if err != nil {
 		return entities.ReceptionSMP{}, errors.NewAppError(
 			errors.InternalServerErrorCode,
-			"failed to get updated reception SMP",
-			err,
-			true,
+			"Failed to get emergency reception",
+			fmt.Errorf("DB create error: %w", err),
+			false,
 		)
 	}
+
 	return updatedReception, nil
 }
 

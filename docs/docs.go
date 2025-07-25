@@ -269,7 +269,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.CreateEmergencyRequest"
+                            "$ref": "#/definitions/models.CreateReceptionSmp"
                         }
                     }
                 ],
@@ -297,7 +297,7 @@ const docTemplate = `{
         },
         "/emergency/receptions/{recep_id}": {
             "put": {
-                "description": "Обновляет информацию о приёvе в больнице",
+                "description": "Обновляет информацию о приёме скорой",
                 "consumes": [
                     "application/json"
                 ],
@@ -307,7 +307,7 @@ const docTemplate = `{
                 "tags": [
                     "SMP"
                 ],
-                "summary": "Обновить приём в больнице",
+                "summary": "Обновить приём скорой",
                 "parameters": [
                     {
                         "type": "integer",
@@ -317,12 +317,13 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Данные для обновления",
+                        "description": "JSON с полями: status, diagnosis, recommendations",
                         "name": "info",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.UpdateSmpReceptionRequest"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     }
                 ],
@@ -332,7 +333,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/entities.ReceptionHospital"
+                                "$ref": "#/definitions/entities.ReceptionSMP"
                             }
                         }
                     },
@@ -419,6 +420,53 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.InternalServerError"
+                        }
+                    }
+                }
+            }
+        },
+        "/emergency/{call_id}": {
+            "patch": {
+                "description": "Возвращает экстренный вызов",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SMP"
+                ],
+                "summary": "Закрыть экстренный вызов",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID emergencyCall",
+                        "name": "call_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Экстренный вызов",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entities.EmergencyCall"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.IncorrectFormatError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка",
                         "schema": {
                             "$ref": "#/definitions/handlers.InternalServerError"
                         }
@@ -716,6 +764,60 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "patch": {
+                "description": "Изменяет статус приёма по ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "HospitalReception"
+                ],
+                "summary": "Обновить статус приема",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID приёма",
+                        "name": "recep_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Приём с обновленным статусом",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ReceptionHospital"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверный формат запроса",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.IncorrectFormatError"
+                        }
+                    },
+                    "401": {
+                        "description": "Некорректный ID приёма",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.IncorrectDataError"
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка валидации",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ValidationError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.InternalServerError"
+                        }
+                    }
+                }
             }
         },
         "/medcard/{pat_id}": {
@@ -884,7 +986,7 @@ const docTemplate = `{
                 "tags": [
                     "Patient"
                 ],
-                "summary": "Получить список пациентов",
+                "summary": "Получить список всех пациентов",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1126,6 +1228,21 @@ const docTemplate = `{
                 }
             }
         },
+        "entities.HospitalReceptionStatus": {
+            "type": "string",
+            "enum": [
+                "scheduled",
+                "completed",
+                "cancelled",
+                "no_show"
+            ],
+            "x-enum-varnames": [
+                "HospitalReceptionStatusScheduled",
+                "HospitalReceptionStatusCompleted",
+                "HospitalReceptionStatusCancelled",
+                "HospitalReceptionStatusNoShow"
+            ]
+        },
         "entities.MedService": {
             "type": "object",
             "properties": {
@@ -1216,7 +1333,7 @@ const docTemplate = `{
                 "status": {
                     "allOf": [
                         {
-                            "$ref": "#/definitions/entities.ReceptionStatus"
+                            "$ref": "#/definitions/entities.HospitalReceptionStatus"
                         }
                     ],
                     "example": "scheduled"
@@ -1270,21 +1387,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "entities.ReceptionStatus": {
-            "type": "string",
-            "enum": [
-                "scheduled",
-                "completed",
-                "cancelled",
-                "no_show"
-            ],
-            "x-enum-varnames": [
-                "StatusScheduled",
-                "StatusCompleted",
-                "StatusCancelled",
-                "StatusNoShow"
-            ]
         },
         "entities.Specialization": {
             "type": "object",
@@ -1486,30 +1588,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.CreateEmergencyRequest": {
-            "type": "object",
-            "required": [
-                "doctor_id",
-                "emergency_call_id"
-            ],
-            "properties": {
-                "doctor_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "emergency_call_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "patient": {
-                    "$ref": "#/definitions/models.PatientData"
-                },
-                "patient_id": {
-                    "type": "integer",
-                    "example": 1
-                }
-            }
-        },
         "models.CreatePatientRequest": {
             "description": "Данные для создания нового пациента",
             "type": "object",
@@ -1528,6 +1606,25 @@ const docTemplate = `{
                     "description": "Пол (true - мужской)",
                     "type": "boolean",
                     "example": true
+                }
+            }
+        },
+        "models.CreateReceptionSmp": {
+            "type": "object",
+            "required": [
+                "emergency_call_id"
+            ],
+            "properties": {
+                "emergency_call_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "patient": {
+                    "$ref": "#/definitions/models.PatientData"
+                },
+                "patient_id": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -1924,53 +2021,8 @@ const docTemplate = `{
                     "example": "Постельный режим"
                 },
                 "status": {
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/entities.ReceptionStatus"
-                        }
-                    ],
+                    "type": "string",
                     "example": "scheduled"
-                }
-            }
-        },
-        "models.UpdateSmpReceptionRequest": {
-            "type": "object",
-            "required": [
-                "doctor_id",
-                "emergency_call_id",
-                "patient_id",
-                "reception_smp_id"
-            ],
-            "properties": {
-                "diagnosis": {
-                    "type": "string",
-                    "example": "ОРВИ"
-                },
-                "doctor_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "emergency_call_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "med_services": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entities.MedService"
-                    }
-                },
-                "patient_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "reception_smp_id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "recommendations": {
-                    "type": "string",
-                    "example": "Постельный режим"
                 }
             }
         }
