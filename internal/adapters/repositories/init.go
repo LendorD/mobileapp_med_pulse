@@ -328,11 +328,11 @@ func seedTestData(db *gorm.DB) error {
 		time.Date(now.Year(), now.Month(), now.Day()+3, 0, 0, 0, 0, time.UTC),
 	}
 
-	statuses := []entities.ReceptionStatus{
-		entities.StatusScheduled,
-		entities.StatusCompleted,
-		entities.StatusCancelled,
-		entities.StatusNoShow,
+	statuses := []entities.HospitalReceptionStatus{
+		entities.HospitalReceptionStatusScheduled,
+		entities.HospitalReceptionStatusCompleted,
+		entities.HospitalReceptionStatusCancelled,
+		entities.HospitalReceptionStatusNoShow,
 	}
 	addresses := []string{
 		"Москва, ул. Ленина, д. 15",
@@ -375,7 +375,7 @@ func createHospitalReceptions(db *gorm.DB,
 	doctors []*entities.Doctor,
 	patients []*entities.Patient,
 	dates []time.Time,
-	statuses []entities.ReceptionStatus,
+	statuses []entities.HospitalReceptionStatus,
 	addresses []string) error {
 
 	for i := 0; i < 50; i++ {

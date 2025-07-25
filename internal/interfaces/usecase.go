@@ -27,6 +27,7 @@ type ReceptionHospitalUsecase interface {
 	GetHospitalReceptionsByDoctorID(doc_id uint, page, count int, filter, order string) (models.FilterResponse[[]models.ReceptionHospitalResponse], *errors.AppError)
 	GetHospitalPatientsByDoctorID(doc_id uint, page, count int, filter, order string) (models.FilterResponse[[]entities.Patient], *errors.AppError)
 	GetReceptionHospitalByID(hospID uint) (models.ReceptionFullResponse, error)
+	UpdateReceptionHospitalStatus(id uint, newStatus string) (entities.ReceptionHospital, error)
 }
 
 type ReceptionSmpUsecase interface {
@@ -67,6 +68,8 @@ type EmergencyCallUsecase interface {
 		page int,
 		perPage int,
 	) (models.FilterResponse[[]models.EmergencyCallShortResponse], error)
+	CloseEmergencyCall(id uint) (entities.EmergencyCall, error)
+	UpdateEmergencyCallStatusByID(id uint, newStatus string) (entities.EmergencyCall, error)
 }
 
 type MedServiceUsecase interface {

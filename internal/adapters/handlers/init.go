@@ -75,7 +75,7 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	patientGroup.GET("/:doc_id/", h.GetAllPatientsByDoctorID) // Список пациентов доктора
 	patientGroup.GET("/", h.GetAllPatients)
 	patientGroup.POST("/", h.CreatePatient)
-	
+
 	// Медкарты
 	medCardGroup := baseRouter.Group("/medcard")
 	medCardGroup.GET("/:pat_id", h.GetMedCardByPatientID)
@@ -87,6 +87,7 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	hospitalGroup.GET("/receptions/:doc_id", h.GetReceptionsHospitalByDoctorID)              // Все приемы доктора
 	hospitalGroup.GET("/receptions/:doc_id/:hosp_id", h.GetReceptionHosptalById)
 	hospitalGroup.PUT("/receptions/:recep_id", h.UpdateReceptionHospitalByReceptionID)
+	hospitalGroup.PATCH("/receptions/:recep_id", h.UpdateReceptionHospitalStatusByID)
 
 	// Медуслуги
 	medServicesGroup := baseRouter.Group("/medservices")
@@ -96,10 +97,12 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	emergencyGroup := baseRouter.Group("/emergency")
 	emergencyGroup.GET("/:doc_id", h.GetEmergencyCallsByDoctorAndDate)
 	emergencyGroup.GET("/calls/:call_id", h.GetReceptionsSMPByCallId)
+
 	emergencyGroup.GET("/smps/:call_id/:smp_id", h.GetReceptionWithMedServices)
 
 	emergencyGroup.POST("/receptions", h.CreateSMPReception)
 	emergencyGroup.PUT("/receptions/:recep_id", h.UpdateReceptionSMPByReceptionID)
+	emergencyGroup.PATCH("/:call_id", h.CloseEmergencyCall)
 
 	// TODO: Обновление статусов у Reception Hospital (PUT запрос)
 	// Поправить пациента на транзакцию

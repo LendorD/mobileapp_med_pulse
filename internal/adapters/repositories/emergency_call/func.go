@@ -62,6 +62,7 @@ func (r *EmergencyCallRepositoryImpl) GetEmergencyCallByID(id uint) (entities.Em
 		return entities.EmergencyCall{}, errors.NewDBError(op, err)
 	}
 	return call, nil
+
 }
 
 func (r *EmergencyCallRepositoryImpl) GetEmergencyCallsByDoctorID(doctorID uint) ([]entities.EmergencyCall, error) {

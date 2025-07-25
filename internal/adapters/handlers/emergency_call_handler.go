@@ -68,3 +68,29 @@ func (h *Handler) GetEmergencyCallsByDoctorAndDate(c *gin.Context) {
 
 	c.JSON(http.StatusOK, receptions)
 }
+
+// CloseEmergencyCall godoc
+// @Summary Закрыть экстренный приём
+// @Description Возвращает экстренный приём
+// @Tags SMP
+// @Accept json
+// @Produce json
+// @Param call_id path uint true "ID emergencyCall"
+// @Success 200 {array} entities.EmergencyCall "Список приёмов"
+// @Failure 400 {object} IncorrectFormatError "Некорректный запрос"
+// @Failure 500 {object} InternalServerError "Внутренняя ошибка"
+// @Router /emergency/{doc_id} [putch]
+func (h *Handler) CloseEmergencyCall(c *gin.Context) {
+	callID, err := strconv.ParseUint(c.Param("call_id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid call ID"})
+		return
+	}
+	receptions, err := h.usecase.CloseEmergencyCall(uint(callID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, receptions)
+}
