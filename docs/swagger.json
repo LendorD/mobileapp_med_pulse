@@ -180,7 +180,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "SMP"
+                    "Calls"
                 ],
                 "summary": "Получить СМП приём по ID",
                 "parameters": [
@@ -368,7 +368,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "SMP"
+                    "Calls"
                 ],
                 "summary": "Получить приём СМП с медуслугами по ID",
                 "parameters": [
@@ -431,7 +431,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "SMP"
+                    "Calls"
                 ],
                 "summary": "Закрыть экстренный вызов",
                 "parameters": [
@@ -778,6 +778,14 @@
                         "name": "recep_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Статус приёма",
+                        "name": "info",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ReceptionHospitalStatus"
+                        }
                     }
                 ],
                 "responses": {
@@ -1161,6 +1169,10 @@
                         "$ref": "#/definitions/entities.EmergencyCall"
                     }
                 },
+                "full_name": {
+                    "type": "string",
+                    "example": "Иванов Иван Иванович"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1334,6 +1346,15 @@
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "entities.ReceptionHospitalStatus": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "example": "completed"
                 }
             }
         },
