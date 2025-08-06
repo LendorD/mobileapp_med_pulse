@@ -2,7 +2,7 @@
 FROM golang:1.24-alpine AS builder
 
 # 2. Устанавливаем нужные пакеты
-RUN apt-get update && apt-get install -y ca-certificates git ssh
+RUN apk update && apk add --no-cache ca-certificates git openssh
 
 # 3. Рабочая директория
 WORKDIR /app
@@ -16,8 +16,7 @@ WORKDIR /app
 COPY . .
 
 # 6. Сборка приложения
-RUN --mount=type=cache,target=/go/pkg/mod \
-    go build -o app ./mobileapp/cmd/app/main.go
+RUN go build -o app ./cmd/app/main.go
 
 # 7. Разрешаем запуск
 RUN chmod +x app
