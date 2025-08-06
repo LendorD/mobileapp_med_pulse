@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   db-postgres:
-    container_name: mobileapp
+    container_name: db-mobileapp
     image: postgres:13-alpine
     environment:
       POSTGRES_USER: postgres
@@ -30,7 +30,7 @@ services:
       db-postgres:
         condition: service_healthy
     ports:
-      - "65237:${APP_PORT}" # Проброси порт из APP_PORT
+      - "65321:${APP_PORT}" # Проброси порт из APP_PORT
     env_file:
       - .env
     networks:
