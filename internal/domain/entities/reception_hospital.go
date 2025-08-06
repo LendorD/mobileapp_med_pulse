@@ -31,3 +31,8 @@ type ReceptionHospital struct {
 	CachedSpecialization      string      `gorm:"index" json:"-"`
 	SpecializationDataDecoded interface{} `gorm:"-" json:"specialization_data_decoded"`
 }
+
+// ReceptionHospitalStatus представляет статус приёма
+type ReceptionHospitalStatus struct {
+	Status string `json:"status" example:"completed"`
+}

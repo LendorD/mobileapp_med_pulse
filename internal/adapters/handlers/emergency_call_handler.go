@@ -72,7 +72,7 @@ func (h *Handler) GetEmergencyCallsByDoctorAndDate(c *gin.Context) {
 // CloseEmergencyCall godoc
 // @Summary Закрыть экстренный вызов
 // @Description Возвращает экстренный вызов
-// @Tags SMP
+// @Tags Calls
 // @Accept json
 // @Produce json
 // @Param call_id path uint true "ID emergencyCall"
