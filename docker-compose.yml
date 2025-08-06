@@ -19,6 +19,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - medservice-net
+    restart: unless-stopped
 
   go-api:
     container_name: go-api-medservice
@@ -34,6 +35,7 @@ services:
       - .env
     networks:
       - medservice-net
+    restart: unless-stopped
 
 volumes:
   postgres_data:
