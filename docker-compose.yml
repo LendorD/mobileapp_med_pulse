@@ -22,7 +22,7 @@ services:
     restart: unless-stopped
 
   go-api:
-    container_name: go-api-medservice
+    container_name: api-mobileapp
     build:
       context: .
       dockerfile: Dockerfile
