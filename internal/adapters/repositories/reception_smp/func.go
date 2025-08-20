@@ -110,14 +110,49 @@ func (r *ReceptionSmpRepositoryImpl) GetReceptionSmpByDoctorID(doctorID uint) ([
 	return receptions, nil
 }
 
-func (r *ReceptionSmpRepositoryImpl) GetReceptionSmpByPatientID(patientID uint) ([]entities.ReceptionSMP, error) {
+func (r *ReceptionSmpRepositoryImpl) GetReceptionSmpByPatientID(
+	patientID uint,
+	page, count int,
+	filter, order string,
+	params []interface{},
+) ([]entities.ReceptionSMP, int64, error) {
 	op := "repo.ReceptionSmp.GetReceptionSmpByPatientID"
 
-	var receptions []entities.ReceptionSMP
-	if err := r.db.Where("patient_id = ?", patientID).Find(&receptions).Error; err != nil {
-		return nil, errors.NewDBError(op, err)
+	var (
+		receptions []entities.ReceptionSMP
+		totalRows  int64
+	)
+
+	// Базовый запрос
+	query := r.db.Model(&entities.ReceptionSMP{}).Where("patient_id = ?", patientID)
+
+	// Применяем фильтр, если есть
+	if filter != "" {
+		query = query.Where(filter, params...)
 	}
-	return receptions, nil
+
+	// Считаем общее количество строк (до пагинации)
+	if err := query.Count(&totalRows).Error; err != nil {
+		return nil, 0, errors.NewDBError(op, err)
+	}
+
+	// Применяем сортировку
+	if order != "" {
+		query = query.Order(order)
+	}
+
+	// Применяем пагинацию (если включена)
+	if count > 0 {
+		offset := (page - 1) * count
+		query = query.Offset(offset).Limit(count)
+	}
+
+	// Получаем данные
+	if err := query.Preload("Doctor").Preload("Patient").Find(&receptions).Error; err != nil {
+		return nil, 0, errors.NewDBError(op, err)
+	}
+
+	return receptions, totalRows, nil
 }
 
 func (r *ReceptionSmpRepositoryImpl) GetReceptionSmpByDateRange(start, end time.Time) ([]entities.ReceptionSMP, error) {

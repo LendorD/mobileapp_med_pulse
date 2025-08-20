@@ -99,7 +99,7 @@ func (h *Handler) GetReceptionsHospitalByDoctorID(c *gin.Context) {
 	h.ResultResponse(c, "Success reception hospital get by doctor id", Object, receptions)
 }
 
-// GetReceptionsHospitalByPatientID godoc
+// GetAllReceptionsByPatientID godoc
 // @Summary Получить список приёмов пациента по его ID
 // @Description История приемов пациента в больнице
 // @Tags HospitalReception
@@ -116,7 +116,7 @@ func (h *Handler) GetReceptionsHospitalByDoctorID(c *gin.Context) {
 // @Failure 422 {object} ValidationError "Ошибка валидации"
 // @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
 // @Router /hospital/receptions/patients/{pat_id} [get]
-func (h *Handler) GetAllHospitalReceptionsByPatientID(c *gin.Context) {
+func (h *Handler) GetAllReceptionsByPatientID(c *gin.Context) {
 	pat_id, err := h.service.ParseUintString(c.Param("pat_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid doctor ID"})
