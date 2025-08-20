@@ -29,7 +29,7 @@ func NewUsecases(r interfaces.Repository, s interfaces.Service, conf *config.Con
 		NewEmergencyCallUsecase(r),
 		NewMedServiceUsecase(r),
 		NewPatientUsecase(r, r, r, s),
-		NewReceptionHospitalUsecase(r, s),
+		NewReceptionHospitalUsecase(r, r, s),
 		NewReceptionSmpUsecase(r, r, r),
 		NewMedCardUsecase(r, r, r, r, r),
 		NewAuthUsecase(r, conf.JWTSecret),

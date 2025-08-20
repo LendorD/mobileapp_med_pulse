@@ -13,16 +13,19 @@ import (
 )
 
 type ReceptionHospitalUsecase struct {
+	smpRepo       interfaces.ReceptionSmpRepository
 	repo          interfaces.ReceptionHospitalRepository
 	FilterBuilder interfaces.FilterBuilderService
 }
 
-func NewReceptionHospitalUsecase(repo interfaces.ReceptionHospitalRepository, s interfaces.Service) interfaces.ReceptionHospitalUsecase {
+func NewReceptionHospitalUsecase(repo interfaces.ReceptionHospitalRepository, smpRepo interfaces.ReceptionSmpRepository, s interfaces.Service) interfaces.ReceptionHospitalUsecase {
 	return &ReceptionHospitalUsecase{
+		smpRepo:       smpRepo,
 		repo:          repo,
 		FilterBuilder: s}
 }
 
+// Получение вообще всех заключений пациента
 func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByPatientID(patientId uint, page, count int, filter, order string) (models.FilterResponse[[]models.ReceptionHospitalResponse], *errors.AppError) {
 	empty := models.FilterResponse[[]models.ReceptionHospitalResponse]{
 		Hits: []models.ReceptionHospitalResponse{},
@@ -70,13 +73,21 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByPatientID(patientId ui
 		queryOrder = subQuery
 	}
 
-	// Получение пациентов
-	receptions, totalRows, err := u.repo.GetAllHospitalReceptionsByPatientID(patientId, page, count, queryFilter, queryOrder, parameters)
+	// Получаем заключения из скорой
+	smpReceps, totalRowsSmp, err := u.smpRepo.GetReceptionSmpByPatientID(patientId, page, count, queryFilter, queryOrder, parameters)
 	if err != nil {
 		return empty, errors.NewAppError(errors.InternalServerErrorCode, "failed to get patients", err, true)
 	}
 
+	// Получаем заключений по больнице
+	receptions, totalRowsHospital, err := u.repo.GetAllHospitalReceptionsByPatientID(patientId, page, count, queryFilter, queryOrder, parameters)
+	if err != nil {
+		return empty, errors.NewAppError(errors.InternalServerErrorCode, "failed to get patients", err, true)
+	}
+
+	totalRows := totalRowsSmp + totalRowsHospital
 	var totalPages int
+
 	if count == 0 {
 		// Если count == 0, то пагинация отключена, и все записи возвращаются на одной странице
 		totalPages = 1
@@ -111,6 +122,29 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByPatientID(patientId ui
 		result = append(result, response)
 	}
 
+	for _, smp := range smpReceps {
+		response := models.ReceptionHospitalResponse{
+			ID: smp.ID,
+			Doctor: models.DoctorInfoResponse{
+				DoctorID:       smp.DoctorID,
+				FullName:       smp.Doctor.FullName,
+				Specialization: smp.CachedSpecialization,
+			},
+			Patient: models.ShortPatientResponse{
+				ID:         smp.Patient.ID,
+				LastName:   smp.Patient.LastName,
+				FirstName:  smp.Patient.FirstName,
+				MiddleName: smp.Patient.MiddleName,
+				BirthDate:  smp.Patient.BirthDate,
+				IsMale:     smp.Patient.IsMale,
+			},
+			Diagnosis:       smp.Diagnosis,
+			Recommendations: smp.Recommendations,
+			Date:            smp.UpdatedAt,
+		}
+		result = append(result, response)
+	}
+
 	if len(result) == 0 {
 		return empty, nil
 	}
@@ -126,9 +160,14 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByPatientID(patientId ui
 
 func (u *ReceptionHospitalUsecase) UpdateReceptionHospital(id uint, input *models.UpdateReceptionHospitalRequest) (models.ReceptionHospitalResponse, *errors.AppError) {
 
-	var specializationData pgtype.JSONB
-	//Пробуем сериализовать specialization_data в JSON
+	recepHospUpdate := map[string]interface{}{
+		"diagnosis":       input.Diagnosis,
+		"recommendations": input.Recommendations,
+		"status":          input.Status,
+	}
+
 	if input.SpecializationData != nil {
+		var specializationData pgtype.JSONB
 		jsonData, err := json.Marshal(input.SpecializationData)
 		if err != nil {
 			return models.ReceptionHospitalResponse{}, errors.NewAppError(
@@ -147,12 +186,8 @@ func (u *ReceptionHospitalUsecase) UpdateReceptionHospital(id uint, input *model
 				true,
 			)
 		}
-	}
-	recepHospUpdate := map[string]interface{}{
-		"diagnosis":           input.Diagnosis,
-		"recommendations":     input.Recommendations,
-		"status":              input.Status,
-		"specialization_data": specializationData,
+
+		recepHospUpdate["specialization_data"] = specializationData
 	}
 
 	if _, err := u.repo.UpdateReceptionHospital(id, recepHospUpdate); err != nil {

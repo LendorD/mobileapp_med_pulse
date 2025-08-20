@@ -92,7 +92,7 @@ type ReceptionSmpRepository interface {
 	GetReceptionWithMedServicesByID(smp_id uint, call_id uint) (entities.ReceptionSMP, error)
 	GetReceptionSmpByID(id uint) (entities.ReceptionSMP, error)
 	GetReceptionSmpByDoctorID(doctorID uint) ([]entities.ReceptionSMP, error)
-	GetReceptionSmpByPatientID(patientID uint) ([]entities.ReceptionSMP, error)
+	GetReceptionSmpByPatientID(patientID uint, page, count int, filter, order string, params []interface{}) ([]entities.ReceptionSMP, int64, error)
 	GetReceptionSmpByDateRange(start, end time.Time) ([]entities.ReceptionSMP, error)
 	GetWithPatientsByEmergencyCallID(emergencyCallID uint, page, perPage int) ([]entities.ReceptionSMP, int64, error)
 }
