@@ -56,7 +56,7 @@ type PersonalInfoRepository interface {
 
 // updated to match the new structure
 type EmergencyCallRepository interface {
-	CreateEmergencyCall(er entities.EmergencyCall) error
+	CreateEmergencyCall(er entities.EmergencyCall) (uint, error)
 	UpdateEmergencyCall(id uint, updateMap map[string]interface{}) (uint, error)
 	DeleteEmergencyCall(id uint) error
 

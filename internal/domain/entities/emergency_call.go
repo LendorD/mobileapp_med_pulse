@@ -16,9 +16,9 @@ type EmergencyCall struct {
 	DoctorID  uint   `gorm:"not null;index" json:"doctor_id" example:"1"`
 	Doctor    Doctor `gorm:"foreignKey:DoctorID" json:"-"`
 	Emergency bool   `json:"emergency" example:"true"` // отвечает за статус (экстренный/неотложный)
-	Priority  *uint  `gorm:"unique;default:null" json:"priority" example:"1"`
-	Address   string `json:"address" example:"+79991234567"`
-	Phone     string `json:"phone" example:"+79991234567"`
-
+	// Priority      *uint          `gorm:"unique;default:null" json:"priority" example:"1"`
+	Address       string         `json:"address" example:"+79991234567"`
+	Phone         string         `json:"phone" example:"+79991234567"`
+	Description   string         `json:"description" example:"Пациент жалуется на сильную боль в груди"`
 	ReceptionSMPs []ReceptionSMP `gorm:"foreignKey:EmergencyCallID" json:"receptions"`
 }

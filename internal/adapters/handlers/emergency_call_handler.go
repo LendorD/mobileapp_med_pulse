@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -52,9 +55,9 @@ func (h *Handler) GetEmergencyCallsByDoctorAndDate(c *gin.Context) {
 		return
 	}
 
-	perPageStr := c.DefaultQuery("perPage", "5")
+	perPageStr := c.DefaultQuery("perPage", "10")
 	perPage, err := strconv.Atoi(perPageStr)
-	if err != nil || perPage < 5 {
+	if err != nil || perPage < 1 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Page must be integer greater than 0"})
 		return
 	}
@@ -93,4 +96,23 @@ func (h *Handler) CloseEmergencyCall(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, receptions)
+}
+
+func (h *Handler) GetPdf(c *gin.Context) {
+	fmt.Println("Зашли для получения pdf")
+	dir, err := os.Getwd() // текущая рабочая директория, обычно это cmd/app
+	fmt.Println("директория:", dir)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get working directory"})
+		return
+	}
+
+	pdfPath := filepath.Join(dir, "assets", "mobileapp.pdf")
+
+	if _, err := os.Stat(pdfPath); os.IsNotExist(err) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "PDF not found"})
+		return
+	}
+
+	c.File(pdfPath) // Gin сам установит нужные заголовки
 }

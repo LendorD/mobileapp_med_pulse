@@ -151,6 +151,38 @@ func (h *Handler) CreateSMPReception(c *gin.Context) {
 	h.ResultResponse(c, "Success emergency reception create", Object, emergency)
 }
 
+// CreateSMP godoc
+// @Summary Создать заключение на скорой
+// @Description Возвращает созданное заключение
+// @Tags SMP
+// @Accept json
+// @Produce json
+// @Param input body models.CreateReceptionSmp true "Данные для создания заключения"
+// @Success 200 {object} entities.ReceptionSMP "Создание заключения для пациента"
+// @Failure 400 {object} IncorrectFormatError "Неверный формат запроса"
+// @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
+// @Router /emergency/receptions [post]
+func (h *Handler) CreateSMP(c *gin.Context) {
+	var input models.CreateEmergencyCallRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
+		return
+	}
+
+	if err := validate.Struct(input); err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
+		return
+	}
+
+	emergency, eerr := h.usecase.CreateSMP(&input)
+	if eerr != nil {
+		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
+		return
+	}
+
+	h.ResultResponse(c, "Success emergency reception create", Object, emergency)
+}
+
 // UpdateReceptionSMPByReceptionID godoc
 // @Summary Обновить приём скорой
 // @Description Обновляет информацию о приёме скорой

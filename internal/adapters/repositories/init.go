@@ -592,21 +592,21 @@ func createEmergencyCallsAndSMPReceptions(
 	for i := 1; i < 50; i++ {
 		doctor := doctors[i%len(doctors)]
 		patient := patients[i%len(patients)]
-		var priority *uint
-		if i%5 == 0 {
-			priority = nil
-		} else {
-			p := uint(i)
-			priority = &p
-		}
+		// var priority *uint
+		// if i%5 == 0 {
+		// 	priority = nil
+		// } else {
+		// 	p := uint(i)
+		// 	priority = &p
+		// }
 
 		// Создаем экстренный вызов с уникальным возрастающим приоритетом
 		emergencyCall := entities.EmergencyCall{
 			DoctorID:  doctor.ID,
 			Emergency: i%3 == 0,
-			Priority:  priority,
-			Address:   addresses[i%len(addresses)],
-			Phone:     fmt.Sprintf("+7915%07d", 2000000+i),
+			// Priority:  priority,
+			Address: addresses[i%len(addresses)],
+			Phone:   fmt.Sprintf("+7915%07d", 2000000+i),
 		}
 
 		if err := db.Create(&emergencyCall).Error; err != nil {

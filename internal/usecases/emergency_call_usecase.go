@@ -19,24 +19,22 @@ func NewEmergencyCallUsecase(repo interfaces.EmergencyCallRepository) interfaces
 	return &EmergencyCallUsecase{repo: repo}
 }
 
-// func (u *EmergencyCallUsecase) Create(input models.CreateEmergencyRequest) (entities.EmergencyCall, *errors.AppError) {
-// 	emergency := entities.EmergencyCall{
-// 		PatientID:       input.PatientID,
-// 		Status:          entities.EmergencyStatusScheduled,
-// 		Priority:        input.Priority,
-// 		Address:         input.Address,
-// 		Date:            time.Now(),
-// 		Diagnosis:       input.Diagnosis,
-// 		Recommendations: input.Recommendations,
-// 	}
+func (u *EmergencyCallUsecase) CreateSMP(input *models.CreateEmergencyCallRequest) (uint, *errors.AppError) {
+	emergency := entities.EmergencyCall{
+		DoctorID:    input.DoctorID,
+		Emergency:   input.Emergency,
+		Address:     input.Address,
+		Phone:       input.Phone,
+		Description: input.Description,
+	}
 
-// 	createdEmergency, err := u.repo.Create(&emergency)
-// 	if err != nil {
-// 		return entities.EmergencyCall{}, errors.NewDBError("failed to create emergency reception", err)
-// 	}
+	createdEmergencyID, err := u.repo.CreateEmergencyCall(emergency)
+	if err != nil {
+		return 0, errors.NewDBError("failed to create emergency reception", err)
+	}
 
-// 	return *createdEmergency, nil
-// }
+	return createdEmergencyID, nil
+}
 
 // func (u *EmergencyCallUsecase) AssignDoctor(id, doctorID uint) (entities.EmergencyCall, *errors.AppError) {
 // 	emergency, err := u.repo.GetByID(id)
@@ -108,7 +106,7 @@ func (u *EmergencyCallUsecase) GetEmergencyCallsByDoctorAndDate(
 			Id:        call.ID,
 			CreatedAt: call.CreatedAt.Format(time.RFC3339),
 			Phone:     call.Phone,
-			Priority:  call.Priority,
+			// Priority:  call.Priority,
 			Emergency: call.Emergency,
 			Address:   call.Address,
 		}
@@ -162,7 +160,7 @@ func (u *EmergencyCallUsecase) CloseEmergencyCall(id uint) (entities.EmergencyCa
 
 	// Обновление статуса в базе
 	updateFields := map[string]interface{}{
-		"priority": nil,
+		// "priority": nil,
 	}
 
 	if _, err := u.repo.UpdateEmergencyCall(id, updateFields); err != nil {

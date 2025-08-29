@@ -62,6 +62,7 @@ type DoctorUsecase interface {
 }
 
 type EmergencyCallUsecase interface {
+	CreateSMP(input *models.CreateEmergencyCallRequest) (uint, *errors.AppError)
 	GetEmergencyCallsByDoctorAndDate(
 		doctorID uint,
 		date time.Time,
