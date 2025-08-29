@@ -10,13 +10,12 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 )
 
-func (r *EmergencyCallRepositoryImpl) CreateEmergencyCall(er entities.EmergencyCall) error {
+func (r *EmergencyCallRepositoryImpl) CreateEmergencyCall(er entities.EmergencyCall) (uint, error) {
 	op := "repo.EmergencyCall.CreateEmergencyCall"
-
-	if err := r.db.Create(&er).Error; err != nil {
-		return errors.NewDBError(op, err)
+	if err := r.db.Clauses(clause.Returning{}).Create(&er).Error; err != nil {
+		return 0, errors.NewDBError(op, err)
 	}
-	return nil
+	return er.ID, nil
 }
 
 func (r *EmergencyCallRepositoryImpl) UpdateEmergencyCall(id uint, updateMap map[string]interface{}) (uint, error) {
@@ -137,8 +136,8 @@ func (r *EmergencyCallRepositoryImpl) GetEmergencyReceptionsByDoctorAndDate(
 	offset := (page - 1) * perPage
 	err := baseQuery.
 		// Сначала сортируем по приоритету (NULL последние, чем меньше значение - тем выше приоритет)
-		Order("priority IS NULL"). // NULL значения идут последними (FALSE(0) раньше TRUE(1))
-		Order("priority ASC").     // Уникальные приоритеты от 1 по возрастанию
+		// Order("priority IS NULL"). // NULL значения идут последними (FALSE(0) раньше TRUE(1))
+		// Order("priority ASC").     // Уникальные приоритеты от 1 по возрастанию
 		// Затем по типу (true выше)
 		Order("emergency DESC").
 		// Затем по дате создания (чем раньше - тем выше)
