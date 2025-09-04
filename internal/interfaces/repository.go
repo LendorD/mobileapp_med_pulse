@@ -95,6 +95,8 @@ type ReceptionSmpRepository interface {
 	GetReceptionSmpByPatientID(patientID uint, page, count int, filter, order string, params []interface{}) ([]entities.ReceptionSMP, int64, error)
 	GetReceptionSmpByDateRange(start, end time.Time) ([]entities.ReceptionSMP, error)
 	GetWithPatientsByEmergencyCallID(emergencyCallID uint, page, perPage int) ([]entities.ReceptionSMP, int64, error)
+	SaveSignature(receptionID uint, signature []byte) error
+	GetSignature(receptionID uint) ([]byte, error)
 }
 
 // updated to match the new structure

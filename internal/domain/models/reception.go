@@ -13,6 +13,7 @@ type ReceptionHospitalResponse struct {
 	Diagnosis       string               `json:"diagnosis" example:"ОРВИ"`
 	Recommendations string               `json:"recommendations" example:"Постельный режим"`
 	Status          string               `json:"status" example:"scheduled"`
+	Source          string               `json:"source"  example:"scheduled"`
 	Date            time.Time            `json:"date" example:"2023-10-15T14:30:00Z"`
 }
 

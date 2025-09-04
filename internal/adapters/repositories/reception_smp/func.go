@@ -220,6 +220,22 @@ func (r *ReceptionSmpRepositoryImpl) UpdateReceptionSmpMedServices(receptionID u
 	return nil
 }
 
+func (r *ReceptionSmpRepositoryImpl) SaveSignature(receptionID uint, signature []byte) error {
+	return r.db.Model(&entities.ReceptionSMP{}).
+		Where("id = ?", receptionID).
+		Update("patient_signature", signature).
+		Error
+}
+
+// Получаем подпись для конкретного медицинского заключения
+func (r *ReceptionSmpRepositoryImpl) GetSignature(receptionID uint) ([]byte, error) {
+	var reception entities.ReceptionSMP
+	if err := r.db.Select("patient_signature").First(&reception, receptionID).Error; err != nil {
+		return nil, err
+	}
+	return reception.PatientSignature, nil
+}
+
 // Обновленные методы репозитория
 func (r *ReceptionSmpRepositoryImpl) GetWithPatientsByEmergencyCallID(
 	emergencyCallID uint,
