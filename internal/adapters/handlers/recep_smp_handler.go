@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"io"
 	"net/http"
 	"strconv"
 
@@ -222,4 +223,57 @@ func (h *Handler) UpdateReceptionSMPByReceptionID(c *gin.Context) {
 		return
 	}
 	h.ResultResponse(c, "Success reception hospital update", Object, recepResponse)
+}
+
+func (h *Handler) SaveSignature(c *gin.Context) {
+	patientID, err := h.service.ParseUintString(c.Param("recep_id"))
+	if err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
+		return
+	}
+
+	// читаем файл из multipart
+	file, err := c.FormFile("signature")
+	if err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
+		return
+	}
+
+	openedFile, err := file.Open()
+	if err != nil {
+		h.ErrorResponse(c, err, http.StatusInternalServerError, errors.InternalServerError, false)
+		return
+	}
+	defer openedFile.Close()
+
+	// читаем все байты
+	signatureBytes, err := io.ReadAll(openedFile)
+	if err != nil {
+		h.ErrorResponse(c, err, http.StatusInternalServerError, errors.InternalServerError, false)
+		return
+	}
+
+	// сохраняем через usecase
+	if appErr := h.usecase.SavePatientSignature(patientID, signatureBytes); appErr != nil {
+		h.ErrorResponse(c, appErr.Err, appErr.Code, appErr.Message, appErr.IsUserFacing)
+		return
+	}
+
+	h.ResultResponse(c, "Signature saved", Object, nil)
+}
+
+func (h *Handler) GetSignature(c *gin.Context) {
+	patientID, err := h.service.ParseUintString(c.Param("recep_id"))
+	if err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
+		return
+	}
+
+	signature, appErr := h.usecase.GetPatientSignature(patientID)
+	if appErr != nil {
+		h.ErrorResponse(c, appErr.Err, appErr.Code, appErr.Message, appErr.IsUserFacing)
+		return
+	}
+
+	h.ResultResponse(c, "Signature fetched", Object, gin.H{"signatureBase64": signature})
 }

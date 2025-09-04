@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -594,6 +595,21 @@ func (u *ReceptionSmpUsecase) GetReceptionWithMedServicesByID(
 	}
 
 	return response, nil
+}
+
+func (u *ReceptionSmpUsecase) SavePatientSignature(patientID uint, signature []byte) *errors.AppError {
+	if err := u.recepSmpRepo.SaveSignature(patientID, signature); err != nil {
+		return errors.NewAppError(errors.InternalServerErrorCode, "Failed to save signature", err, true)
+	}
+	return nil
+}
+
+func (u *ReceptionSmpUsecase) GetPatientSignature(patientID uint) (string, *errors.AppError) {
+	data, err := u.recepSmpRepo.GetSignature(patientID)
+	if err != nil {
+		return "", errors.NewAppError(errors.NotFoundErrorCode, "Signature not found", err, true)
+	}
+	return base64.StdEncoding.EncodeToString(data), nil
 }
 
 // Сейчас вечно вызывает unused, нужно применить

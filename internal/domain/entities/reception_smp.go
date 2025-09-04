@@ -29,5 +29,6 @@ type ReceptionSMP struct {
 	CachedSpecialization      string      `gorm:"index" json:"-"`
 	SpecializationDataDecoded interface{} `gorm:"-" json:"specialization_data_decoded"`
 
-	MedServices []MedService `gorm:"many2many:reception_smp_med_services;" json:"med_services"`
+	MedServices      []MedService `gorm:"many2many:reception_smp_med_services;" json:"med_services"`
+	PatientSignature []byte       `gorm:"type:bytea;default:null;" json:"-"`
 }

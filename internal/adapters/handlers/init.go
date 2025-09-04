@@ -104,6 +104,10 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	emergencyGroup.PUT("/receptions/:recep_id", h.UpdateReceptionSMPByReceptionID)
 	emergencyGroup.GET("/smps/:call_id/:smp_id", h.GetReceptionWithMedServices)
 
+	//Подписи пациентов
+	emergencyGroup.GET("/signature/:recep_id", h.GetSignature)
+	emergencyGroup.POST("/signature/:recep_id", h.SaveSignature)
+
 	// Звонки (для удобства в тестинге Swagger разделили их)
 	// Маршрут оставляем тот же, просто для удобства
 	emergencyGroup.GET("/calls/:call_id", h.GetReceptionsSMPByCallID)

@@ -118,6 +118,7 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByPatientID(patientId ui
 			Diagnosis:       reception.Diagnosis,
 			Recommendations: reception.Recommendations,
 			Date:            reception.Date,
+			Source:          "hospital",
 		}
 		result = append(result, response)
 	}
@@ -141,6 +142,7 @@ func (u *ReceptionHospitalUsecase) GetHospitalReceptionsByPatientID(patientId ui
 			Diagnosis:       smp.Diagnosis,
 			Recommendations: smp.Recommendations,
 			Date:            smp.UpdatedAt,
+			Source:          "smp",
 		}
 		result = append(result, response)
 	}

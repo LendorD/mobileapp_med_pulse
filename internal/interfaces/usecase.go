@@ -35,6 +35,8 @@ type ReceptionSmpUsecase interface {
 	UpdateReceptionSMP(id uint, updateData map[string]interface{}) (entities.ReceptionSMP, *errors.AppError)
 	GetReceptionWithMedServicesByID(smp_id uint, call_id uint) (models.ReceptionSMPResponse, error)
 	GetReceptionsSMPByEmergencyCall(call_id uint, page, perPage int) (*models.FilterResponse[[]models.ReceptionSmpShortResponse], error)
+	GetPatientSignature(patientID uint) (string, *errors.AppError)
+	SavePatientSignature(patientID uint, signature []byte) *errors.AppError
 }
 
 type MedCardUsecase interface {
@@ -82,7 +84,6 @@ type PatientUsecase interface {
 	GetPatientByID(id uint) (entities.Patient, *errors.AppError)
 	UpdatePatient(input *models.UpdatePatientRequest) (entities.Patient, *errors.AppError)
 	DeletePatient(id uint) *errors.AppError
-
 	GetAllPatients(page, count int, filter string, order string) (models.FilterResponse[[]models.ShortPatientResponse], *errors.AppError)
 }
 
