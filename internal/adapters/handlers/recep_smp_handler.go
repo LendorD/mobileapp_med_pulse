@@ -152,6 +152,72 @@ func (h *Handler) CreateSMPReception(c *gin.Context) {
 	h.ResultResponse(c, "Success emergency reception create", Object, emergency)
 }
 
+// UpdatePatientSMP godoc
+// @Summary Обновить заключение на скорой
+// @Description Обновляет существующее заключение по ID
+// @Tags SMP
+// @Accept json
+// @Produce json
+// @Param id path int true "ID заключения"
+// @Param input body models.UpdatePatientSMP true "Данные для обновления заключения"
+// @Success 200 {object} entities.ReceptionSMP "Обновлённое заключение"
+// @Failure 400 {object} IncorrectFormatError "Неверный формат запроса"
+// @Failure 404 {object} NotFoundError "Заключение не найдено"
+// @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
+// @Router /emergency/receptions/{id} [put]
+func (h *Handler) UpdatePatientSMP(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
+		return
+	}
+
+	var input models.UpdatePatientSMP
+	if err := c.ShouldBindJSON(&input); err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
+		return
+	}
+
+	if err := validate.Struct(input); err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
+		return
+	}
+
+	reception, eerr := h.usecase.UpdatePatientSMP(id, &input)
+	if eerr != nil {
+		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
+		return
+	}
+
+	h.ResultResponse(c, "Success emergency reception update", Object, reception)
+}
+
+// DeleteSMPReception godoc
+// @Summary Удалить заключение на скорой
+// @Description Удаляет заключение по ID
+// @Tags SMP
+// @Param id path int true "ID заключения"
+// @Success 200 {object} SuccessResponse "Заключение успешно удалено"
+// @Failure 400 {object} IncorrectFormatError "Неверный ID"
+// @Failure 404 {object} NotFoundError "Заключение не найдено"
+// @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
+// @Router /emergency/receptions/{id} [delete]
+func (h *Handler) DeleteSMPReception(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
+		return
+	}
+
+	eerr := h.usecase.DeleteReceptionSMP(id)
+	if eerr != nil {
+		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
+		return
+	}
+
+	h.ResultResponse(c, "Emergency reception deleted successfully", Empty, nil)
+}
+
 // CreateSMP godoc
 // @Summary Создать заключение на скорой
 // @Description Возвращает созданное заключение

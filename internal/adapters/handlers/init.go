@@ -76,7 +76,7 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 
 	// Пациенты
 	patientGroup := protected.Group("/patients")
-	patientGroup.GET("/:doc_id/", h.GetAllPatientsByDoctorID) // Список пациентов доктора
+	patientGroup.GET("/:doc_id/", h.GetAllPatientsByDoctorID) // Список пациентов доктора ПЕРЕПИСАТЬ НА 1С + получить со скорой
 	patientGroup.GET("/", h.GetAllPatients)
 	patientGroup.POST("/", h.CreatePatient)
 
@@ -85,13 +85,13 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	medCardGroup.GET("/:pat_id", h.GetMedCardByPatientID)
 	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
 
-	// Приёмы больницы
-	hospitalGroup := protected.Group("/hospital")
-	hospitalGroup.GET("/receptions/patients/:pat_id", h.GetAllReceptionsByPatientID) // Все приемы пациента
-	hospitalGroup.GET("/receptions/:doc_id", h.GetReceptionsHospitalByDoctorID)      // Все приемы доктора
-	hospitalGroup.GET("/receptions/:doc_id/:hosp_id", h.GetReceptionHosptalById)
-	hospitalGroup.PUT("/receptions/:recep_id", h.UpdateReceptionHospitalByReceptionID)
-	hospitalGroup.PATCH("/receptions/:recep_id", h.UpdateReceptionHospitalStatusByID)
+	// Приёмы больницы УДАЛИТЬ
+	// hospitalGroup := protected.Group("/hospital")
+	// hospitalGroup.GET("/receptions/patients/:pat_id", h.GetAllReceptionsByPatientID) // Все приемы пациента
+	// hospitalGroup.GET("/receptions/:doc_id", h.GetReceptionsHospitalByDoctorID)      // Все приемы доктора
+	// hospitalGroup.GET("/receptions/:doc_id/:hosp_id", h.GetReceptionHosptalById)
+	// hospitalGroup.PUT("/receptions/:recep_id", h.UpdateReceptionHospitalByReceptionID)
+	// hospitalGroup.PATCH("/receptions/:recep_id", h.UpdateReceptionHospitalStatusByID)
 
 	// Медуслуги
 	medServicesGroup := protected.Group("/medservices")
@@ -100,7 +100,8 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	// Скорая медицинская помощь
 	emergencyGroup := protected.Group("/emergency")
 	emergencyGroup.POST("/smp", h.CreateSMP)
-	emergencyGroup.POST("/receptions", h.CreateSMPReception)
+	emergencyGroup.POST("/receptions", h.CreateSMPReception) //Создание пациента + заключения к нему
+	emergencyGroup.PUT("/receptions/:id", h.UpdatePatientSMP)
 	emergencyGroup.PUT("/receptions/:recep_id", h.UpdateReceptionSMPByReceptionID)
 	emergencyGroup.GET("/smps/:call_id/:smp_id", h.GetReceptionWithMedServices)
 

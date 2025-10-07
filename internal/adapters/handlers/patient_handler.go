@@ -89,7 +89,7 @@ func (h *Handler) GetAllPatientsByDoctorID(c *gin.Context) {
 	filter := c.Query("filter")
 	order := c.Query("order")
 
-	patients, appErr := h.usecase.GetHospitalPatientsByDoctorID(doc_id, page, count, filter, order)
+	patients, appErr := h.usecase.GetHospitalPatientsByDoctorID(doc_id, page, count, filter, order) // вот тут должны получать пациентов с 1С и со скорой
 	if appErr != nil {
 		h.ErrorResponse(c, appErr.Err, appErr.Code, appErr.Message, appErr.IsUserFacing)
 		return
