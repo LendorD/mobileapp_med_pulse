@@ -100,9 +100,10 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	// Скорая медицинская помощь
 	emergencyGroup := protected.Group("/emergency")
 	emergencyGroup.POST("/smp", h.CreateSMP)
-	emergencyGroup.POST("/receptions", h.CreateSMPReception) //Создание пациента + заключения к нему
-	emergencyGroup.PUT("/receptions/:id", h.UpdatePatientSMP)
-	emergencyGroup.PUT("/receptions/:recep_id", h.UpdateReceptionSMPByReceptionID)
+	emergencyGroup.POST("/receptions", h.CreateSMPReception)    //Создание пациента + заключения к нему
+	emergencyGroup.PATCH("/receptions/:id", h.UpdatePatientSMP) // Обновление пациента
+	emergencyGroup.DELETE("/receptions/:id", h.DeleteSMPReception)
+	emergencyGroup.PUT("/receptions/:recep_id", h.UpdateReceptionSMPByReceptionID) //Обновление самого заключения
 	emergencyGroup.GET("/smps/:call_id/:smp_id", h.GetReceptionWithMedServices)
 
 	//Подписи пациентов
