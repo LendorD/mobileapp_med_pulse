@@ -172,7 +172,7 @@ func (h *Handler) UpdatePatientSMP(c *gin.Context) {
 		return
 	}
 
-	var input models.UpdatePatientSMP
+	var input models.CreateReceptionSmp
 	if err := c.ShouldBindJSON(&input); err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
 		return
@@ -183,13 +183,13 @@ func (h *Handler) UpdatePatientSMP(c *gin.Context) {
 		return
 	}
 
-	reception, eerr := h.usecase.UpdatePatientSMP(id, &input)
-	if eerr != nil {
-		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
-		return
-	}
+	// reception, eerr := h.usecase.UpdatePatientSMP(id, &input)
+	// if eerr != nil {
+	// 	h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
+	// 	return
+	// }
 
-	h.ResultResponse(c, "Success emergency reception update", Object, reception)
+	h.ResultResponse(c, "Success emergency reception update", Object, id)
 }
 
 // DeleteSMPReception godoc
@@ -209,13 +209,13 @@ func (h *Handler) DeleteSMPReception(c *gin.Context) {
 		return
 	}
 
-	eerr := h.usecase.DeleteReceptionSMP(id)
-	if eerr != nil {
-		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
-		return
-	}
+	// eerr := h.usecase.DeleteReceptionSMP(id)
+	// if eerr != nil {
+	// 	h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
+	// 	return
+	// }
 
-	h.ResultResponse(c, "Emergency reception deleted successfully", Empty, nil)
+	h.ResultResponse(c, "Emergency reception deleted successfully", Empty, id)
 }
 
 // CreateSMP godoc

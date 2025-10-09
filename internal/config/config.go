@@ -18,6 +18,8 @@ type Config struct {
 	App        AppConfig
 	HTTPServer HTTPConfig
 	Database   DatabaseConfig
+	Redis      RedisConfig
+	OneC       OneCConfig
 	Logging    LoggerConfig
 	Services   Services
 	Server     ServerConfig // Добавляем ServerConfig в основную структуру
@@ -58,6 +60,20 @@ type LoggerConfig struct {
 	SavingDays int
 }
 
+type RedisConfig struct {
+	Host     string
+	Port     string
+	Password string
+	DB       int
+}
+
+type OneCConfig struct {
+	BaseURL  string
+	Timeout  time.Duration
+	Username string
+	Password string
+}
+
 type DatabaseConfig struct {
 	Host     string
 	Port     string
@@ -80,6 +96,13 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("error loading .env file: %s", err.Error())
 	}
 
+	// Парсим timeout для 1С
+	oneCTimeoutStr := getEnv("ONESC_TIMEOUT", "30s")
+	oneCTimeout, err := time.ParseDuration(oneCTimeoutStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid ONESC_TIMEOUT: %w", err)
+	}
+
 	// Инициализируем Config с Server
 	cfg := &Config{
 		App: AppConfig{
@@ -97,6 +120,19 @@ func LoadConfig() (*Config, error) {
 			Username: getEnv("DB_USER", "postgres"),
 			Password: getEnv("DB_PASSWORD", "password"),
 			DBName:   getEnv("DB_NAME", "db_name"),
+		},
+		Redis: RedisConfig{
+			Host:     getEnv("REDIS_HOST", "localhost"),
+			Port:     getEnv("REDIS_PORT", "6379"),
+			Password: getEnv("REDIS_PASSWORD", ""),
+			DB:       getEnvAsInt("REDIS_DB", 0),
+		},
+
+		OneC: OneCConfig{
+			BaseURL:  getEnv("ONESC_BASE_URL", "http://localhost:8081/hs/api"),
+			Timeout:  oneCTimeout,
+			Username: getEnv("ONESC_USERNAME", ""),
+			Password: getEnv("ONESC_PASSWORD", ""),
 		},
 		Logging: LoggerConfig{
 			Enable:     getEnvAsBool("LOGGER_ENABLE", true),
