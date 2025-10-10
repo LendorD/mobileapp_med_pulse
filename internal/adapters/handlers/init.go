@@ -58,8 +58,10 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	r.Use(LoggingMiddleware(h.logger))
 
 	// WebSocket-группа
+
 	wsGroup := r.Group("/ws/notification")
-	wsGroup.Use(JWTAuth(cfg.JWTSecret))
+	wsGroup.Use(middleware.JWTAuth(cfg.JWTSecret))
+
 	wsGroup.GET("/register/:user_id", ws.Register)
 	wsGroup.GET("/unregister/:user_id", ws.Unregister)
 
