@@ -2,15 +2,19 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/handlers"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/auth"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/cache"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/external/onec"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/swagger"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/services/websocket"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/usecases"
 	"go.uber.org/fx"
 )
@@ -22,6 +26,9 @@ func New() *fx.App {
 			func(cfg *config.Config) string { return cfg.JWTSecret },
 		),
 		LoggingModule,
+		CacheModule,
+		OneCModule,
+		WebsocketModule,
 		RepositoryModule,
 		ServiceModule,
 		UsecaseModule,
@@ -79,6 +86,7 @@ var HttpServerModule = fx.Module("http_server_module",
 	fx.Provide(
 		NewSwaggerConfig,
 		handlers.NewHandler,
+		handlers.NewWebsocketHandler,
 		handlers.ProvideRouter,
 	),
 	fx.Invoke(InvokeHttpServer),
@@ -110,6 +118,28 @@ var AuthModule = fx.Module("auth_module",
 		},
 		usecases.NewAuthUsecase,
 	),
+)
+
+func ProvideRedisCache(cfg *config.Config) *cache.RedisCache {
+	addr := fmt.Sprintf("%s:%s", cfg.Redis.Host, cfg.Redis.Port)
+	return cache.NewRedisCache(addr, cfg.Redis.Password, cfg.Redis.DB)
+}
+
+var CacheModule = fx.Module("cache_module",
+	fx.Provide(ProvideRedisCache),
+)
+
+func ProvideOneCClient(cfg *config.Config) *onec.Client {
+	return onec.NewClient(cfg.OneC)
+}
+
+var OneCModule = fx.Module("onec_module",
+	fx.Provide(ProvideOneCClient),
+)
+
+var WebsocketModule = fx.Module("websocket_module",
+	fx.Provide(websocket.NewHub),
+	fx.Invoke(websocket.InvokeHub),
 )
 
 // TODO: Может быть вынести в services

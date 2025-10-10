@@ -39,7 +39,7 @@ func NewHandler(usecase interfaces.Usecases, parentLogger *logging.Logger, servi
 }
 
 // ProvideRouter создает и настраивает маршруты
-func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http.Handler {
+func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg *swagger.Config) http.Handler {
 	r := gin.Default()
 
 	// CORS
@@ -56,6 +56,12 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 
 	// Logger
 	r.Use(LoggingMiddleware(h.logger))
+
+	// WebSocket-группа
+	wsGroup := r.Group("/ws/notification")
+	wsGroup.Use(JWTAuth(cfg.JWTSecret))
+	wsGroup.GET("/register/:user_id", ws.Register)
+	wsGroup.GET("/unregister/:user_id", ws.Unregister)
 
 	// Общая группа для API
 	baseRouter := r.Group("/api/v1")
@@ -80,7 +86,7 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 	patientGroup.GET("/", h.GetAllPatients)
 	patientGroup.POST("/", h.CreatePatient)
 
-	// Медкарты
+	// Медкарты (Больше не формируется а с 1С)
 	medCardGroup := protected.Group("/medcard")
 	medCardGroup.GET("/:pat_id", h.GetMedCardByPatientID)
 	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
@@ -95,7 +101,7 @@ func ProvideRouter(h *Handler, cfg *config.Config, swagCfg *swagger.Config) http
 
 	// Медуслуги
 	medServicesGroup := protected.Group("/medservices")
-	medServicesGroup.GET("/", h.GetAllMedServices)
+	medServicesGroup.GET("/", h.GetAllMedServices) // реализовать получение с 1с
 
 	// Скорая медицинская помощь
 	emergencyGroup := protected.Group("/emergency")
