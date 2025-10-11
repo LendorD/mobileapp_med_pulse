@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"gorm.io/gorm"
 )
 
@@ -20,6 +21,11 @@ type Repository interface {
 	ReceptionHospitalRepository
 	ReceptionSmpRepository
 	TxRepository
+}
+
+type OneCCacheRepository interface {
+	SaveReceptions(ctx context.Context, callID int, receptions []models.Reception) error
+	GetReceptions(ctx context.Context, callID int) ([]models.Reception, error)
 }
 
 type TxRepository interface {

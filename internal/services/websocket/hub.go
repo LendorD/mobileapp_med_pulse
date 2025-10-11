@@ -1,13 +1,12 @@
 package websocket
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"sync"
 
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/gorilla/websocket"
-
-	logging "gitlab.com/devkit3/logger"
 )
 
 type Hub struct {
@@ -17,19 +16,17 @@ type Hub struct {
 	unregister chan *Client
 	mutex      sync.Mutex
 
-	auth   *services.AuthService
-	logger *logging.Logger
+	logger *log.Logger
 }
 
-func NewHub(logger *logging.Logger, auth *services.AuthService) *Hub {
+func NewHub(logger *log.Logger) *Hub {
 	return &Hub{
 		broadcast:  make(chan models.Message),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[uint]*Client),
 
-		logger: logging.NewModuleLogger("Websocket", "Notification Hub", logger),
-		auth:   auth,
+		logger: logger,
 	}
 }
 
@@ -71,16 +68,12 @@ var upgrader = websocket.Upgrader{
 func (h *Hub) ServeRegister(w http.ResponseWriter, r *http.Request, userId uint) error {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		h.logger.Error(fmt.Sprintf("cant upgrade request to ws: %s", err))
+		h.logger.Printf("cant upgrade request to ws: %s", err)
 		return err
 	}
-	h.logger.Info("upgrade to websocket")
+	h.logger.Printf("upgrade to websocket")
 
-	client, err := NewClient(conn, h.logger, userId, h.auth)
-	if err != nil {
-		h.logger.Error(fmt.Sprintf("cant process user: %s", err))
-		return err
-	}
+	client := NewClient(conn, h.logger, userId)
 
 	h.register <- client
 
@@ -88,7 +81,7 @@ func (h *Hub) ServeRegister(w http.ResponseWriter, r *http.Request, userId uint)
 	go client.readPump(h)
 	// go client.testMessages()
 
-	h.logger.Info(fmt.Sprintf("added new subscriber: %d", userId))
+	h.logger.Printf("added new subscriber: %d", userId)
 
 	return nil
 }

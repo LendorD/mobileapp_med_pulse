@@ -13,12 +13,18 @@ import (
 type Usecases interface {
 	DoctorUsecase
 	EmergencyCallUsecase
-	MedServiceUsecase
+	// MedServiceUsecase
 	PatientUsecase
 	ReceptionHospitalUsecase
 	ReceptionSmpUsecase
 	MedCardUsecase
 	AuthUsecase
+	OneCWebhookUsecase
+}
+
+type OneCWebhookUsecase interface {
+	HandleReceptionsUpdate(ctx context.Context, update models.OneCReceptionsUpdate) error
+	GetInterestedUserIDs(callID int) []uint
 }
 
 type ReceptionHospitalUsecase interface {
@@ -75,9 +81,9 @@ type EmergencyCallUsecase interface {
 	UpdateEmergencyCallStatusByID(id uint, newStatus string) (entities.EmergencyCall, error)
 }
 
-type MedServiceUsecase interface {
-	GetAllMedServices() (models.MedServicesListResponse, *errors.AppError)
-}
+// type MedServiceUsecase interface {
+// 	GetAllMedServices() (models.MedServicesListResponse, *errors.AppError)
+// }
 
 type PatientUsecase interface {
 	CreatePatient(input *models.CreatePatientRequest) (entities.Patient, *errors.AppError)

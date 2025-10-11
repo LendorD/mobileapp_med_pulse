@@ -3,11 +3,15 @@ package app
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/handlers"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/auth"
+	onecRepo "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/onec"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/cache"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/external/onec"
@@ -16,6 +20,7 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services/websocket"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/usecases"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/fx"
 )
 
@@ -55,6 +60,32 @@ var LoggingModule = fx.Module("logging_module",
 	fx.Invoke(func(l *logging.Logger) {
 		l.Info("Logging system initialized")
 	}),
+)
+
+// В app/app.go
+
+func ProvideRedisClient(cfg *config.Config) *redis.Client {
+	addr := fmt.Sprintf("%s:%s", cfg.Redis.Host, cfg.Redis.Port)
+	return redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: cfg.Redis.Password,
+		DB:       cfg.Redis.DB,
+	})
+}
+
+func ProvideRedisCache(client *redis.Client) *cache.RedisCache {
+	// Проверка подключения
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	if err := client.Ping(ctx).Err(); err != nil {
+		panic(fmt.Sprintf("Failed to connect to Redis: %v", err))
+	}
+	return &cache.RedisCache{Client: client} // ← обнови RedisCache, чтобы он хранил *redis.Client
+}
+
+var CacheModule = fx.Module("cache_module",
+	fx.Provide(ProvideRedisClient),
+	fx.Provide(ProvideRedisCache),
 )
 
 func InvokeHttpServer(lc fx.Lifecycle, h http.Handler) {
@@ -107,6 +138,10 @@ var UsecaseModule = fx.Module("usecases_module",
 	),
 )
 
+func ProvideStdLogger() *log.Logger {
+	return log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile)
+}
+
 var AuthModule = fx.Module("auth_module",
 	fx.Provide(
 		auth.NewAuthRepository,
@@ -120,24 +155,18 @@ var AuthModule = fx.Module("auth_module",
 	),
 )
 
-func ProvideRedisCache(cfg *config.Config) *cache.RedisCache {
-	addr := fmt.Sprintf("%s:%s", cfg.Redis.Host, cfg.Redis.Port)
-	return cache.NewRedisCache(addr, cfg.Redis.Password, cfg.Redis.DB)
-}
-
-var CacheModule = fx.Module("cache_module",
-	fx.Provide(ProvideRedisCache),
-)
-
 func ProvideOneCClient(cfg *config.Config) *onec.Client {
 	return onec.NewClient(cfg.OneC)
 }
 
 var OneCModule = fx.Module("onec_module",
 	fx.Provide(ProvideOneCClient),
+	fx.Provide(onecRepo.NewRedisOneCCacheRepository),
+	fx.Provide(usecases.NewOneCWebhookUsecase),
 )
 
 var WebsocketModule = fx.Module("websocket_module",
+	fx.Provide(ProvideStdLogger),
 	fx.Provide(websocket.NewHub),
 	fx.Invoke(websocket.InvokeHub),
 )

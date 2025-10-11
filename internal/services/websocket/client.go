@@ -2,14 +2,10 @@ package websocket
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
-	"time"
 
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/gorilla/websocket"
-	logging "gitlab.com/devkit3/logger"
-	"gitlab.com/enterprisemes/notification-service/internal/domain/models"
-	"gitlab.com/enterprisemes/notification-service/internal/service/services"
 )
 
 type Client struct {
@@ -17,32 +13,16 @@ type Client struct {
 	conn   *websocket.Conn
 	send   chan models.Message
 
-	groupIDs []uint
-
-	logger *logging.Logger
-	auth   *services.AuthService
+	logger *log.Logger
 }
 
-func NewClient(conn *websocket.Conn, logger *logging.Logger, userId uint, auth *services.AuthService) (*Client, error) {
-	groups, _, err := auth.API.GetUserGroups(auth.Token, int(userId))
-	if err != nil {
-		return nil, fmt.Errorf("cant get groups: %s", err)
-	}
-
-	groupsIDs := make([]uint, 0)
-	for _, group := range groups {
-		groupsIDs = append(groupsIDs, uint(group.Id))
-	}
-
+func NewClient(conn *websocket.Conn, logger *log.Logger, userID uint) *Client {
 	return &Client{
-		userID: userId,
+		userID: userID,
 		conn:   conn,
 		send:   make(chan models.Message, 256),
-
-		logger:   logger,
-		auth:     auth,
-		groupIDs: groupsIDs,
-	}, nil
+		logger: logger,
+	}
 }
 
 func (c *Client) readPump(h *Hub) {
@@ -52,15 +32,14 @@ func (c *Client) readPump(h *Hub) {
 	}()
 
 	for {
-		_, message, err := c.conn.ReadMessage()
+		_, _, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				c.logger.Error(fmt.Sprintf("error read message: %s", err))
+				log.Printf("WebSocket read error (user %d): %v", c.userID, err)
 			}
 			break
 		}
-
-		log.Printf("Received message: %s \nfrom user with id: %d", message, c.userID)
+		// Входящие сообщения от клиента не обрабатываются (если не нужно)
 	}
 }
 
@@ -76,42 +55,20 @@ func (c *Client) writePump() {
 			return
 		}
 
-		hasGroup := false
-		for _, nGroupID := range message.GroupIDs {
-			for _, uGroupID := range c.groupIDs {
-				if uGroupID == nGroupID {
-					hasGroup = true
-				}
-			}
-		}
-
-		if !hasGroup {
-			continue
-		}
-
-		jmessage, err := json.Marshal(message)
+		w, err := c.conn.NextWriter(websocket.TextMessage)
 		if err != nil {
-			c.logger.Error(fmt.Sprintf("json marshal error message: %s", err))
+			log.Printf("Failed to get writer (user %d): %v", c.userID, err)
 			return
 		}
-		fmt.Println(c.conn.LocalAddr(), "send message")
-		err = c.conn.WriteMessage(websocket.TextMessage, jmessage)
-		if err != nil {
-			c.logger.Error(fmt.Sprintf("write error:: %s", err))
+
+		if err := json.NewEncoder(w).Encode(message); err != nil {
+			log.Printf("Failed to encode message (user %d): %v", c.userID, err)
 			return
 		}
-	}
-}
 
-func (c *Client) testMessages() {
-	count := 0
-	for {
-		count++
-		time.Sleep(5 * time.Second)
-		c.send <- models.Message{
-			Header:   "Test",
-			Text:     fmt.Sprintf("Test Notification: %d", count),
-			GroupIDs: []uint{1},
+		if err := w.Close(); err != nil {
+			log.Printf("Failed to close writer (user %d): %v", c.userID, err)
+			return
 		}
 	}
 }

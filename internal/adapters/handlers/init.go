@@ -68,6 +68,9 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	// Общая группа для API
 	baseRouter := r.Group("/api/v1")
 
+	webhook := baseRouter.Group("webhook")
+	webhook.POST("/onec/receptions", h.OneCWebhook)
+
 	//Версия
 	baseRouter.GET("/version", h.GetVersionProject)
 	// Авторизация

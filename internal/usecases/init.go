@@ -8,31 +8,39 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
 	_ "github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/services/websocket"
 	_ "github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 )
 
 type UseCases struct {
 	interfaces.DoctorUsecase
 	interfaces.EmergencyCallUsecase
-	interfaces.MedServiceUsecase
+	// interfaces.MedServiceUsecase
 	interfaces.PatientUsecase
 	interfaces.ReceptionHospitalUsecase
 	interfaces.ReceptionSmpUsecase
 	interfaces.MedCardUsecase
 	interfaces.AuthUsecase
+	interfaces.OneCWebhookUsecase
 }
 
-func NewUsecases(r interfaces.Repository, s interfaces.Service, conf *config.Config) interfaces.Usecases {
+func NewUsecases(
+	r interfaces.Repository,
+	s interfaces.Service,
+	conf *config.Config,
+	onecCacheRepo interfaces.OneCCacheRepository,
+	hub *websocket.Hub) interfaces.Usecases {
 
 	return &UseCases{
 		NewDoctorUsecase(r),
 		NewEmergencyCallUsecase(r),
-		NewMedServiceUsecase(r),
+		// NewMedSer(r),
 		NewPatientUsecase(r, r, r, s),
 		NewReceptionHospitalUsecase(r, r, s),
 		NewReceptionSmpUsecase(r, r, r),
 		NewMedCardUsecase(r, r, r, r, r),
 		NewAuthUsecase(r, conf.JWTSecret),
+		NewOneCWebhookUsecase(onecCacheRepo, hub),
 	}
 
 }

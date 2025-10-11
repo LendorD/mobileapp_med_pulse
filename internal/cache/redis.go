@@ -9,7 +9,7 @@ import (
 )
 
 type RedisCache struct {
-	client *redis.Client
+	Client *redis.Client
 }
 
 func NewRedisCache(addr, password string, db int) *RedisCache {
@@ -26,11 +26,11 @@ func NewRedisCache(addr, password string, db int) *RedisCache {
 		panic(fmt.Sprintf("Failed to connect to Redis: %v", err))
 	}
 
-	return &RedisCache{client: rdb}
+	return &RedisCache{Client: rdb}
 }
 
 func (r *RedisCache) Get(ctx context.Context, key string) ([]byte, error) {
-	val, err := r.client.Get(ctx, key).Result()
+	val, err := r.Client.Get(ctx, key).Result()
 	if err == redis.Nil {
 		return nil, nil // ключ не найден — не ошибка
 	}
@@ -42,9 +42,9 @@ func (r *RedisCache) Get(ctx context.Context, key string) ([]byte, error) {
 
 func (r *RedisCache) Set(ctx context.Context, key string, value []byte, ttlSec int) error {
 	ttl := time.Duration(ttlSec) * time.Second
-	return r.client.Set(ctx, key, value, ttl).Err()
+	return r.Client.Set(ctx, key, value, ttl).Err()
 }
 
 func (r *RedisCache) Del(ctx context.Context, key string) error {
-	return r.client.Del(ctx, key).Err()
+	return r.Client.Del(ctx, key).Err()
 }
