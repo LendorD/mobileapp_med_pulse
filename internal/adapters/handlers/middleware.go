@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
+
+	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
+	"github.com/gin-gonic/gin"
 )
 
 type RequestInfo struct {

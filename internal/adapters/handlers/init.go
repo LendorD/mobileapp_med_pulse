@@ -68,8 +68,10 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	// Общая группа для API
 	baseRouter := r.Group("/api/v1")
 
+	//Запросы от 1С
 	webhook := baseRouter.Group("webhook")
 	webhook.POST("/onec/receptions", h.OneCWebhook)
+	webhook.POST("/onec/patients", h.OneCPatientListWebhook)
 
 	//Версия
 	baseRouter.GET("/version", h.GetVersionProject)
@@ -88,21 +90,14 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	// Пациенты
 	patientGroup := protected.Group("/patients")
 	patientGroup.GET("/:doc_id/", h.GetAllPatientsByDoctorID) // Список пациентов доктора ПЕРЕПИСАТЬ НА 1С + получить со скорой
-	patientGroup.GET("/", h.GetAllPatients)
+	// patientGroup.GET("/", h.GetAllPatients) // новый роут ниже
+	patientGroup.GET("", h.GetPatientList) // Отдаёт список всех пациентов
 	patientGroup.POST("/", h.CreatePatient)
 
 	// Медкарты (Больше не формируется а с 1С)
 	medCardGroup := protected.Group("/medcard")
 	medCardGroup.GET("/:pat_id", h.GetMedCardByPatientID)
 	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
-
-	// Приёмы больницы УДАЛИТЬ
-	// hospitalGroup := protected.Group("/hospital")
-	// hospitalGroup.GET("/receptions/patients/:pat_id", h.GetAllReceptionsByPatientID) // Все приемы пациента
-	// hospitalGroup.GET("/receptions/:doc_id", h.GetReceptionsHospitalByDoctorID)      // Все приемы доктора
-	// hospitalGroup.GET("/receptions/:doc_id/:hosp_id", h.GetReceptionHosptalById)
-	// hospitalGroup.PUT("/receptions/:recep_id", h.UpdateReceptionHospitalByReceptionID)
-	// hospitalGroup.PATCH("/receptions/:recep_id", h.UpdateReceptionHospitalStatusByID)
 
 	// Медуслуги
 	medServicesGroup := protected.Group("/medservices")

@@ -20,10 +20,16 @@ type Usecases interface {
 	MedCardUsecase
 	AuthUsecase
 	OneCWebhookUsecase
+	OneCPatientUsecase
+}
+
+type OneCPatientUsecase interface {
+	HandlePatientListUpdate(ctx context.Context, update models.PatientListUpdate) error
+	GetPatientList(ctx context.Context) ([]models.PatientListItem, error)
 }
 
 type OneCWebhookUsecase interface {
-	HandleReceptionsUpdate(ctx context.Context, update models.OneCReceptionsUpdate) error
+	HandleReceptionsUpdate(ctx context.Context, update models.Call) error
 	GetInterestedUserIDs(callID int) []uint
 }
 
@@ -46,8 +52,8 @@ type ReceptionSmpUsecase interface {
 }
 
 type MedCardUsecase interface {
-	GetMedCardByPatientID(id uint) (models.MedCardResponse, *errors.AppError)
-	UpdateMedCard(input *models.UpdateMedCardRequest) (models.MedCardResponse, *errors.AppError)
+	GetMedCardByPatientID(ctx context.Context, patientID string) (*models.PatientCard, error)
+	UpdateMedicalCard(ctx context.Context, req *models.UpdateMedicalCardRequest) error
 }
 
 type AllergyUsecase interface {

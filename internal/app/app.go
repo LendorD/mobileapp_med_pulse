@@ -62,8 +62,6 @@ var LoggingModule = fx.Module("logging_module",
 	}),
 )
 
-// В app/app.go
-
 func ProvideRedisClient(cfg *config.Config) *redis.Client {
 	addr := fmt.Sprintf("%s:%s", cfg.Redis.Host, cfg.Redis.Port)
 	return redis.NewClient(&redis.Options{

@@ -24,8 +24,22 @@ type Repository interface {
 }
 
 type OneCCacheRepository interface {
-	SaveReceptions(ctx context.Context, callID int, receptions []models.Reception) error
-	GetReceptions(ctx context.Context, callID int) ([]models.Reception, error)
+	// Вызовы (скорая)
+	SaveReceptions(ctx context.Context, callID string, receptions []models.Patient) error
+	GetReceptions(ctx context.Context, callID string) ([]models.Patient, error)
+
+	// Список пациентов
+	SavePatientList(ctx context.Context, patients []models.PatientListItem) error
+	GetPatientList(ctx context.Context) ([]models.PatientListItem, error)
+
+	// Медицинская карта
+	SaveMedicalCard(ctx context.Context, patientID string, card *models.PatientCard) error
+	GetMedicalCard(ctx context.Context, patientID string) (*models.PatientCard, error)
+	DeleteMedicalCard(ctx context.Context, patientID string) error
+
+	// История посещений (заготовка)
+	// SaveVisitHistory(ctx context.Context, patientID string, visits []models.Visit) error
+	// GetVisitHistory(ctx context.Context, patientID string) ([]models.Visit, error)
 }
 
 type TxRepository interface {

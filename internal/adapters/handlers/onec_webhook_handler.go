@@ -16,7 +16,7 @@ import (
 // @Success 200
 // @Router /webhook/onec/receptions [post]
 func (h *Handler) OneCWebhook(c *gin.Context) {
-	var update models.OneCReceptionsUpdate
+	var update models.Call
 	if err := c.ShouldBindJSON(&update); err != nil {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return

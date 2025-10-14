@@ -2,6 +2,8 @@ package usecases
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
@@ -25,29 +27,33 @@ func NewOneCWebhookUsecase(
 }
 
 // HandleReceptionsUpdate — обрабатывает обновление от 1С
-func (u *OneCWebhookUsecase) HandleReceptionsUpdate(ctx context.Context, update models.OneCReceptionsUpdate) error {
-	// 1. Сохраняем в Redis
-	err := u.cacheRepo.SaveReceptions(ctx, update.CallID, update.Receptions)
+func (u *OneCWebhookUsecase) HandleReceptionsUpdate(ctx context.Context, call models.Call) error {
+	// 1. Сохраняем пациентов вызова в Redis по CallID (строка)
+	err := u.cacheRepo.SaveReceptions(ctx, call.CallID, call.Patients)
 	if err != nil {
 		return err
 	}
 
-	// 2. Определяем, какие пользователи должны получить обновление
-	// Например: все доктора, привязанные к этому вызову
-	// Пока что — просто отправим всем (или по списку)
-	// userIDs := u.GetInterestedUserIDs(update.CallID)
-
-	// 3. Отправляем уведомление через WebSocket
+	// 2. Готовим сообщение для WebSocket-рассылки
+	// Поскольку CallID — строка, а Message ожидает uint — у тебя два варианта:
+	var typeID uint
+	if callIDNum, err := strconv.Atoi(call.CallID); err == nil {
+		typeID = uint(callIDNum)
+	} else {
+		// Если не число — используем 0 или хэш (но лучше переделать Message)
+		typeID = 0
+	}
 	message := models.Message{
-		Header:        "header",
-		Text:          "text",
-		TypeID:        uint(update.CallID),
-		Reference:     "",
-		ReferenceID:   uint(update.CallID),
+		Header:        "Новый вызов",
+		Text:          fmt.Sprintf("Поступил вызов %s", call.CallID),
+		TypeID:        typeID,      // uint (может быть 0, если CallID не число)
+		Reference:     call.CallID, // ← строковый ID сохраняем здесь
+		ReferenceID:   typeID,      // дублируем, если нужно
 		GroupIDs:      nil,
 		BroadcastUUID: uuid.Nil,
 	}
 
+	// 3. Отправляем broadcast-сообщение всем подписчикам
 	u.hub.AddBroadcastMessage(message)
 
 	return nil
