@@ -17,7 +17,6 @@ type UseCases struct {
 	interfaces.EmergencyCallUsecase
 	// interfaces.MedServiceUsecase
 	interfaces.PatientUsecase
-	interfaces.ReceptionHospitalUsecase
 	interfaces.ReceptionSmpUsecase
 	interfaces.MedCardUsecase
 	interfaces.AuthUsecase
@@ -39,7 +38,6 @@ func NewUsecases(
 		NewEmergencyCallUsecase(r),
 		// NewMedSer(r),
 		NewPatientUsecase(r, r, r, s),
-		NewReceptionHospitalUsecase(r, r, s),
 		NewReceptionSmpUsecase(r, r, r),
 		NewMedCardUsecase(onecCacheRepo, onecClient),
 		NewAuthUsecase(r, conf.JWTSecret),

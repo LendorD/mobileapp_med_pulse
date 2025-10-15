@@ -27,6 +27,11 @@ func (u *OneCPatientUsecase) HandlePatientListUpdate(ctx context.Context, update
 	return u.cacheRepo.SavePatientList(ctx, update.Patients)
 }
 
-func (u *OneCPatientUsecase) GetPatientList(ctx context.Context) ([]models.PatientListItem, error) {
-	return u.cacheRepo.GetPatientList(ctx)
+func (u *OneCPatientUsecase) GetPatientListPage(ctx context.Context, offset, limit int) ([]models.PatientListItem, error) {
+	patients, err := u.cacheRepo.GetPatientListPage(ctx, offset, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return patients, nil
 }

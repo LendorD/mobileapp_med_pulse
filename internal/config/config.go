@@ -75,11 +75,15 @@ type OneCConfig struct {
 }
 
 type DatabaseConfig struct {
+	//Postgres
 	Host     string
 	Port     string
 	Username string
 	Password string
 	DBName   string
+
+	//SqlLite
+	LocalDBPath string `mapstructure:"local_db_path"`
 }
 
 type Services struct {

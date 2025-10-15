@@ -58,7 +58,6 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	r.Use(LoggingMiddleware(h.logger))
 
 	// WebSocket-группа
-
 	wsGroup := r.Group("/ws/notification")
 	// wsGroup.Use(middleware.JWTAuth(cfg.JWTSecret))
 
@@ -72,6 +71,7 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	webhook := baseRouter.Group("webhook")
 	webhook.POST("/onec/receptions", h.OneCWebhook)
 	webhook.POST("/onec/patients", h.OneCPatientListWebhook)
+	webhook.POST("/onec/auth")
 
 	//Версия
 	baseRouter.GET("/version", h.GetVersionProject)
@@ -82,26 +82,14 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	protected := baseRouter.Group("/")
 	protected.Use(middleware.JWTAuth(cfg.JWTSecret))
 
-	// Доктора
-	doctorGroup := protected.Group("/doctors")
-	doctorGroup.GET("/:doc_id", h.GetDoctorByID)
-	doctorGroup.PUT("/:doc_id", h.UpdateDoctor)
-
 	// Пациенты
 	patientGroup := protected.Group("/patients")
-	patientGroup.GET("/:doc_id/", h.GetAllPatientsByDoctorID) // Список пациентов доктора ПЕРЕПИСАТЬ НА 1С + получить со скорой
-	// patientGroup.GET("/", h.GetAllPatients) // новый роут ниже
-	patientGroup.GET("", h.GetPatientList) // Отдаёт список всех пациентов
-	patientGroup.POST("/", h.CreatePatient)
+	patientGroup.GET("", h.GetPatientList) // Отдаёт список всех пациентов c пагинацией (1С)
 
-	// Медкарты (Больше не формируется а с 1С)
+	// Медкарты (Больше не формируется а получаются от 1С)
 	medCardGroup := protected.Group("/medcard")
 	medCardGroup.GET("/:pat_id", h.GetMedCardByPatientID)
 	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
-
-	// Медуслуги
-	medServicesGroup := protected.Group("/medservices")
-	medServicesGroup.GET("/", h.GetAllMedServices) // реализовать получение с 1с
 
 	// Скорая медицинская помощь
 	emergencyGroup := protected.Group("/emergency")
@@ -124,9 +112,6 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 
 	emergencyGroup.GET("/pdf/:rec_id", h.GetPdf)
 	// emergencyGroup.POST("/pdf/:rec_id", h.UploadPdf)
-
-	// TODO: Обновление статусов у Reception Hospital (PUT запрос)
-	// Поправить пациента на транзакцию
 
 	return r
 }

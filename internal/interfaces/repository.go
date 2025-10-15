@@ -30,7 +30,7 @@ type OneCCacheRepository interface {
 
 	// Список пациентов
 	SavePatientList(ctx context.Context, patients []models.PatientListItem) error
-	GetPatientList(ctx context.Context) ([]models.PatientListItem, error)
+	GetPatientListPage(ctx context.Context, offset, limit int) ([]models.PatientListItem, error)
 
 	// Медицинская карта
 	SaveMedicalCard(ctx context.Context, patientID string, card *models.PatientCard) error
@@ -181,4 +181,6 @@ type AllergyRepository interface {
 
 type AuthRepository interface {
 	GetByLogin(ctx context.Context, login string) (*entities.Doctor, error)
+	SaveUsers(ctx context.Context, users []entities.AuthUser) error
+	GetUserByLogin(ctx context.Context, login string) (*entities.AuthUser, error)
 }

@@ -15,7 +15,6 @@ type Usecases interface {
 	EmergencyCallUsecase
 	// MedServiceUsecase
 	PatientUsecase
-	ReceptionHospitalUsecase
 	ReceptionSmpUsecase
 	MedCardUsecase
 	AuthUsecase
@@ -25,21 +24,12 @@ type Usecases interface {
 
 type OneCPatientUsecase interface {
 	HandlePatientListUpdate(ctx context.Context, update models.PatientListUpdate) error
-	GetPatientList(ctx context.Context) ([]models.PatientListItem, error)
+	GetPatientListPage(ctx context.Context, offset, limit int) ([]models.PatientListItem, error)
 }
 
 type OneCWebhookUsecase interface {
 	HandleReceptionsUpdate(ctx context.Context, update models.Call) error
 	GetInterestedUserIDs(callID int) []uint
-}
-
-type ReceptionHospitalUsecase interface {
-	GetHospitalReceptionsByPatientID(patientId uint, page, count int, filter, order string) (models.FilterResponse[[]models.ReceptionHospitalResponse], *errors.AppError)
-	UpdateReceptionHospital(id uint, input *models.UpdateReceptionHospitalRequest) (models.ReceptionHospitalResponse, *errors.AppError)
-	GetHospitalReceptionsByDoctorID(doc_id uint, page, count int, filter, order string) (models.FilterResponse[[]models.ReceptionHospitalResponse], *errors.AppError)
-	GetHospitalPatientsByDoctorID(doc_id uint, page, count int, filter, order string) (models.FilterResponse[[]entities.Patient], *errors.AppError)
-	GetReceptionHospitalByID(hospID uint) (models.ReceptionFullResponse, error)
-	UpdateReceptionHospitalStatus(id uint, newStatus string) (entities.ReceptionHospital, error)
 }
 
 type ReceptionSmpUsecase interface {
@@ -87,10 +77,6 @@ type EmergencyCallUsecase interface {
 	UpdateEmergencyCallStatusByID(id uint, newStatus string) (entities.EmergencyCall, error)
 }
 
-// type MedServiceUsecase interface {
-// 	GetAllMedServices() (models.MedServicesListResponse, *errors.AppError)
-// }
-
 type PatientUsecase interface {
 	CreatePatient(input *models.CreatePatientRequest) (entities.Patient, *errors.AppError)
 	GetPatientByID(id uint) (entities.Patient, *errors.AppError)
@@ -102,5 +88,6 @@ type PatientUsecase interface {
 type PersonalInfoUsecase interface{}
 
 type AuthUsecase interface {
+	SyncUsers(ctx context.Context, users []entities.AuthUser) error
 	LoginDoctor(ctx context.Context, phone, password string) (uint, string, *errors.AppError)
 }

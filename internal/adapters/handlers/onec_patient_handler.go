@@ -4,6 +4,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/gin-gonic/gin"
@@ -35,21 +36,39 @@ func (h *Handler) OneCPatientListWebhook(c *gin.Context) {
 }
 
 // GetPatientList godoc
-// @Summary Get cached patient list from 1C
+// @Summary Get cached patient list from 1C with pagination
 // @Tags Patients
 // @Produce json
+// @Param page query int false "Page number (default: 1)"
+// @Param limit query int false "Items per page (default: 20, max: 100)"
 // @Success 200 {object} models.PatientListResponse
 // @Router /patients [get]
 func (h *Handler) GetPatientList(c *gin.Context) {
-	patients, err := h.usecase.GetPatientList(c.Request.Context())
+	// Получаем параметры пагинации
+	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "20"))
+	if err != nil || limit < 1 {
+		limit = 20
+	}
+	if limit > 100 { // ограничим максимум
+		limit = 100
+	}
+
+	offset := (page - 1) * limit
+
+	// Получаем данные
+	patients, err := h.usecase.GetPatientListPage(c.Request.Context(), offset, limit)
 	if err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "Failed to get patient list from cache", true)
+		h.ErrorResponse(c, err, http.StatusInternalServerError, "Failed to get patient list from cache", true)
 		return
 	}
 
 	response := models.PatientListResponse{
 		Patient: patients,
-		// Count:    len(patients),
 	}
 
 	h.ResultResponse(c, "success", Object, response)

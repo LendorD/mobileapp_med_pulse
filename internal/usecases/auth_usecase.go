@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"github.com/golang-jwt/jwt/v4"
@@ -20,6 +21,11 @@ func NewAuthUsecase(repo interfaces.Repository, secretKey string) *AuthUsecase {
 		repo:      repo,
 		secretKey: secretKey,
 	}
+}
+
+// SyncUsers заменяет весь список пользователей в SQLite (полная синхронизация от 1С)
+func (u *AuthUsecase) SyncUsers(ctx context.Context, users []entities.AuthUser) error {
+	return u.repo.SaveUsers(ctx, users)
 }
 
 func (uc *AuthUsecase) LoginDoctor(ctx context.Context, phone, password string) (uint, string, *errors.AppError) {

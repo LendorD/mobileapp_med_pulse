@@ -41,29 +41,47 @@ func (r *RedisOneCCacheRepository) GetReceptions(ctx context.Context, callID str
 
 // SavePatientList сохраняет список пациентов в Redis
 func (r *RedisOneCCacheRepository) SavePatientList(ctx context.Context, patients []models.PatientListItem) error {
-	data, err := json.Marshal(patients)
-	if err != nil {
+	// Удаляем старый список
+	if err := r.client.Del(ctx, patientListCacheKey).Err(); err != nil {
 		return err
 	}
 
-	// Сохраняем с TTL (можно убрать TTL, передав 0)
-	return r.client.Set(ctx, patientListCacheKey, data, cacheExpiry).Err()
+	// Преобразуем каждого пациента в JSON и добавляем в список
+	var members []interface{}
+	for _, p := range patients {
+		data, err := json.Marshal(p)
+		if err != nil {
+			return err
+		}
+		members = append(members, data)
+	}
+
+	// Добавляем все элементы в список
+	if len(members) > 0 {
+		if err := r.client.RPush(ctx, patientListCacheKey, members...).Err(); err != nil {
+			return err
+		}
+	}
+
+	// Устанавливаем TTL при необходимости
+	return r.client.Expire(ctx, patientListCacheKey, cacheExpiry).Err()
 }
 
-// GetPatientList возвращает список пациентов из Redis
-func (r *RedisOneCCacheRepository) GetPatientList(ctx context.Context) ([]models.PatientListItem, error) {
-	data, err := r.client.Get(ctx, patientListCacheKey).Result()
+// GetPatientListPage возвращает список пациентов из Redis с пагинацией
+func (r *RedisOneCCacheRepository) GetPatientListPage(ctx context.Context, offset, limit int) ([]models.PatientListItem, error) {
+	end := offset + limit - 1
+	values, err := r.client.LRange(ctx, patientListCacheKey, int64(offset), int64(end)).Result()
 	if err != nil {
-		if err == redis.Nil {
-			// Ключ не найден — возвращаем пустой список
-			return []models.PatientListItem{}, nil
-		}
 		return nil, err
 	}
 
 	var patients []models.PatientListItem
-	if err := json.Unmarshal([]byte(data), &patients); err != nil {
-		return nil, err
+	for _, v := range values {
+		var p models.PatientListItem
+		if err := json.Unmarshal([]byte(v), &p); err != nil {
+			return nil, err
+		}
+		patients = append(patients, p)
 	}
 
 	return patients, nil
