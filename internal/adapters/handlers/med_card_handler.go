@@ -63,7 +63,7 @@ func (h *Handler) UpdateMedCard(c *gin.Context) {
 		return
 	}
 
-	// Убеждаемся, что ID из URL совпадает с ID в теле (опционально, но безопасно)
+	// Убеждаемся, что ID из URL совпадает с ID в теле
 	if req.PatientID != patientID {
 		h.ErrorResponse(c, http.ErrBodyNotAllowed, http.StatusBadRequest, "Patient_id in URL and body must match", true)
 		return

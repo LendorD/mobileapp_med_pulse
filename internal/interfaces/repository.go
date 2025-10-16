@@ -180,7 +180,6 @@ type AllergyRepository interface {
 }
 
 type AuthRepository interface {
-	GetByLogin(ctx context.Context, login string) (*entities.Doctor, error)
 	SaveUsers(ctx context.Context, users []entities.AuthUser) error
 	GetUserByLogin(ctx context.Context, login string) (*entities.AuthUser, error)
 }

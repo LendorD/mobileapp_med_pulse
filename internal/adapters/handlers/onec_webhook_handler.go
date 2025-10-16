@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -45,16 +46,16 @@ func (h *Handler) OneCAuthWebhook(c *gin.Context) {
 		return
 	}
 
-	var users []sqlite.AuthUser
+	var users []entities.AuthUser
 	for _, u := range update.Users {
 		hash, _ := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
-		users = append(users, sqlite.AuthUser{
+		users = append(users, entities.AuthUser{
 			Login:    u.Login,
 			Password: string(hash),
 		})
 	}
 
-	if err := h.authUsecase.SyncUsers(c.Request.Context(), users); err != nil {
+	if err := h.usecase.SyncUsers(c.Request.Context(), users); err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "sync failed"})
 		return
 	}

@@ -31,12 +31,12 @@ func (u *AuthUsecase) SyncUsers(ctx context.Context, users []entities.AuthUser) 
 func (uc *AuthUsecase) LoginDoctor(ctx context.Context, phone, password string) (uint, string, *errors.AppError) {
 	op := "usecase.Auth.LoginDoctor"
 
-	user, err := uc.repo.GetByLogin(ctx, phone)
+	user, err := uc.repo.GetUserByLogin(ctx, phone)
 	if err != nil || user.ID == 0 {
 		return 0, "", errors.NewUnauthorizedError(op, "invalid credentials")
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return 0, "", errors.NewUnauthorizedError(op, "invalid credentials")
 	}
 

@@ -5,7 +5,6 @@ import (
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
-	middleware "github.com/AlexanderMorozov1919/mobileapp/internal/middleware/jwt"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/swagger"
 	"github.com/gin-gonic/gin"
@@ -71,7 +70,7 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	webhook := baseRouter.Group("webhook")
 	webhook.POST("/onec/receptions", h.OneCWebhook)
 	webhook.POST("/onec/patients", h.OneCPatientListWebhook)
-	webhook.POST("/onec/auth")
+	webhook.POST("/onec/auth", h.OneCAuthWebhook)
 
 	//Версия
 	baseRouter.GET("/version", h.GetVersionProject)
@@ -80,7 +79,7 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	authGroup.POST("/", h.LoginDoctor)
 
 	protected := baseRouter.Group("/")
-	protected.Use(middleware.JWTAuth(cfg.JWTSecret))
+	// protected.Use(middleware.JWTAuth(cfg.JWTSecret))
 
 	// Пациенты
 	patientGroup := protected.Group("/patients")
