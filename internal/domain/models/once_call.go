@@ -1,5 +1,7 @@
 package models
 
+import "github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
+
 // Call — основная структура вызова из 1С
 type Call struct {
 	CallID       string     `json:"call_id"`
@@ -20,12 +22,12 @@ const (
 
 // Patient — данные пациента
 type Patient struct {
-	FullName    string      `json:"full_name"`   // ФИО
-	BirthDate   string      `json:"birth_date"`  // Дата рождения
-	Age         string      `json:"age"`         // Возраст
-	Gender      bool        `json:"gender"`      // Пол: true — мужской, false — женский
-	Phone       string      `json:"phone"`       // Телефон
-	Snils       string      `json:"snils"`       // СНИЛС
-	Policy      Policy      `json:"policy"`      // Полис
-	Certificate Certificate `json:"certificate"` // Сертификат
+	FullName    string               `json:"full_name"`   // ФИО
+	BirthDate   string               `json:"birth_date"`  // Дата рождения
+	Age         string               `json:"age"`         // Возраст
+	Gender      bool                 `json:"gender"`      // Пол: true — мужской, false — женский
+	Phone       string               `json:"phone"`       // Телефон
+	Snils       string               `json:"snils"`       // СНИЛС
+	Policy      entities.Policy      `json:"policy"`      // Полис
+	Certificate entities.Certificate `json:"certificate"` // Сертификат
 }

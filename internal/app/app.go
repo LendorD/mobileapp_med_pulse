@@ -11,7 +11,6 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/handlers"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/auth"
-	onecRepo "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/onec"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/cache"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/external/onec"
@@ -32,7 +31,6 @@ func New() *fx.App {
 			func(cfg *config.Config) string { return cfg.JWTSecret },
 		),
 		LoggingModule,
-		CacheModule,
 		OneCModule,
 		WebsocketModule,
 		RepositoryModule,
@@ -63,15 +61,6 @@ var LoggingModule = fx.Module("logging_module",
 	}),
 )
 
-func ProvideRedisClient(cfg *config.Config) *redis.Client {
-	addr := fmt.Sprintf("%s:%s", cfg.Redis.Host, cfg.Redis.Port)
-	return redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: cfg.Redis.Password,
-		DB:       cfg.Redis.DB,
-	})
-}
-
 func ProvideRedisCache(client *redis.Client) *cache.RedisCache {
 	// Проверка подключения
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
@@ -81,11 +70,6 @@ func ProvideRedisCache(client *redis.Client) *cache.RedisCache {
 	}
 	return &cache.RedisCache{Client: client} // ← обнови RedisCache, чтобы он хранил *redis.Client
 }
-
-var CacheModule = fx.Module("cache_module",
-	fx.Provide(ProvideRedisClient),
-	fx.Provide(ProvideRedisCache),
-)
 
 func InvokeHttpServer(lc fx.Lifecycle, h http.Handler) {
 	server := &http.Server{
@@ -160,7 +144,6 @@ func ProvideOneCClient(cfg *config.Config) interfaces.OneCClient {
 
 var OneCModule = fx.Module("onec_module",
 	fx.Provide(ProvideOneCClient),
-	fx.Provide(onecRepo.NewRedisOneCCacheRepository),
 	fx.Provide(usecases.NewOneCWebhookUsecase),
 )
 

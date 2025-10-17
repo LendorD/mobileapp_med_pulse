@@ -6,15 +6,9 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
-
-	"time"
 )
 
 type Usecases interface {
-	DoctorUsecase
-	EmergencyCallUsecase
-	// MedServiceUsecase
-	PatientUsecase
 	ReceptionSmpUsecase
 	MedCardUsecase
 	AuthUsecase
@@ -23,8 +17,8 @@ type Usecases interface {
 }
 
 type OneCPatientUsecase interface {
-	HandlePatientListUpdate(ctx context.Context, update models.PatientListUpdate) error
-	GetPatientListPage(ctx context.Context, offset, limit int) ([]models.PatientListItem, error)
+	HandlePatientListUpdate(ctx context.Context, update entities.PatientListUpdate) error
+	GetPatientListPage(ctx context.Context, offset, limit int) ([]entities.OneCPatientListItem, error)
 }
 
 type OneCWebhookUsecase interface {
@@ -33,59 +27,12 @@ type OneCWebhookUsecase interface {
 }
 
 type ReceptionSmpUsecase interface {
-	CreateReceptionSMP(input *models.CreateReceptionSmp) (entities.ReceptionSMP, *errors.AppError)
-	UpdateReceptionSMP(id uint, updateData map[string]interface{}) (entities.ReceptionSMP, *errors.AppError)
-	GetReceptionWithMedServicesByID(smp_id uint, call_id uint) (models.ReceptionSMPResponse, error)
-	GetReceptionsSMPByEmergencyCall(call_id uint, page, perPage int) (*models.FilterResponse[[]models.ReceptionSmpShortResponse], error)
-	GetPatientSignature(patientID uint) (string, *errors.AppError)
-	SavePatientSignature(patientID uint, signature []byte) *errors.AppError
 }
 
 type MedCardUsecase interface {
-	GetMedCardByPatientID(ctx context.Context, patientID string) (*models.PatientCard, error)
-	UpdateMedicalCard(ctx context.Context, req *models.UpdateMedicalCardRequest) error
+	GetMedCardByPatientID(ctx context.Context, patientID string) (*entities.OneCMedicalCard, error)
+	UpdateMedicalCard(ctx context.Context, card *entities.OneCMedicalCard) error
 }
-
-type AllergyUsecase interface {
-	AddAllergyToPatient(patientID, allergyID uint, description string) (entities.Allergy, *errors.AppError)
-	GetAllergyByPatientID(patientID uint) ([]entities.Allergy, *errors.AppError)
-	RemoveAllergyFromPatient(patientID, allergyID uint) *errors.AppError
-	UpdateAllergyDescription(patientID, allergyID uint, description string) (entities.Allergy, *errors.AppError)
-}
-
-type ContactInfoUsecase interface {
-	CreateContactInfo(input *models.CreateContactInfoRequest) (entities.ContactInfo, *errors.AppError)
-	GetContactInfoByPatientID(patientID uint) (entities.ContactInfo, *errors.AppError)
-}
-
-type DoctorUsecase interface {
-	CreateDoctor(doctor *models.CreateDoctorRequest) (entities.Doctor, *errors.AppError)
-	GetDoctorByID(doctorId uint) (entities.Doctor, *errors.AppError)
-	UpdateDoctor(doctor *models.UpdateDoctorRequest) (entities.Doctor, *errors.AppError)
-	DeleteDoctor(doctorId uint) *errors.AppError
-}
-
-type EmergencyCallUsecase interface {
-	CreateSMP(input *models.CreateEmergencyCallRequest) (uint, *errors.AppError)
-	GetEmergencyCallsByDoctorAndDate(
-		doctorID uint,
-		date time.Time,
-		page int,
-		perPage int,
-	) (models.FilterResponse[[]models.EmergencyCallShortResponse], error)
-	CloseEmergencyCall(id uint) (entities.EmergencyCall, error)
-	UpdateEmergencyCallStatusByID(id uint, newStatus string) (entities.EmergencyCall, error)
-}
-
-type PatientUsecase interface {
-	CreatePatient(input *models.CreatePatientRequest) (entities.Patient, *errors.AppError)
-	GetPatientByID(id uint) (entities.Patient, *errors.AppError)
-	UpdatePatient(input *models.UpdatePatientRequest) (entities.Patient, *errors.AppError)
-	DeletePatient(id uint) *errors.AppError
-	GetAllPatients(page, count int, filter string, order string) (models.FilterResponse[[]models.ShortPatientResponse], *errors.AppError)
-}
-
-type PersonalInfoUsecase interface{}
 
 type AuthUsecase interface {
 	SyncUsers(ctx context.Context, users []entities.AuthUser) error

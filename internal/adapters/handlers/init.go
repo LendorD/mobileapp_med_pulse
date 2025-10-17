@@ -92,22 +92,10 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 
 	// Скорая медицинская помощь
 	emergencyGroup := protected.Group("/emergency")
-	emergencyGroup.POST("/smp", h.CreateSMP)
-	emergencyGroup.POST("/receptions", h.CreateSMPReception)    //Создание пациента + заключения к нему
-	emergencyGroup.PATCH("/receptions/:id", h.UpdatePatientSMP) // Обновление пациента
-	emergencyGroup.DELETE("/receptions/:id", h.DeleteSMPReception)
-	emergencyGroup.PUT("/receptions/:recep_id", h.UpdateReceptionSMPByReceptionID) //Обновление самого заключения
-	emergencyGroup.GET("/smps/:call_id/:smp_id", h.GetReceptionWithMedServices)
 
 	//Подписи пациентов
 	emergencyGroup.GET("/signature/:recep_id", h.GetSignature)
 	emergencyGroup.POST("/signature/:recep_id", h.SaveSignature)
-
-	// Звонки (для удобства в тестинге Swagger разделили их)
-	// Маршрут оставляем тот же, просто для удобства
-	emergencyGroup.GET("/calls/:call_id", h.GetReceptionsSMPByCallID)
-	emergencyGroup.GET("/:doc_id", h.GetEmergencyCallsByDoctorAndDate)
-	emergencyGroup.PATCH("/:call_id", h.CloseEmergencyCall)
 
 	emergencyGroup.GET("/pdf/:rec_id", h.GetPdf)
 	// emergencyGroup.POST("/pdf/:rec_id", h.UploadPdf)

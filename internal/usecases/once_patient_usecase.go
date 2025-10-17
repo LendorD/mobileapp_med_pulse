@@ -5,30 +5,29 @@ package usecases
 import (
 	"context"
 
-	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 )
 
 type OneCPatientUsecase struct {
-	cacheRepo interfaces.OneCCacheRepository
+	repo interfaces.PatientRepository
 }
 
 func NewOneCPatientListUsecase(
-	cacheRepo interfaces.OneCCacheRepository,
+	repo interfaces.PatientRepository,
 ) interfaces.OneCPatientUsecase {
 	return &OneCPatientUsecase{
-		cacheRepo: cacheRepo,
+		repo: repo,
 	}
 }
 
 // HandlePatientListUpdate обрабатывает обновление списка пациентов от 1С
-func (u *OneCPatientUsecase) HandlePatientListUpdate(ctx context.Context, update models.PatientListUpdate) error {
-	// Сохраняем список пациентов в кеш
-	return u.cacheRepo.SavePatientList(ctx, update.Patients)
+func (u *OneCPatientUsecase) HandlePatientListUpdate(ctx context.Context, update entities.PatientListUpdate) error {
+	return u.repo.SavePatientList(ctx, update.Patients)
 }
 
-func (u *OneCPatientUsecase) GetPatientListPage(ctx context.Context, offset, limit int) ([]models.PatientListItem, error) {
-	patients, err := u.cacheRepo.GetPatientListPage(ctx, offset, limit)
+func (u *OneCPatientUsecase) GetPatientListPage(ctx context.Context, offset, limit int) ([]entities.OneCPatientListItem, error) {
+	patients, _, err := u.repo.GetPatientListPage(ctx, offset, limit)
 	if err != nil {
 		return nil, err
 	}

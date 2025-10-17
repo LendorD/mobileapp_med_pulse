@@ -13,10 +13,6 @@ import (
 )
 
 type UseCases struct {
-	interfaces.DoctorUsecase
-	interfaces.EmergencyCallUsecase
-	// interfaces.MedServiceUsecase
-	interfaces.PatientUsecase
 	interfaces.ReceptionSmpUsecase
 	interfaces.MedCardUsecase
 	interfaces.AuthUsecase
@@ -28,21 +24,16 @@ func NewUsecases(
 	r interfaces.Repository,
 	s interfaces.Service,
 	conf *config.Config,
-	onecCacheRepo interfaces.OneCCacheRepository,
 	hub *websocket.Hub,
 	onecClient interfaces.OneCClient,
 ) interfaces.Usecases {
 
 	return &UseCases{
-		NewDoctorUsecase(r),
-		NewEmergencyCallUsecase(r),
-		// NewMedSer(r),
-		NewPatientUsecase(r, r, r, s),
-		NewReceptionSmpUsecase(r, r, r),
-		NewMedCardUsecase(onecCacheRepo, onecClient),
+		NewReceptionSmpUsecase(r, r),
+		NewMedCardUsecase(r, onecClient),
 		NewAuthUsecase(r, conf.JWTSecret),
-		NewOneCWebhookUsecase(onecCacheRepo, hub),
-		NewOneCPatientListUsecase(onecCacheRepo),
+		NewOneCWebhookUsecase(r, hub),
+		NewOneCPatientListUsecase(r),
 	}
 
 }

@@ -18,7 +18,6 @@ type Config struct {
 	App        AppConfig
 	HTTPServer HTTPConfig
 	Database   DatabaseConfig
-	Redis      RedisConfig
 	OneC       OneCConfig
 	Logging    LoggerConfig
 	Services   Services
@@ -60,13 +59,6 @@ type LoggerConfig struct {
 	SavingDays int
 }
 
-type RedisConfig struct {
-	Host     string
-	Port     string
-	Password string
-	DB       int
-}
-
 type OneCConfig struct {
 	BaseURL  string
 	Timeout  time.Duration
@@ -81,9 +73,6 @@ type DatabaseConfig struct {
 	Username string
 	Password string
 	DBName   string
-
-	//SqlLite
-	LocalDBPath string `mapstructure:"local_db_path"`
 }
 
 type Services struct {
@@ -125,13 +114,6 @@ func LoadConfig() (*Config, error) {
 			Password: getEnv("DB_PASSWORD", "password"),
 			DBName:   getEnv("DB_NAME", "db_name"),
 		},
-		Redis: RedisConfig{
-			Host:     getEnv("REDIS_HOST", "localhost"),
-			Port:     getEnv("REDIS_PORT", "6379"),
-			Password: getEnv("REDIS_PASSWORD", ""),
-			DB:       getEnvAsInt("REDIS_DB", 0),
-		},
-
 		OneC: OneCConfig{
 			BaseURL:  getEnv("ONESC_BASE_URL", "http://localhost:8081/hs/api"),
 			Timeout:  oneCTimeout,

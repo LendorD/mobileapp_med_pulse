@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/gin-gonic/gin"
 )
@@ -15,11 +16,11 @@ import (
 // @Tags 1C
 // @Accept json
 // @Produce json
-// @Param update body models.PatientListUpdate true "Patient list update from 1C"
+// @Param update body entities.PatientListUpdate true "Patient list update from 1C"
 // @Success 200
 // @Router /webhook/onec/patients [post]
 func (h *Handler) OneCPatientListWebhook(c *gin.Context) {
-	var update models.PatientListUpdate
+	var update entities.PatientListUpdate
 	if err := c.ShouldBindJSON(&update); err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "Invalid patient list update payload", true)
 		c.AbortWithStatus(http.StatusBadRequest)

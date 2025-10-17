@@ -119,3 +119,7 @@ func (c *Client) Post(ctx context.Context, path string, data interface{}) ([]byt
 
 	return responseBody, nil
 }
+
+// func (c *Client) GetMEdicalCort() {
+// 	const endpoint = "/medcica;l-castye"
+// }

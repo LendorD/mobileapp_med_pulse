@@ -1,302 +1,21 @@
 package handlers
 
 import (
-	"io"
+	"fmt"
 	"net/http"
-	"strconv"
+	"os"
+	"path/filepath"
 
-	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"github.com/gin-gonic/gin"
 )
 
-// GetReceptionsSMPByCallId godoc
-// @Summary Получить СМП приём по ID
-// @Description Возвращает список приёмов скорой медицинской помощи для указанного врача с пагинацией
-// @Tags Calls
-// @Accept json
-// @Produce json
-// @Param call_id path uint true "ID вызова"
-// @Param page query int false "Номер страницы" default(1)
-// @Param perPage query int false "Количество записей на страницу" default(5)
-// @Success 200 {array} models.ReceptionSMPResponseList "Информация о приёме скорой помощи"
-// @Failure 400 {object} IncorrectFormatError "Неверный формат запроса"
-// @Failure 401 {object} IncorrectDataError "Некорректный ID вызова"
-// @Failure 422 {object} ValidationError "Ошибка валидации"
-// @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
-// @Router /emergency/calls/{call_id} [get]
-func (h *Handler) GetReceptionsSMPByCallID(c *gin.Context) {
-
-	// Получаем doctor_id из URL
-	callIDStr := c.Param("call_id")
-	callID, err := strconv.ParseUint(callIDStr, 10, 32)
-	if err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'call_id' must be an integer", false)
-		return
-	}
-
-	// Получаем номер страницы из query параметров
-	pageStr := c.DefaultQuery("page", "1")
-	page, err := strconv.Atoi(pageStr)
-	if err != nil || page < 1 {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "page must be a positive integer", false)
-		return
-	}
-
-	// Получаем номер страницы из query параметров
-	perPageStr := c.DefaultQuery("perPage", "5")
-	perPage, err := strconv.Atoi(perPageStr)
-	if err != nil || perPage < 5 {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "page must be a positive integer", false)
-		return
-	}
-
-	// Вызываем usecase
-	receptions, err := h.usecase.GetReceptionsSMPByEmergencyCall(uint(callID), page, perPage)
-	if err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "error get refeptions SMP by Emergency Call", false)
-		return
-	}
-	h.ResultResponse(c, "Success ger reception with med services", Object, receptions)
-}
-
-// GetReceptionWithMedServices godoc
-// @Summary Получить приём СМП с медуслугами по ID
-// @Description Возвращает информацию о приёме скорой медицинской помощи вместе со списком медицинских услуг
-// @Tags Calls
-// @Accept json
-// @Produce json
-// @Param call_id path uint true "ID вызова"
-// @Param smp_id path uint true "ID приёма СМП"
-// @Success 200 {object} models.ReceptionSMPResponse "Информация о приёме и медуслугах"
-// @Failure 400 {object} IncorrectFormatError "Неверный формат запроса"
-// @Failure 401 {object} IncorrectDataError "Некорректный ID вызова"
-// @Failure 422 {object} ValidationError "Ошибка валидации"
-// @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
-// @Router /emergency/smps/{call_id}/{smp_id} [get]
-func (h *Handler) GetReceptionWithMedServices(c *gin.Context) {
-	// Парсинг ID
-	smp_id, err := h.service.ParseUintString(c.Param("smp_id"))
-
-	if err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'smp_id' must be an integer", false)
-		return
-	}
-
-	call_id, err := h.service.ParseUintString(c.Param("call_id"))
-
-	if err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'call_id' must be an integer", false)
-		return
-	}
-
-	// Вызов usecase
-	reception, err := h.usecase.GetReceptionWithMedServicesByID(smp_id, call_id)
-	if err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "Reception not found", false)
-		return
-	}
-	h.ResultResponse(c, "Success ger reception with med services", Object, reception)
-}
-
-// Примеры JSON
-// Создание нового пациента на вызове
-//
-//	{
-//	  "emergency_call_id": 123,
-//	  "doctor_id": 1,
-//	  "patient": {
-//	    "full_name": "Иванов Иван Иванович",
-//	    "birth_date": "1980-05-15",
-//	    "is_male": true
-//	  }
-//	}
-//
-// Добавление существуещего пользователя
-//
-//	{
-//	  "emergency_call_id": 124,
-//	  "doctor_id": 2,
-//	  "patient_id": 42
-//	}
-
-// CreateSMPReception godoc
-// @Summary Создать заключение на скорой
-// @Description Возвращает созданное заключение
-// @Tags SMP
-// @Accept json
-// @Produce json
-// @Param input body models.CreateReceptionSmp true "Данные для создания заключения"
-// @Success 200 {object} entities.ReceptionSMP "Создание заключения для пациента"
-// @Failure 400 {object} IncorrectFormatError "Неверный формат запроса"
-// @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
-// @Router /emergency/receptions [post]
-func (h *Handler) CreateSMPReception(c *gin.Context) {
-	var input models.CreateReceptionSmp
-	if err := c.ShouldBindJSON(&input); err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
-		return
-	}
-
-	if err := validate.Struct(input); err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
-		return
-	}
-
-	emergency, eerr := h.usecase.CreateReceptionSMP(&input)
-	if eerr != nil {
-		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
-		return
-	}
-
-	h.ResultResponse(c, "Success emergency reception create", Object, emergency)
-}
-
-// UpdatePatientSMP godoc
-// @Summary Обновить заключение на скорой
-// @Description Обновляет существующее заключение по ID
-// @Tags SMP
-// @Accept json
-// @Produce json
-// @Param id path int true "ID заключения"
-// @Param input body models.UpdatePatientSMP true "Данные для обновления заключения"
-// @Success 200 {object} entities.ReceptionSMP "Обновлённое заключение"
-// @Failure 400 {object} IncorrectFormatError "Неверный формат запроса"
-// @Failure 404 {object} NotFoundError "Заключение не найдено"
-// @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
-// @Router /emergency/receptions/{id} [put]
-func (h *Handler) UpdatePatientSMP(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
-		return
-	}
-
-	var input models.CreateReceptionSmp
-	if err := c.ShouldBindJSON(&input); err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
-		return
-	}
-
-	if err := validate.Struct(input); err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
-		return
-	}
-
-	// reception, eerr := h.usecase.UpdatePatientSMP(id, &input)
-	// if eerr != nil {
-	// 	h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
-	// 	return
-	// }
-
-	h.ResultResponse(c, "Success emergency reception update", Object, id)
-}
-
-// DeleteSMPReception godoc
-// @Summary Удалить заключение на скорой
-// @Description Удаляет заключение по ID
-// @Tags SMP
-// @Param id path int true "ID заключения"
-// @Success 200 {object} SuccessResponse "Заключение успешно удалено"
-// @Failure 400 {object} IncorrectFormatError "Неверный ID"
-// @Failure 404 {object} NotFoundError "Заключение не найдено"
-// @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
-// @Router /emergency/receptions/{id} [delete]
-func (h *Handler) DeleteSMPReception(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
-		return
-	}
-
-	// eerr := h.usecase.DeleteReceptionSMP(id)
-	// if eerr != nil {
-	// 	h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
-	// 	return
-	// }
-
-	h.ResultResponse(c, "Emergency reception deleted successfully", Empty, id)
-}
-
-// CreateSMP godoc
-// @Summary Создать заключение на скорой
-// @Description Возвращает созданное заключение
-// @Tags SMP
-// @Accept json
-// @Produce json
-// @Param input body models.CreateReceptionSmp true "Данные для создания заключения"
-// @Success 200 {object} entities.ReceptionSMP "Создание заключения для пациента"
-// @Failure 400 {object} IncorrectFormatError "Неверный формат запроса"
-// @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
-// @Router /emergency/receptions [post]
-func (h *Handler) CreateSMP(c *gin.Context) {
-	var input models.CreateEmergencyCallRequest
-	if err := c.ShouldBindJSON(&input); err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
-		return
-	}
-
-	if err := validate.Struct(input); err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
-		return
-	}
-
-	emergency, eerr := h.usecase.CreateSMP(&input)
-	if eerr != nil {
-		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
-		return
-	}
-
-	h.ResultResponse(c, "Success emergency reception create", Object, emergency)
-}
-
-// UpdateReceptionSMPByReceptionID godoc
-// @Summary Обновить приём скорой
-// @Description Обновляет информацию о приёме скорой
-// @Tags SMP
-// @Accept json
-// @Produce json
-// @Param recep_id path uint true "ID приёма"
-// @Param info body map[string]interface{} true "JSON с полями: status, diagnosis, recommendations" example({"status":"approved","diagnosis":"Гипертония","recommendations":"Покой"})
-// @Success 200 {array} entities.ReceptionSMP
-// @Failure 400 {object} IncorrectFormatError "Неверный формат запроса"
-// @Failure 401 {object} IncorrectDataError "Некорректный ID приёма"
-// @Failure 422 {object} ValidationError "Ошибка валидации"
-// @Failure 500 {object} InternalServerError "Внутренняя ошибка сервера"
-// @Router /emergency/receptions/{recep_id} [put]
-func (h *Handler) UpdateReceptionSMPByReceptionID(c *gin.Context) {
-	smp_id, err := h.service.ParseUintString(c.Param("recep_id"))
-
-	if err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "parameter 'smp_id' must be an integer", false)
-		return
-	}
-
-	var input map[string]interface{}
-	if err := c.ShouldBindJSON(&input); err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "Error update ReceptionSMPRequest", true)
-		return
-	}
-
-	// if err := validate.Struct(input); err != nil {
-	// 	h.ErrorResponse(c, err, 422, "Error validate ReceptionSMPRequest", true)
-	// 	return
-	// }
-
-	recepResponse, eerr := h.usecase.UpdateReceptionSMP(smp_id, input)
-	if eerr != nil {
-		h.ErrorResponse(c, eerr.Err, eerr.Code, eerr.Message, eerr.IsUserFacing)
-		return
-	}
-	h.ResultResponse(c, "Success reception hospital update", Object, recepResponse)
-}
-
 func (h *Handler) SaveSignature(c *gin.Context) {
-	patientID, err := h.service.ParseUintString(c.Param("recep_id"))
-	if err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
-		return
-	}
+	// patientID, err := h.service.ParseUintString(c.Param("recep_id"))
+	// if err != nil {
+	// 	h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
+	// 	return
+	// }
 
 	// читаем файл из multipart
 	file, err := c.FormFile("signature")
@@ -313,33 +32,52 @@ func (h *Handler) SaveSignature(c *gin.Context) {
 	defer openedFile.Close()
 
 	// читаем все байты
-	signatureBytes, err := io.ReadAll(openedFile)
+	// signatureBytes, err := io.ReadAll(openedFile)
 	if err != nil {
 		h.ErrorResponse(c, err, http.StatusInternalServerError, errors.InternalServerError, false)
 		return
 	}
 
 	// сохраняем через usecase
-	if appErr := h.usecase.SavePatientSignature(patientID, signatureBytes); appErr != nil {
-		h.ErrorResponse(c, appErr.Err, appErr.Code, appErr.Message, appErr.IsUserFacing)
-		return
-	}
+	// if appErr := h.usecase.SavePatientSignature(patientID, signatureBytes); appErr != nil {
+	// 	h.ErrorResponse(c, appErr.Err, appErr.Code, appErr.Message, appErr.IsUserFacing)
+	// 	return
+	// }
 
 	h.ResultResponse(c, "Signature saved", Object, nil)
 }
 
 func (h *Handler) GetSignature(c *gin.Context) {
-	patientID, err := h.service.ParseUintString(c.Param("recep_id"))
+	// patientID, err := h.service.ParseUintString(c.Param("recep_id"))
+	// if err != nil {
+	// 	h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
+	// 	return
+	// }
+
+	// // signature, appErr := h.usecase.GetPatientSignature(patientID)
+	// if appErr != nil {
+	// 	h.ErrorResponse(c, appErr.Err, appErr.Code, appErr.Message, appErr.IsUserFacing)
+	// 	return
+	// }
+
+	// h.ResultResponse(c, "Signature fetched", Object, gin.H{"signatureBase64": signature})
+}
+
+func (h *Handler) GetPdf(c *gin.Context) {
+	fmt.Println("Зашли для получения pdf")
+	dir, err := os.Getwd() // текущая рабочая директория, обычно это cmd/app
+	fmt.Println("директория:", dir)
 	if err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, errors.BadRequest, true)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get working directory"})
 		return
 	}
 
-	signature, appErr := h.usecase.GetPatientSignature(patientID)
-	if appErr != nil {
-		h.ErrorResponse(c, appErr.Err, appErr.Code, appErr.Message, appErr.IsUserFacing)
+	pdfPath := filepath.Join(dir, "assets", "mobileapp.pdf")
+
+	if _, err := os.Stat(pdfPath); os.IsNotExist(err) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "PDF not found"})
 		return
 	}
 
-	h.ResultResponse(c, "Signature fetched", Object, gin.H{"signatureBase64": signature})
+	c.File(pdfPath) // Gin сам установит нужные заголовки
 }

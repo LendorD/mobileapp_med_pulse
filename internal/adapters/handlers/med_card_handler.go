@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,21 +20,17 @@ import (
 func (h *Handler) GetMedCardByPatientID(c *gin.Context) {
 	patientID := c.Param("pat_id")
 	if patientID == "" {
-		h.ErrorResponse(c, http.ErrBodyNotAllowed, http.StatusBadRequest, "Failed to parse patientID", true)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "patient_id is required"})
 		return
 	}
 
 	card, err := h.usecase.GetMedCardByPatientID(c.Request.Context(), patientID)
 	if err != nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "Failed to fetch medical card", true)
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "medical card not found"})
 		return
 	}
 
-	if card == nil {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "Medical card not found", true)
-		return
-	}
-	h.ResultResponse(c, "success", Object, card)
+	c.JSON(http.StatusOK, card) // ← entities.OneCMedicalCard с тегами json
 }
 
 // UpdateMedCard godoc
@@ -51,29 +47,26 @@ func (h *Handler) GetMedCardByPatientID(c *gin.Context) {
 func (h *Handler) UpdateMedCard(c *gin.Context) {
 	patientID := c.Param("pat_id")
 	if patientID == "" {
-		h.ErrorResponse(c, http.ErrBodyNotAllowed, http.StatusBadRequest, "Failed to parse patientID", true)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "patient_id is required"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "patient_id is required"})
 		return
 	}
 
-	var req models.UpdateMedicalCardRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		h.ErrorResponse(c, http.ErrBodyNotAllowed, http.StatusBadRequest, "Invalid request body", true)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+	var card entities.OneCMedicalCard
+	if err := c.ShouldBindJSON(&card); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
 	}
 
 	// Убеждаемся, что ID из URL совпадает с ID в теле
-	if req.PatientID != patientID {
-		h.ErrorResponse(c, http.ErrBodyNotAllowed, http.StatusBadRequest, "Patient_id in URL and body must match", true)
+	if card.PatientID != patientID {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "patient_id in URL and body must match"})
 		return
 	}
 
-	err := h.usecase.UpdateMedicalCard(c.Request.Context(), &req)
-	if err != nil {
-		h.ErrorResponse(c, http.ErrBodyNotAllowed, http.StatusBadRequest, "Failed to update medical card", true)
+	if err := h.usecase.UpdateMedicalCard(c.Request.Context(), &card); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "failed to update medical card"})
 		return
 	}
 
-	h.ResultResponse(c, "success", Empty, nil)
+	c.Status(http.StatusOK)
 }

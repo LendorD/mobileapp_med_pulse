@@ -12,24 +12,23 @@ import (
 )
 
 type OneCWebhookUsecase struct {
-	cacheRepo interfaces.OneCCacheRepository
-	hub       *websocket.Hub
+	repo interfaces.ReceptionSmpRepository
+	hub  *websocket.Hub
 }
 
 func NewOneCWebhookUsecase(
-	cacheRepo interfaces.OneCCacheRepository,
+	repo interfaces.ReceptionSmpRepository,
 	hub *websocket.Hub,
 ) interfaces.OneCWebhookUsecase {
 	return &OneCWebhookUsecase{
-		cacheRepo: cacheRepo,
-		hub:       hub,
+		repo: repo,
+		hub:  hub,
 	}
 }
 
 // HandleReceptionsUpdate — обрабатывает обновление от 1С
 func (u *OneCWebhookUsecase) HandleReceptionsUpdate(ctx context.Context, call models.Call) error {
-	// 1. Сохраняем пациентов вызова в Redis по CallID (строка)
-	err := u.cacheRepo.SaveReceptions(ctx, call.CallID, call.Patients)
+	err := u.repo.SaveReceptions(ctx, call.CallID, call.Patients)
 	if err != nil {
 		return err
 	}
