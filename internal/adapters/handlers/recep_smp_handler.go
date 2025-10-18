@@ -75,7 +75,7 @@ func (h *Handler) GetPdf(c *gin.Context) {
 	pdfPath := filepath.Join(dir, "assets", "mobileapp.pdf")
 
 	if _, err := os.Stat(pdfPath); os.IsNotExist(err) {
-		c.JSON(http.StatusNotFound, gin.H{"error": "PDF not found"})
+		h.ErrorResponse(c, err, http.StatusBadRequest, "PDF not found", true)
 		return
 	}
 

@@ -68,9 +68,9 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 
 	//Запросы от 1С
 	webhook := baseRouter.Group("webhook")
-	webhook.POST("/onec/receptions", h.OneCWebhook)
-	webhook.POST("/onec/patients", h.OneCPatientListWebhook)
-	webhook.POST("/onec/auth", h.OneCAuthWebhook)
+	webhook.POST("/onec/receptions", h.OneCWebhook)          // Получение заявок
+	webhook.POST("/onec/patients", h.OneCPatientListWebhook) // получение списка пациентов
+	webhook.POST("/onec/auth", h.OneCAuthWebhook)            // Получение списка авторизации
 
 	//Версия
 	baseRouter.GET("/version", h.GetVersionProject)

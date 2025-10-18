@@ -23,14 +23,12 @@ func (h *Handler) OneCPatientListWebhook(c *gin.Context) {
 	var update entities.PatientListUpdate
 	if err := c.ShouldBindJSON(&update); err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "Invalid patient list update payload", true)
-		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 
 	err := h.usecase.HandlePatientListUpdate(c.Request.Context(), update)
 	if err != nil {
 		h.ErrorResponse(c, err, http.StatusBadRequest, "Failed to handle patient list update", true)
-		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	h.ResultResponse(c, "success", Empty, nil)

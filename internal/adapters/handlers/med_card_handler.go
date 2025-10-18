@@ -20,17 +20,16 @@ import (
 func (h *Handler) GetMedCardByPatientID(c *gin.Context) {
 	patientID := c.Param("pat_id")
 	if patientID == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "patient_id is required"})
+		h.ErrorResponse(c, http.ErrAbortHandler, http.StatusBadRequest, "patient_id is required", true)
 		return
 	}
 
 	card, err := h.usecase.GetMedCardByPatientID(c.Request.Context(), patientID)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "medical card not found"})
+		h.ErrorResponse(c, err, http.StatusBadRequest, "medical card not found", true)
 		return
 	}
-
-	c.JSON(http.StatusOK, card) // ← entities.OneCMedicalCard с тегами json
+	h.ResultResponse(c, "success", Object, card)
 }
 
 // UpdateMedCard godoc
@@ -47,26 +46,25 @@ func (h *Handler) GetMedCardByPatientID(c *gin.Context) {
 func (h *Handler) UpdateMedCard(c *gin.Context) {
 	patientID := c.Param("pat_id")
 	if patientID == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "patient_id is required"})
+		h.ErrorResponse(c, http.ErrAbortHandler, http.StatusBadRequest, "patient_id is required", true)
 		return
 	}
 
 	var card entities.OneCMedicalCard
 	if err := c.ShouldBindJSON(&card); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		h.ErrorResponse(c, err, http.StatusBadRequest, "invalid request body", true)
 		return
 	}
 
 	// Убеждаемся, что ID из URL совпадает с ID в теле
 	if card.PatientID != patientID {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "patient_id in URL and body must match"})
+		h.ErrorResponse(c, http.ErrAbortHandler, http.StatusBadRequest, "patient_id in URL and body must match", true)
 		return
 	}
 
 	if err := h.usecase.UpdateMedicalCard(c.Request.Context(), &card); err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "failed to update medical card"})
+		h.ErrorResponse(c, err, http.StatusBadRequest, "failed to update medical card", true)
 		return
 	}
-
-	c.Status(http.StatusOK)
+	h.ResultResponse(c, "success", Empty, nil)
 }
