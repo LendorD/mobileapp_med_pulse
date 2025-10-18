@@ -8,7 +8,6 @@ import (
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/medcard"
 	receptionSmp "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/reception_smp"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/auth"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/doctor"
@@ -55,11 +54,11 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 		return nil, fmt.Errorf("ошибка подключения к базе данных: %w", err)
 	}
 
-	// Выполнение автомиграций
-	if err := autoMigrate(db); err != nil {
-		return nil, fmt.Errorf("ошибка выполнения автомиграций: %w", err)
+	// // Выполнение автомиграций
+	// if err := autoMigrate(db); err != nil {
+	// 	return nil, fmt.Errorf("ошибка выполнения автомиграций: %w", err)
 
-	}
+	// }
 
 	return &Repository{
 		auth.NewAuthRepository(db),
@@ -71,57 +70,57 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 
 }
 
-// autoMigrate - выполнение автомиграций для моделей
-func autoMigrate(db *gorm.DB) error {
+// // autoMigrate - выполнение автомиграций для моделей
+// func autoMigrate(db *gorm.DB) error {
 
-	// Удаляем таблицы в правильном порядке зависимостей
-	tables := []string{
-		"reception_smp_med_services",
-		"patient_allergy",
-		"receptions_smp_patient",
-		"reception_hospitals",
-		"reception_smps",
-		"emergency_calls",
-		"contact_infos",
-		"personal_infos",
-		"patients",
-		"doctors",
-		"med_services",
-		"allergies",
-		"specializations",
-	}
+// 	// Удаляем таблицы в правильном порядке зависимостей
+// 	tables := []string{
+// 		"reception_smp_med_services",
+// 		"patient_allergy",
+// 		"receptions_smp_patient",
+// 		"reception_hospitals",
+// 		"reception_smps",
+// 		"emergency_calls",
+// 		"contact_infos",
+// 		"personal_infos",
+// 		"patients",
+// 		"doctors",
+// 		"med_services",
+// 		"allergies",
+// 		"specializations",
+// 	}
 
-	for _, table := range tables {
-		if err := db.Migrator().DropTable(table); err != nil {
-			return fmt.Errorf("failed to drop table %s: %w", table, err)
-		}
-	}
+// 	for _, table := range tables {
+// 		if err := db.Migrator().DropTable(table); err != nil {
+// 			return fmt.Errorf("failed to drop table %s: %w", table, err)
+// 		}
+// 	}
 
-	// Создаем таблицы
-	models := []interface{}{
-		&entities.Specialization{},
-		&entities.Doctor{},
-		&entities.Patient{},
-		&entities.ContactInfo{},
-		&entities.PersonalInfo{},
-		&entities.MedService{},
-		&entities.Allergy{},
-		&entities.ReceptionHospital{},
-		&entities.ReceptionSMP{},
-		&entities.EmergencyCall{},
-	}
+// 	// Создаем таблицы
+// 	models := []interface{}{
+// 		&entities.Specialization{},
+// 		&entities.Doctor{},
+// 		&entities.Patient{},
+// 		&entities.ContactInfo{},
+// 		&entities.PersonalInfo{},
+// 		&entities.MedService{},
+// 		&entities.Allergy{},
+// 		&entities.ReceptionHospital{},
+// 		&entities.ReceptionSMP{},
+// 		&entities.EmergencyCall{},
+// 	}
 
-	if err := db.AutoMigrate(models...); err != nil {
-		return fmt.Errorf("failed to auto-migrate: %w", err)
-	}
+// 	if err := db.AutoMigrate(models...); err != nil {
+// 		return fmt.Errorf("failed to auto-migrate: %w", err)
+// 	}
 
-	// Заполняем тестовыми данными
-	// if err := seedTestData(db); err != nil {
-	// 	return fmt.Errorf("failed to seed test data: %w", err)
-	// }
+// 	// Заполняем тестовыми данными
+// 	// if err := seedTestData(db); err != nil {
+// 	// 	return fmt.Errorf("failed to seed test data: %w", err)
+// 	// }
 
-	return nil
-}
+// 	return nil
+// }
 
 // func seedTestData(db *gorm.DB) error {
 // 	// 1. Создаем специализации

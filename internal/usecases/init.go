@@ -7,6 +7,7 @@ import (
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
 	_ "github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
+	httpClient "github.com/AlexanderMorozov1919/mobileapp/internal/http/onec"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services/websocket"
 	_ "github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
@@ -25,7 +26,7 @@ func NewUsecases(
 	s interfaces.Service,
 	conf *config.Config,
 	hub *websocket.Hub,
-	onecClient interfaces.OneCClient,
+	onecClient httpClient.Client,
 ) interfaces.Usecases {
 
 	return &UseCases{

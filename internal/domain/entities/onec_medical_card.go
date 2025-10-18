@@ -1,7 +1,7 @@
 // internal/domain/entities/onec_medical_card.go
 package entities
 
-// OneCMedicalCard — используется и для БД, и для JSON
+// OneCMedicalCard — мед карта пациента,  используется и для БД, и для JSON
 type OneCMedicalCard struct {
 	ID        uint   `gorm:"primaryKey" json:"-"`
 	PatientID string `gorm:"not null;uniqueIndex" json:"patient_id"`

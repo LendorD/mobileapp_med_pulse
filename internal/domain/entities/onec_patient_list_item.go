@@ -11,4 +11,6 @@ type OneCPatientListItem struct {
 	FullName  string `gorm:"not null"`
 	Gender    bool   // true — мужской
 	BirthDate string // в формате "YYYY-MM-DD"
+
+	MedicalCard *OneCMedicalCard `gorm:"foreignKey:PatientID;references:PatientID" json:"medical_card,omitempty"`
 }

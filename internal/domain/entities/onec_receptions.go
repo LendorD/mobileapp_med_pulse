@@ -2,7 +2,7 @@ package entities
 
 import "time"
 
-// OneCReception — приём (список пациентов) по вызову скорой
+// OneCReception — заявка на скорую
 type OneCReception struct {
 	ID        uint   `gorm:"primaryKey"`
 	CallID    string `gorm:"uniqueIndex"` // ID вызова из 1С

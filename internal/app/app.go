@@ -2,25 +2,20 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"time"
 
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/handlers"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/auth"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/cache"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/external/onec"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/http/handlers"
+	httpClient "github.com/AlexanderMorozov1919/mobileapp/internal/http/onec"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/swagger"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services/websocket"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/usecases"
-	"github.com/redis/go-redis/v9"
 	"go.uber.org/fx"
 )
 
@@ -60,16 +55,6 @@ var LoggingModule = fx.Module("logging_module",
 		l.Info("Logging system initialized")
 	}),
 )
-
-func ProvideRedisCache(client *redis.Client) *cache.RedisCache {
-	// Проверка подключения
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-	if err := client.Ping(ctx).Err(); err != nil {
-		panic(fmt.Sprintf("Failed to connect to Redis: %v", err))
-	}
-	return &cache.RedisCache{Client: client} // ← обнови RedisCache, чтобы он хранил *redis.Client
-}
 
 func InvokeHttpServer(lc fx.Lifecycle, h http.Handler) {
 	server := &http.Server{
@@ -138,8 +123,8 @@ var AuthModule = fx.Module("auth_module",
 	),
 )
 
-func ProvideOneCClient(cfg *config.Config) interfaces.OneCClient {
-	return onec.NewClient(cfg.OneC)
+func ProvideOneCClient(cfg *config.Config) *httpClient.Client {
+	return httpClient.NewClient(cfg.OneC)
 }
 
 var OneCModule = fx.Module("onec_module",
