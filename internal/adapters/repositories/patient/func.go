@@ -5,6 +5,7 @@ import (
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // SavePatientList сохраняет полный список пациентов (заменяет текущий)
@@ -17,6 +18,24 @@ func (r *PatientRepositoryImpl) SavePatientList(ctx context.Context, patients []
 		// Вставляем новые данные
 		if len(patients) > 0 {
 			return tx.CreateInBatches(patients, 100).Error
+		}
+		return nil
+	})
+}
+
+// SaveOrUpdatePatientList сохраняет список пациентов, обновляя существующих и добавляя новых
+func (r *PatientRepositoryImpl) SaveOrUpdatePatientList(ctx context.Context, patients []entities.OneCPatientListItem) error {
+	if len(patients) == 0 {
+		return nil
+	}
+
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// Вставляем или обновляем существующих по PatientID
+		if err := tx.Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "patient_id"}}, // уникальное поле
+			UpdateAll: true,                                  // обновляем все поля при конфликте
+		}).CreateInBatches(patients, 100).Error; err != nil {
+			return err
 		}
 		return nil
 	})

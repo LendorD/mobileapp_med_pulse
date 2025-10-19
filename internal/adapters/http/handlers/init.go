@@ -56,6 +56,19 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	// Logger
 	r.Use(LoggingMiddleware(h.logger))
 
+	// Общая группа для API
+	baseRouter := r.Group("/api/v1")
+
+	protected := baseRouter.Group("/")
+	// protected.Use(middleware.JWTAuth(cfg.JWTSecret))
+
+	//Версия
+	baseRouter.GET("/version", h.GetVersionProject)
+
+	// Авторизация
+	authGroup := baseRouter.Group("/auth")
+	authGroup.POST("/", h.LoginDoctor)
+
 	// WebSocket-группа
 	wsGroup := r.Group("/ws/notification")
 	// wsGroup.Use(middleware.JWTAuth(cfg.JWTSecret))
@@ -63,23 +76,11 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	wsGroup.GET("/register/:user_id", ws.Register)
 	wsGroup.GET("/unregister/:user_id", ws.Unregister)
 
-	// Общая группа для API
-	baseRouter := r.Group("/api/v1")
-
 	//Запросы от 1С
 	webhook := baseRouter.Group("webhook")
 	webhook.POST("/onec/receptions", h.OneCWebhook)          // Получение заявок
 	webhook.POST("/onec/patients", h.OneCPatientListWebhook) // получение списка пациентов
 	webhook.POST("/onec/auth", h.OneCAuthWebhook)            // Получение списка авторизации
-
-	//Версия
-	baseRouter.GET("/version", h.GetVersionProject)
-	// Авторизация
-	authGroup := baseRouter.Group("/auth")
-	authGroup.POST("/", h.LoginDoctor)
-
-	protected := baseRouter.Group("/")
-	// protected.Use(middleware.JWTAuth(cfg.JWTSecret))
 
 	// Пациенты
 	patientGroup := protected.Group("/patients")
@@ -90,7 +91,7 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	medCardGroup.GET("/:pat_id", h.GetMedCardByPatientID)
 	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
 
-	// Скорая медицинская помощь
+	// Выезд
 	emergencyGroup := protected.Group("/emergency")
 
 	//Подписи пациентов

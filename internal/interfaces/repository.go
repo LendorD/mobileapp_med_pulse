@@ -38,6 +38,7 @@ type ReceptionSmpRepository interface {
 type PatientRepository interface {
 	// Список пациентов
 	SavePatientList(ctx context.Context, patients []entities.OneCPatientListItem) error
+	SaveOrUpdatePatientList(ctx context.Context, patients []entities.OneCPatientListItem) error
 	GetPatientListPage(ctx context.Context, offset, limit int) ([]entities.OneCPatientListItem, int64, error)
 }
 

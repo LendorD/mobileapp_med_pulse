@@ -5,16 +5,18 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/http/handlers"
+	httpClient "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/http/onec"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/auth"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
-	"github.com/AlexanderMorozov1919/mobileapp/internal/http/handlers"
-	httpClient "github.com/AlexanderMorozov1919/mobileapp/internal/http/onec"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/swagger"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services/websocket"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/services/workers"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/usecases"
 	"go.uber.org/fx"
 )
@@ -73,7 +75,6 @@ func InvokeHttpServer(lc fx.Lifecycle, h http.Handler) {
 	})
 }
 
-// Swagger-конфигуратор
 func NewSwaggerConfig(cfg *config.Config) *swagger.Config {
 	return &swagger.Config{
 		Enabled: true,
@@ -128,15 +129,44 @@ func ProvideOneCClient(cfg *config.Config) *httpClient.Client {
 }
 
 var OneCModule = fx.Module("onec_module",
-	fx.Provide(ProvideOneCClient),
-	fx.Provide(usecases.NewOneCWebhookUsecase),
+	fx.Provide(
+		ProvideOneCClient,
+		usecases.NewOneCWebhookUsecase,
+		ProvidePatientSyncWorker,
+	),
 )
 
 var WebsocketModule = fx.Module("websocket_module",
-	fx.Provide(ProvideStdLogger),
-	fx.Provide(websocket.NewHub),
+	fx.Provide(ProvideStdLogger,
+		websocket.NewHub,
+	),
 	fx.Invoke(websocket.InvokeHub),
 )
+
+func ProvidePatientSyncWorker(lc fx.Lifecycle, uc *usecases.OneCPatientUsecase, cfg *config.Config) *workers.PatientSyncWorker {
+	interval := time.Minute * 5
+	// if cfg.PatientSyncInterval > 0 {
+	// 	interval = time.Duration(cfg.PatientSyncInterval) * time.Second
+	// }
+
+	worker := &workers.PatientSyncWorker{
+		Usecase:  uc,
+		Interval: interval,
+	}
+
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			go worker.Start(ctx)
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			worker.Stop()
+			return nil
+		},
+	})
+
+	return worker
+}
 
 // TODO: Может быть вынести в services
 func IntToUint(c int) uint {
