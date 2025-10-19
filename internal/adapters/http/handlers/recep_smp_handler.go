@@ -33,10 +33,10 @@ func (h *Handler) SaveSignature(c *gin.Context) {
 
 	// читаем все байты
 	// signatureBytes, err := io.ReadAll(openedFile)
-	if err != nil {
-		h.ErrorResponse(c, err, http.StatusInternalServerError, errors.InternalServerError, false)
-		return
-	}
+	// if err != nil {
+	// 	h.ErrorResponse(c, err, http.StatusInternalServerError, errors.InternalServerError, false)
+	// 	return
+	// }
 
 	// сохраняем через usecase
 	// if appErr := h.usecase.SavePatientSignature(patientID, signatureBytes); appErr != nil {

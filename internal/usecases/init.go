@@ -14,7 +14,6 @@ import (
 )
 
 type UseCases struct {
-	interfaces.ReceptionSmpUsecase
 	interfaces.MedCardUsecase
 	interfaces.AuthUsecase
 	interfaces.OneCWebhookUsecase
@@ -30,7 +29,6 @@ func NewUsecases(
 ) interfaces.Usecases {
 
 	return &UseCases{
-		NewReceptionSmpUsecase(r, r),
 		NewMedCardUsecase(r, onecClient),
 		NewAuthUsecase(r, conf.JWTSecret),
 		NewOneCWebhookUsecase(r, hub),

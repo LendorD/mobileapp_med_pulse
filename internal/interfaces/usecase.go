@@ -36,5 +36,5 @@ type MedCardUsecase interface {
 
 type AuthUsecase interface {
 	SyncUsers(ctx context.Context, users []entities.AuthUser) error
-	LoginDoctor(ctx context.Context, phone, password string) (uint, string, *errors.AppError)
+	LoginDoctor(ctx context.Context, phone, password string) (*models.DoctorAuthResponse, *errors.AppError)
 }

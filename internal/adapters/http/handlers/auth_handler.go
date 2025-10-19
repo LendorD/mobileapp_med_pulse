@@ -23,23 +23,20 @@ func (h *Handler) LoginDoctor(c *gin.Context) {
 	var req models.DoctorLoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Error("Error decoding auth request", "error", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+		h.ErrorResponse(c, err, http.StatusBadRequest, "Invalid request payload", true)
 		return
 	}
 
 	h.logger.Info("Auth attempt", "phone", req.Phone)
 
-	id, token, err := h.usecase.LoginDoctor(c.Request.Context(), req.Phone, req.Password)
+	credentials, err := h.usecase.LoginDoctor(c.Request.Context(), req.Phone, req.Password)
 	if err != nil {
 		h.logger.Warn("Auth failed", "phone", req.Phone, "error", err)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		h.ErrorResponse(c, err, http.StatusBadRequest, "Invalid credentials", true)
 		return
 	}
 
-	c.JSON(http.StatusOK, models.DoctorAuthResponse{
-		ID:    id,
-		Token: token,
-	})
+	h.ResultResponse(c, "success", Object, credentials)
 }
 
 func (h *Handler) GetVersionProject(c *gin.Context) {

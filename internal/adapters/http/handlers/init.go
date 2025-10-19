@@ -5,6 +5,7 @@ import (
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
+	middleware "github.com/AlexanderMorozov1919/mobileapp/internal/middleware/jwt"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/swagger"
 	"github.com/gin-gonic/gin"
@@ -60,7 +61,7 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	baseRouter := r.Group("/api/v1")
 
 	protected := baseRouter.Group("/")
-	// protected.Use(middleware.JWTAuth(cfg.JWTSecret))
+	protected.Use(middleware.JWTAuth(cfg.JWTSecret))
 
 	//Версия
 	baseRouter.GET("/version", h.GetVersionProject)

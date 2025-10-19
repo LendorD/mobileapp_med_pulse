@@ -53,7 +53,7 @@ func (h *Handler) GetPatientList(c *gin.Context) {
 	if err != nil || limit < 1 {
 		limit = 20
 	}
-	if limit > 100 { // ограничим максимум
+	if limit > 100 {
 		limit = 100
 	}
 
