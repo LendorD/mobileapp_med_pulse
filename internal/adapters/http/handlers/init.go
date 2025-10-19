@@ -67,7 +67,7 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	baseRouter.GET("/version", h.GetVersionProject)
 
 	// Авторизация
-	authGroup := baseRouter.Group("/auth")
+	authGroup := protected.Group("/auth")
 	authGroup.POST("/", h.LoginDoctor)
 
 	// WebSocket-группа
@@ -78,7 +78,7 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	wsGroup.GET("/unregister/:user_id", ws.Unregister)
 
 	//Запросы от 1С
-	webhook := baseRouter.Group("webhook")
+	webhook := protected.Group("webhook")
 	webhook.POST("/onec/receptions", h.OneCWebhook)          // Получение заявок
 	webhook.POST("/onec/patients", h.OneCPatientListWebhook) // получение списка пациентов
 	webhook.POST("/onec/auth", h.OneCAuthWebhook)            // Получение списка авторизации
