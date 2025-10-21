@@ -3,7 +3,6 @@
 // @description API для работы с приёмами пациентов
 // @contact.name API Support
 // @contact.email support@example.com
-// @host localhost:8080
 // @BasePath /api/v1
 package main
 

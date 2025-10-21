@@ -259,7 +259,6 @@ definitions:
           $ref: '#/definitions/entities.OneCPatientListItem'
         type: array
     type: object
-host: localhost:8080
 info:
   contact:
     email: support@example.com
