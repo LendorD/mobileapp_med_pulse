@@ -8,6 +8,7 @@ import (
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/medcard"
 	receptionSmp "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/reception_smp"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/tx"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/auth"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/doctor"
@@ -25,6 +26,7 @@ type Repository struct {
 	interfaces.PatientRepository
 	interfaces.ReceptionSmpRepository
 	interfaces.MedicalCardRepository
+	interfaces.TxManager
 }
 
 func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
@@ -66,6 +68,7 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 		patient.NewPatientRepository(db),
 		receptionSmp.NewReceptionSmpRepository(db),
 		medcard.NewMedicalCardRepository(db),
+		tx.NewTxManager(db),
 	}, nil
 
 }

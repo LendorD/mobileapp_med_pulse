@@ -1,37 +1,29 @@
 package httpClient
 
 import (
-	"bytes"
+	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
+
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 )
 
-func SendJSONRequest(httpMehod, url string, body []byte) ([]byte, error) {
-	req, err := http.NewRequest(httpMehod, url, bytes.NewBuffer(body))
+func (c *OneCClient) GetMedCardByPatientID(patientID string) (*entities.OneCMedicalCard, error) {
+	endpoint := fmt.Sprintf("/medical-card/%s", patientID)
+	req, err := c.CreateRequestJSON(http.MethodGet, endpoint, nil, nil, nil)
 	if err != nil {
-		return nil, fmt.Errorf("error creating request: %v", err)
+		return nil, fmt.Errorf("failed to create 1C request: %w", err)
 	}
 
-	// Устанавливаем заголовки, если нужно
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	body, _, err := c.DoRequest(req)
 	if err != nil {
-		return nil, fmt.Errorf("error sending request: %v", err)
-	}
-	defer resp.Body.Close()
-
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("error reading response body: %v", err)
+		return nil, fmt.Errorf("1C request error: %w", err)
 	}
 
-	// Пример обработки ответа (смотрите, что необходимо для вашего случая)
-	if resp.StatusCode != http.StatusOK {
-		return respBody, fmt.Errorf("unexpected status code %d", resp.StatusCode)
+	var patientCard entities.OneCMedicalCard
+	if err := json.Unmarshal(body, &patientCard); err != nil {
+		return nil, fmt.Errorf("unmarshal error: %w", err)
 	}
 
-	return respBody, nil
+	return &patientCard, nil
 }

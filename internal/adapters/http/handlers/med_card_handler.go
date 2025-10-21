@@ -12,7 +12,7 @@ import (
 // @Tags MedicalCard
 // @Produce json
 // @Param pat_id path string true "Patient ID"
-// @Success 200 {object} models.PatientCard
+// @Success 200 {object} entities.OneCMedicalCard
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -38,7 +38,7 @@ func (h *Handler) GetMedCardByPatientID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param pat_id path string true "Patient ID"
-// @Param update body models.UpdateMedicalCardRequest true "Medical card update data"
+// @Param update body entities.OneCMedicalCard true "Medical card update data"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string

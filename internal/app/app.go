@@ -12,6 +12,7 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/auth"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/swagger"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services"
@@ -124,8 +125,8 @@ var AuthModule = fx.Module("auth_module",
 	),
 )
 
-func ProvideOneCClient(cfg *config.Config) *httpClient.Client {
-	return httpClient.NewClient(cfg.OneC)
+func ProvideOneCClient(cfg *config.Config) interfaces.OneCClient {
+	return httpClient.NewOneCClient(cfg.OneC)
 }
 
 var OneCModule = fx.Module("onec_module",

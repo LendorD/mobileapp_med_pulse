@@ -5,6 +5,7 @@ import (
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
+	"gorm.io/gorm"
 )
 
 type Repository interface {
@@ -13,6 +14,13 @@ type Repository interface {
 	PatientRepository
 	ReceptionSmpRepository
 	MedicalCardRepository
+	TxManager
+}
+
+type TxManager interface {
+	Rollback(ctx context.Context) error
+	Commit(ctx context.Context) error
+	GetTransaction(ctx context.Context) *gorm.DB
 }
 
 type MedicalCardRepository interface {

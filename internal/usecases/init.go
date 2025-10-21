@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"strings"
 
-	httpClient "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/http/onec"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
 	_ "github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
@@ -25,11 +24,11 @@ func NewUsecases(
 	s interfaces.Service,
 	conf *config.Config,
 	hub *websocket.Hub,
-	onecClient httpClient.Client,
+	onecClient interfaces.OneCClient,
 ) interfaces.Usecases {
 
 	return &UseCases{
-		NewMedCardUsecase(r, onecClient),
+		NewMedCardUsecase(r, onecClient, r),
 		NewAuthUsecase(r, conf.JWTSecret),
 		NewOneCWebhookUsecase(r, hub),
 		NewOneCPatientListUsecase(r, onecClient),

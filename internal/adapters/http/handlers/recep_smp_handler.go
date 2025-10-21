@@ -1,15 +1,24 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
 
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"github.com/gin-gonic/gin"
 )
 
+// SaveSignature uploads a signature image for a given reception ID.
+// @Summary Upload patient signature
+// @Description Accepts a multipart form with a 'signature' file (e.g., PNG, JPG) and saves it.
+// @Tags Emergency
+// @Accept multipart/form-data
+// @Produce json
+// @Param recep_id path string true "Reception ID"
+// @Param signature formData file true "Signature image file"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /signature/{recep_id} [post]
 func (h *Handler) SaveSignature(c *gin.Context) {
 	// patientID, err := h.service.ParseUintString(c.Param("recep_id"))
 	// if err != nil {
@@ -47,6 +56,17 @@ func (h *Handler) SaveSignature(c *gin.Context) {
 	h.ResultResponse(c, "Signature saved", Object, nil)
 }
 
+// GetSignature retrieves the patient's signature by reception ID.
+// @Summary Get patient signature
+// @Description Returns the base64-encoded signature image for a given reception ID.
+// @Tags Emergency
+// @Produce json
+// @Param recep_id path string true "Reception ID"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /signature/{recep_id} [get]
 func (h *Handler) GetSignature(c *gin.Context) {
 	// patientID, err := h.service.ParseUintString(c.Param("recep_id"))
 	// if err != nil {
@@ -61,23 +81,4 @@ func (h *Handler) GetSignature(c *gin.Context) {
 	// }
 
 	// h.ResultResponse(c, "Signature fetched", Object, gin.H{"signatureBase64": signature})
-}
-
-func (h *Handler) GetPdf(c *gin.Context) {
-	fmt.Println("Зашли для получения pdf")
-	dir, err := os.Getwd() // текущая рабочая директория, обычно это cmd/app
-	fmt.Println("директория:", dir)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot get working directory"})
-		return
-	}
-
-	pdfPath := filepath.Join(dir, "assets", "mobileapp.pdf")
-
-	if _, err := os.Stat(pdfPath); os.IsNotExist(err) {
-		h.ErrorResponse(c, err, http.StatusBadRequest, "PDF not found", true)
-		return
-	}
-
-	c.File(pdfPath) // Gin сам установит нужные заголовки
 }

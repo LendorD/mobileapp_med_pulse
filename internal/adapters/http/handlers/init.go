@@ -99,7 +99,6 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	emergencyGroup.GET("/signature/:recep_id", h.GetSignature)
 	emergencyGroup.POST("/signature/:recep_id", h.SaveSignature)
 
-	emergencyGroup.GET("/pdf/:rec_id", h.GetPdf)
 	// emergencyGroup.POST("/pdf/:rec_id", h.UploadPdf)
 
 	return r

@@ -4,23 +4,19 @@ package usecases
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"strings"
 
-	httpClient "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/http/onec"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 )
 
 type OneCPatientUsecase struct {
 	repo       interfaces.PatientRepository
-	httpClient httpClient.Client
+	httpClient interfaces.OneCClient
 }
 
 func NewOneCPatientListUsecase(
 	repo interfaces.PatientRepository,
-	httpClient httpClient.Client,
+	httpClient interfaces.OneCClient,
 ) interfaces.OneCPatientUsecase {
 	return &OneCPatientUsecase{
 		repo:       repo,
@@ -45,28 +41,28 @@ func (u *OneCPatientUsecase) GetPatientListPage(ctx context.Context, offset, lim
 
 // UpdatePatientListFromOneC — получает список пациентов из 1С и сохраняет в БД
 func (u *OneCPatientUsecase) UpdatePatientListFromOneC(ctx context.Context) error {
-	req, err := u.httpClient.CreateRequestJSON("GET", "/patients", nil, nil, nil)
-	if err != nil {
-		return fmt.Errorf("failed to create 1C request: %w", err)
-	}
+	// req, err := u.httpClient.CreateRequestJSON("GET", "/patients", nil, nil, nil)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to create 1C request: %w", err)
+	// }
 
-	bodyBytes, _, err := u.httpClient.DoRequest(req)
-	if err != nil {
-		return fmt.Errorf("failed to send 1C request: %w", err)
-	}
+	// bodyBytes, _, err := u.httpClient.DoRequest(req)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to send 1C request: %w", err)
+	// }
 
-	var update entities.PatientListUpdate
-	if err := json.Unmarshal(bodyBytes, &update); err != nil {
-		return fmt.Errorf("failed to unmarshal 1C response: %w", err)
-	}
+	// var update entities.PatientListUpdate
+	// if err := json.Unmarshal(bodyBytes, &update); err != nil {
+	// 	return fmt.Errorf("failed to unmarshal 1C response: %w", err)
+	// }
 
-	if len(update.Patients) == 0 {
-		return fmt.Errorf("received empty patient list from 1C: %s", strings.TrimSpace(string(bodyBytes)))
-	}
+	// if len(update.Patients) == 0 {
+	// 	return fmt.Errorf("received empty patient list from 1C: %s", strings.TrimSpace(string(bodyBytes)))
+	// }
 
-	if err := u.repo.SaveOrUpdatePatientList(ctx, update.Patients); err != nil {
-		return fmt.Errorf("failed to save patients: %w", err)
-	}
+	// if err := u.repo.SaveOrUpdatePatientList(ctx, update.Patients); err != nil {
+	// 	return fmt.Errorf("failed to save patients: %w", err)
+	// }
 
 	return nil
 }

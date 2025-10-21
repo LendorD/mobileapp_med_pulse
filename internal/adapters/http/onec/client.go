@@ -10,10 +10,11 @@ import (
 	"strings"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 )
 
 // Client — HTTP-клиент для взаимодействия с 1С
-type Client struct {
+type OneCClient struct {
 	Host       string
 	HTTPClient *http.Client
 	username   string
@@ -21,13 +22,13 @@ type Client struct {
 }
 
 // NewClient создаёт новый клиент для 1С
-func NewClient(cfg config.OneCConfig) *Client {
+func NewOneCClient(cfg config.OneCConfig) interfaces.OneCClient {
 	// Создаём HTTP-клиент с таймаутом
 	client := &http.Client{
 		Timeout: cfg.Timeout,
 	}
 
-	return &Client{
+	return &OneCClient{
 		Host:       cfg.BaseURL,
 		HTTPClient: client,
 		username:   cfg.Username,
@@ -36,7 +37,7 @@ func NewClient(cfg config.OneCConfig) *Client {
 }
 
 // createRequestJSON to create request with json
-func (s *Client) CreateRequestJSON(httpMethod, endpoint string, queryParams, additionalHeaders map[string]string, reqBody io.Reader) (*http.Request, error) {
+func (s *OneCClient) CreateRequestJSON(httpMethod, endpoint string, queryParams, additionalHeaders map[string]string, reqBody io.Reader) (*http.Request, error) {
 	ctx := context.Background()
 
 	proccesedEndpoint, _ := strings.CutPrefix(endpoint, "/")
@@ -64,7 +65,7 @@ func (s *Client) CreateRequestJSON(httpMethod, endpoint string, queryParams, add
 	return req, nil
 }
 
-func (s *Client) DoRequest(req *http.Request) ([]byte, *http.Response, error) {
+func (s *OneCClient) DoRequest(req *http.Request) ([]byte, *http.Response, error) {
 	resp, err := s.HTTPClient.Do(req)
 	if err != nil {
 		return nil, resp, err
