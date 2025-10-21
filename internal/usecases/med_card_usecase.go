@@ -49,20 +49,13 @@ func (u *MedCardUsecase) GetMedCardByPatientID(ctx context.Context, patientID st
 
 // UpdateMedicalCard — обновляет карту в 1С и БД
 func (u *MedCardUsecase) UpdateMedicalCard(ctx context.Context, card *entities.OneCMedicalCard) error {
-	// body, err := json.Marshal(card)
-	// if err != nil {
-	// 	return fmt.Errorf("marshal error: %w", err)
-	// }
+	if err := u.onecClient.UpdateMedCardByPatientID(card.PatientID, card); err != nil {
+		return fmt.Errorf("failed to update in 1C: %w", err)
+	}
 
-	// url := "/medical-card/" + card.PatientID
-	// _, err = u.onecClient.CreateRequestJSON(http.MethodPost, url, body)
-	// if err != nil {
-	// 	return fmt.Errorf("1C update error: %w", err)
-	// }
-
-	// if err := u.repo.SaveMedicalCard(ctx, card); err != nil {
-	// 	fmt.Printf("warn: failed to update cache: %v\n", err)
-	// }
+	if err := u.repo.SaveMedicalCard(ctx, card); err != nil {
+		fmt.Printf("warn: failed to update local cache for patient %s: %v\n", card.PatientID, err)
+	}
 
 	return nil
 }

@@ -72,6 +72,11 @@ const docTemplate = `{
         },
         "/medcard/{pat_id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -125,6 +130,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -235,6 +245,11 @@ const docTemplate = `{
         },
         "/patients": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -268,6 +283,11 @@ const docTemplate = `{
         },
         "/signature/{recep_id}": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Returns the base64-encoded signature image for a given reception ID.",
                 "produces": [
                     "application/json"
@@ -325,6 +345,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Accepts a multipart form with a 'signature' file (e.g., PNG, JPG) and saves it.",
                 "consumes": [
                     "multipart/form-data"
@@ -893,6 +918,14 @@ const docTemplate = `{
                     }
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "Type \"Bearer \u003cJWT\u003e\" to authenticate",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

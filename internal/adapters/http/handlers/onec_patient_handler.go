@@ -41,6 +41,7 @@ func (h *Handler) OneCPatientListWebhook(c *gin.Context) {
 // @Param page query int false "Page number (default: 1)"
 // @Param limit query int false "Items per page (default: 20, max: 100)"
 // @Success 200 {object} models.PatientListResponse
+// @Security ApiKeyAuth
 // @Router /patients [get]
 func (h *Handler) GetPatientList(c *gin.Context) {
 	// Получаем параметры пагинации

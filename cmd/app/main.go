@@ -4,6 +4,10 @@
 // @contact.name API Support
 // @contact.email support@example.com
 // @BasePath /api/v1
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer <JWT>" to authenticate
 package main
 
 import (

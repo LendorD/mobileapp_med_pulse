@@ -1,6 +1,7 @@
 package httpClient
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -26,4 +27,26 @@ func (c *OneCClient) GetMedCardByPatientID(patientID string) (*entities.OneCMedi
 	}
 
 	return &patientCard, nil
+}
+
+func (c *OneCClient) UpdateMedCardByPatientID(patientID string, card *entities.OneCMedicalCard) error {
+	body, err := json.Marshal(card)
+
+	if err != nil {
+		return fmt.Errorf("marshal error: %w", err)
+	}
+
+	endpoint := fmt.Sprintf("/medical-card/%s", patientID)
+
+	req, err := c.CreateRequestJSON(http.MethodPost, endpoint, nil, nil, bytes.NewReader(body))
+	if err != nil {
+		return fmt.Errorf("1C update error: %w", err)
+	}
+
+	_, _, err = c.DoRequest(req)
+	if err != nil {
+		return fmt.Errorf("1C request error: %w", err)
+	}
+
+	return nil
 }

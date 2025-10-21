@@ -9,7 +9,8 @@ import (
 )
 
 func (r *AuthRepository) SaveUsers(ctx context.Context, users []entities.AuthUser) error {
-	tx := r.db.WithContext(ctx).Begin()
+	db := r.db.GetDB(ctx)
+	tx := db.WithContext(ctx).Begin()
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -31,7 +32,8 @@ func (r *AuthRepository) SaveUsers(ctx context.Context, users []entities.AuthUse
 
 func (r *AuthRepository) GetUserByLogin(ctx context.Context, login string) (*entities.AuthUser, error) {
 	var user entities.AuthUser
-	err := r.db.WithContext(ctx).Where("login = ?", login).First(&user).Error
+	db := r.db.GetDB(ctx)
+	err := db.WithContext(ctx).Where("login = ?", login).First(&user).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}

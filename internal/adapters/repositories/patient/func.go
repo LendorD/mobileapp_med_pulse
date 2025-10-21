@@ -10,7 +10,8 @@ import (
 
 // SavePatientList сохраняет полный список пациентов (заменяет текущий)
 func (r *PatientRepositoryImpl) SavePatientList(ctx context.Context, patients []entities.OneCPatientListItem) error {
-	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	db := r.db.GetDB(ctx)
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// Очищаем таблицу
 		if err := tx.Delete(&entities.OneCPatientListItem{}, "1=1").Error; err != nil {
 			return err
@@ -28,8 +29,8 @@ func (r *PatientRepositoryImpl) SaveOrUpdatePatientList(ctx context.Context, pat
 	if len(patients) == 0 {
 		return nil
 	}
-
-	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	db := r.db.GetDB(ctx)
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// Вставляем или обновляем существующих по PatientID
 		if err := tx.Clauses(clause.OnConflict{
 			Columns:   []clause.Column{{Name: "patient_id"}}, // уникальное поле
@@ -45,14 +46,14 @@ func (r *PatientRepositoryImpl) SaveOrUpdatePatientList(ctx context.Context, pat
 func (r *PatientRepositoryImpl) GetPatientListPage(ctx context.Context, offset, limit int) ([]entities.OneCPatientListItem, int64, error) {
 	var patients []entities.OneCPatientListItem
 	var total int64
-
+	db := r.db.GetDB(ctx)
 	// Получаем общее количество
-	if err := r.db.WithContext(ctx).Model(&entities.OneCPatientListItem{}).Count(&total).Error; err != nil {
+	if err := db.WithContext(ctx).Model(&entities.OneCPatientListItem{}).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
 	// Получаем страницу
-	if err := r.db.WithContext(ctx).
+	if err := db.WithContext(ctx).
 		Offset(offset).
 		Limit(limit).
 		Find(&patients).Error; err != nil {

@@ -68,7 +68,7 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	baseRouter.GET("/version", h.GetVersionProject)
 
 	// Авторизация
-	authGroup := protected.Group("/auth")
+	authGroup := baseRouter.Group("/auth")
 	authGroup.POST("/", h.LoginDoctor)
 
 	// WebSocket-группа

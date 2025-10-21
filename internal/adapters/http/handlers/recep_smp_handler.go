@@ -18,6 +18,7 @@ import (
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
 // @Router /signature/{recep_id} [post]
 func (h *Handler) SaveSignature(c *gin.Context) {
 	// patientID, err := h.service.ParseUintString(c.Param("recep_id"))
@@ -66,6 +67,7 @@ func (h *Handler) SaveSignature(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
+// @Security ApiKeyAuth
 // @Router /signature/{recep_id} [get]
 func (h *Handler) GetSignature(c *gin.Context) {
 	// patientID, err := h.service.ParseUintString(c.Param("recep_id"))
