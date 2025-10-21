@@ -16,6 +16,7 @@ import (
 // @Produce json
 // @Param update body models.Call true "Receptions update"
 // @Success 200
+// @Security ApiKeyAuth
 // @Router /webhook/onec/receptions [post]
 func (h *Handler) OneCWebhook(c *gin.Context) {
 	var update models.Call

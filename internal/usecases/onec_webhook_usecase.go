@@ -26,10 +26,10 @@ func NewOneCWebhookUsecase(
 
 // HandleReceptionsUpdate — обрабатывает обновление от 1С
 func (u *OneCWebhookUsecase) HandleReceptionsUpdate(ctx context.Context, call models.Call) error {
-	err := u.repo.SaveReceptions(ctx, call.CallID, call.Patients)
-	if err != nil {
-		return err
-	}
+	// err := u.repo.SaveReceptions(ctx, call.CallID, call.Patients)
+	// if err != nil {
+	// 	return err
+	// }
 
 	message := models.Message{
 		Header: "Новый вызов",

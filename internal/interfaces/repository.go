@@ -31,8 +31,8 @@ type MedicalCardRepository interface {
 
 // updated to match the new structure
 type DoctorRepository interface {
-	GetDoctorByID(id uint) (entities.Doctor, error)
-	GetDoctorByLogin(login string) (entities.Doctor, error)
+	GetDoctorByID(ctx context.Context, id uint) (entities.Doctor, error)
+	GetDoctorByLogin(ctx context.Context, login string) (entities.Doctor, error)
 }
 
 // updated to match the new structure

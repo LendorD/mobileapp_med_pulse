@@ -3,15 +3,16 @@ package doctor
 import (
 	"gorm.io/gorm"
 
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/base"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 )
 
 type DoctorRepository struct {
-	db *gorm.DB
+	db *base.BaseRepository
 }
 
 func NewDoctorRepository(db *gorm.DB) interfaces.DoctorRepository {
-	repo := &DoctorRepository{db: db}
+	repo := &DoctorRepository{db: base.NewBaseRepository(db)}
 	// repo.createTestDoctors() // Создаем тестовых докторов при инициализации
 	return repo
 }
