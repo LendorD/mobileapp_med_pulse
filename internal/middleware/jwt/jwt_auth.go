@@ -18,15 +18,25 @@ func JWTAuth(secretKey string) gin.HandlerFunc {
 			return
 		}
 
-		// 2. Проверяем Bearer
+		var tokenStr string
 		parts := strings.Split(authHeader, " ")
-		if len(parts) != 2 || parts[0] != "Bearer" {
+		switch len(parts) {
+		case 1:
+			// Только токен
+			tokenStr = parts[0]
+		case 2:
+			if parts[0] == "Bearer" {
+				tokenStr = parts[1]
+			} else {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization header format"})
+				c.Abort()
+				return
+			}
+		default:
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization header format"})
 			c.Abort()
 			return
 		}
-
-		tokenStr := parts[1]
 
 		// 3. Валидируем токен
 		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
