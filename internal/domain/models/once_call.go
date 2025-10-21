@@ -16,8 +16,8 @@ type Call struct {
 type CallStatus string
 
 const (
-	CallStatusCompleted CallStatus = "Выполнен"
-	CallStatusWork      CallStatus = "В работе"
+	CallStatusCompleted CallStatus = "compleated"
+	CallStatusWork      CallStatus = "proccess"
 )
 
 // Patient — данные пациента
