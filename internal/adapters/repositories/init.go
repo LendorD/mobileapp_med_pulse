@@ -133,7 +133,7 @@ func seedInitialData(db *gorm.DB, cfg *config.Config) error {
 	var patientListItems []entities.OneCPatientListItem
 
 	for i := 1; i <= 10; i++ {
-		login := fmt.Sprintf("user%d", i)
+		login := fmt.Sprintf("+7962284076%d", i)
 		patientID := fmt.Sprintf("user%d_id", i)
 		fullName := fmt.Sprintf("Пациент %d", i)
 
