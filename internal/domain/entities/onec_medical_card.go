@@ -19,7 +19,7 @@ type OneCMedicalCard struct {
 
 	// Вложенные структуры
 	LegalRepresentative ClientRef   `gorm:"embedded;embeddedPrefix:legal_rep_" json:"legal_representative,omitempty"`
-	Relative            *Relative   `gorm:"embedded;embeddedPrefix:relative_" json:"relative,omitempty"`
+	Relative            Relative    `gorm:"embedded;embeddedPrefix:relative_" json:"relative,omitempty"`
 	AttendingDoctor     Doctor      `gorm:"embedded;embeddedPrefix:doctor_" json:"attending_doctor"`
 	Policy              Policy      `gorm:"embedded;embeddedPrefix:policy_" json:"policy"`
 	Certificate         Certificate `gorm:"embedded;embeddedPrefix:cert_" json:"certificate"`
