@@ -5,10 +5,10 @@ import (
 	"gorm.io/gorm"
 )
 
-type TxRepositoryImpl struct {
+type TxManager struct {
 	db *gorm.DB
 }
 
-func NewTxRepository(db *gorm.DB) interfaces.TxRepository {
-	return &TxRepositoryImpl{db: db}
+func NewTxManager(db *gorm.DB) interfaces.TxManager {
+	return &TxManager{db: db}
 }

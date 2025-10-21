@@ -2,15 +2,22 @@ package app
 
 import (
 	"context"
+	"log"
 	"net/http"
+	"os"
+	"time"
 
-	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/handlers"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/http/handlers"
+	httpClient "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/http/onec"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/auth"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/swagger"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/services/websocket"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/services/workers"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/usecases"
 	"go.uber.org/fx"
 )
@@ -22,6 +29,8 @@ func New() *fx.App {
 			func(cfg *config.Config) string { return cfg.JWTSecret },
 		),
 		LoggingModule,
+		OneCModule,
+		WebsocketModule,
 		RepositoryModule,
 		ServiceModule,
 		UsecaseModule,
@@ -67,7 +76,6 @@ func InvokeHttpServer(lc fx.Lifecycle, h http.Handler) {
 	})
 }
 
-// Swagger-конфигуратор
 func NewSwaggerConfig(cfg *config.Config) *swagger.Config {
 	return &swagger.Config{
 		Enabled: true,
@@ -79,6 +87,7 @@ var HttpServerModule = fx.Module("http_server_module",
 	fx.Provide(
 		NewSwaggerConfig,
 		handlers.NewHandler,
+		handlers.NewWebsocketHandler,
 		handlers.ProvideRouter,
 	),
 	fx.Invoke(InvokeHttpServer),
@@ -99,6 +108,10 @@ var UsecaseModule = fx.Module("usecases_module",
 	),
 )
 
+func ProvideStdLogger() *log.Logger {
+	return log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile)
+}
+
 var AuthModule = fx.Module("auth_module",
 	fx.Provide(
 		auth.NewAuthRepository,
@@ -111,6 +124,50 @@ var AuthModule = fx.Module("auth_module",
 		usecases.NewAuthUsecase,
 	),
 )
+
+func ProvideOneCClient(cfg *config.Config) interfaces.OneCClient {
+	return httpClient.NewOneCClient(cfg.OneC)
+}
+
+var OneCModule = fx.Module("onec_module",
+	fx.Provide(
+		ProvideOneCClient,
+		usecases.NewOneCWebhookUsecase,
+		ProvidePatientSyncWorker,
+	),
+)
+
+var WebsocketModule = fx.Module("websocket_module",
+	fx.Provide(ProvideStdLogger,
+		websocket.NewHub,
+	),
+	fx.Invoke(websocket.InvokeHub),
+)
+
+func ProvidePatientSyncWorker(lc fx.Lifecycle, uc *usecases.OneCPatientUsecase, cfg *config.Config) *workers.PatientSyncWorker {
+	interval := time.Minute * 5
+	// if cfg.PatientSyncInterval > 0 {
+	// 	interval = time.Duration(cfg.PatientSyncInterval) * time.Second
+	// }
+
+	worker := &workers.PatientSyncWorker{
+		Usecase:  uc,
+		Interval: interval,
+	}
+
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			go worker.Start(ctx)
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			worker.Stop()
+			return nil
+		},
+	})
+
+	return worker
+}
 
 // TODO: Может быть вынести в services
 func IntToUint(c int) uint {

@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   db-postgres:
-    container_name: db-mobileapp
+    container_name: db-medPulse
     image: postgres:13-alpine
     environment:
       POSTGRES_USER: postgres
@@ -22,7 +22,7 @@ services:
     restart: unless-stopped
 
   go-api:
-    container_name: api-mobileapp
+    container_name: api-medPulse
     build:
       context: .
       dockerfile: Dockerfile
@@ -30,7 +30,7 @@ services:
       db-postgres:
         condition: service_healthy
     ports:
-      - "65321:${APP_PORT}" # Проброси порт из APP_PORT
+      - "65323:${APP_PORT}" # Проброси порт из APP_PORT
     env_file:
       - .env
     networks:

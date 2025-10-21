@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 	"github.com/golang-jwt/jwt/v4"
@@ -22,16 +24,21 @@ func NewAuthUsecase(repo interfaces.Repository, secretKey string) *AuthUsecase {
 	}
 }
 
-func (uc *AuthUsecase) LoginDoctor(ctx context.Context, phone, password string) (uint, string, *errors.AppError) {
+// SyncUsers заменяет весь список пользователей
+func (u *AuthUsecase) SyncUsers(ctx context.Context, users []entities.AuthUser) error {
+	return u.repo.SaveUsers(ctx, users)
+}
+
+func (uc *AuthUsecase) LoginDoctor(ctx context.Context, phone, password string) (*models.DoctorAuthResponse, *errors.AppError) {
 	op := "usecase.Auth.LoginDoctor"
 
-	user, err := uc.repo.GetByLogin(ctx, phone)
+	user, err := uc.repo.GetUserByLogin(ctx, phone)
 	if err != nil || user.ID == 0 {
-		return 0, "", errors.NewUnauthorizedError(op, "invalid credentials")
+		return nil, errors.NewUnauthorizedError(op, "invalid credentials")
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
-		return 0, "", errors.NewUnauthorizedError(op, "invalid credentials")
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		return nil, errors.NewUnauthorizedError(op, "invalid credentials")
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -41,8 +48,12 @@ func (uc *AuthUsecase) LoginDoctor(ctx context.Context, phone, password string) 
 
 	tokenString, err := token.SignedString([]byte(uc.secretKey))
 	if err != nil {
-		return 0, "", errors.NewInternalError(op, "failed to generate token", err)
+		return nil, errors.NewInternalError(op, "failed to generate token", err)
 	}
 
-	return user.ID, tokenString, nil
+	creditonalds := models.DoctorAuthResponse{
+		ID:    user.ID,
+		Token: tokenString,
+	}
+	return &creditonalds, nil
 }
