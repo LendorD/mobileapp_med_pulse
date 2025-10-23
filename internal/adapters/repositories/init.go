@@ -204,16 +204,6 @@ func seedInitialData(db *gorm.DB, cfg *config.Config) error {
 		return fmt.Errorf("failed to seed medical cards: %w", err)
 	}
 
-	// Добавим одну заявку на скорую (опционально)
-	emergencyCall := entities.OneCReception{
-		CallID: "demo_call_001",
-		Status: "received",
-		Data:   []byte(`{"patient": "demo", "reason": "test"}`),
-	}
-	if err := db.Create(&emergencyCall).Error; err != nil {
-		log.Printf("⚠️ Warning: failed to seed emergency call: %v", err)
-	}
-
 	log.Println("Demo data seeded successfully (10 users, 10 medical cards, 10 patient list items)")
 	return nil
 }

@@ -11,9 +11,8 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
 
-// SaveReceptions сохраняет список пациентов по callID
 func (r *ReceptionSmpRepositoryImpl) SaveReceptions(ctx context.Context, callID string, patients []models.Patient) error {
-	data, err := json.Marshal(patients)
+	_, err := json.Marshal(patients)
 	if err != nil {
 		return err
 	}
@@ -21,7 +20,7 @@ func (r *ReceptionSmpRepositoryImpl) SaveReceptions(ctx context.Context, callID 
 	reception := entities.OneCReception{
 		CallID: callID,
 		Status: "received",
-		Data:   data,
+		// Receptions: data,
 	}
 	db := r.db.GetDB(ctx)
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
@@ -34,7 +33,6 @@ func (r *ReceptionSmpRepositoryImpl) SaveReceptions(ctx context.Context, callID 
 	})
 }
 
-// GetReceptions возвращает список пациентов по callID
 func (r *ReceptionSmpRepositoryImpl) GetReceptions(ctx context.Context, callID string) ([]models.Patient, error) {
 	var reception entities.OneCReception
 	db := r.db.GetDB(ctx)
@@ -47,7 +45,7 @@ func (r *ReceptionSmpRepositoryImpl) GetReceptions(ctx context.Context, callID s
 	}
 
 	var patients []models.Patient
-	if err := json.Unmarshal(reception.Data, &patients); err != nil {
+	if err := json.Unmarshal(reception.MedServices, &patients); err != nil {
 		return nil, err
 	}
 	return patients, nil
