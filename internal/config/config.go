@@ -23,6 +23,15 @@ type Config struct {
 	Services   Services
 	Server     ServerConfig // Добавляем ServerConfig в основную структуру
 	JWTSecret  string
+	MinIO      MinIOConfig
+}
+
+type MinIOConfig struct {
+	Endpoint   string
+	Login      string
+	Password   string
+	BucketName string
+	UseSSL     bool
 }
 
 func DefaultServerConfig() ServerConfig {
@@ -130,6 +139,13 @@ func LoadConfig() (*Config, error) {
 			MobileApp: Service{
 				Host: getEnv("API_URL", "http://localhost:8080"),
 			},
+		},
+		MinIO: MinIOConfig{
+			Endpoint:   getEnv("MINIO_ENDPOINT", "localhost:9000"),
+			Login:      getEnv("MINIO_ROOT_LOGIN", "minioadmin"),
+			Password:   getEnv("MINIO_ROOT_PASSWORD", "minioadmin"),
+			BucketName: getEnv("MINIO_BUCKET_NAME", "default-bucket"),
+			UseSSL:     getEnvAsBool("MINIO_USE_SSL", false),
 		},
 		Server: ServerConfig{ // Явно инициализируем Server
 			Port: getEnv("SERVER_PORT", "8080"),

@@ -80,7 +80,7 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 }
 
 func autoMigrate(db *gorm.DB) error {
-	// 🔥 Только для dev! Удаляем ВСЁ
+	//  Только для dev! Удаляем ВСЁ
 	log.Println("🗑️ Dropping all tables...")
 
 	// Сначала дочерние таблицы (с FK), потом родительские
@@ -214,6 +214,6 @@ func seedInitialData(db *gorm.DB, cfg *config.Config) error {
 		log.Printf("⚠️ Warning: failed to seed emergency call: %v", err)
 	}
 
-	log.Println("✅ Demo data seeded successfully (10 users, 10 medical cards, 10 patient list items)")
+	log.Println("Demo data seeded successfully (10 users, 10 medical cards, 10 patient list items)")
 	return nil
 }
