@@ -10,6 +10,7 @@ type Call struct {
 	PatientCount int        `json:"patient_count"` // Кол-во пациентов
 	Status       CallStatus `json:"status"`        // Статус вызова
 	Patients     []Patient  `json:"patients"`      // Данные пациентов
+	DoctorID     int
 }
 
 // CallStatus — статус вызова

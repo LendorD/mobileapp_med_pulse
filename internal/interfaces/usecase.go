@@ -22,7 +22,7 @@ type OneCPatientUsecase interface {
 }
 
 type OneCWebhookUsecase interface {
-	HandleReceptionsUpdate(ctx context.Context, update models.Call) error
+	HandleReceptionsUpdate(DoctorID int, ctx context.Context, call models.Call) error
 	GetInterestedUserIDs(callID int) []uint
 }
 

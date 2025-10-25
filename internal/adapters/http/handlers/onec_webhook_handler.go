@@ -25,7 +25,7 @@ func (h *Handler) OneCWebhook(c *gin.Context) {
 		return
 	}
 
-	err := h.usecase.HandleReceptionsUpdate(c.Request.Context(), update)
+	err := h.usecase.HandleReceptionsUpdate(update.DoctorID, c.Request.Context(), update)
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return

@@ -86,9 +86,9 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 
 	// Пациенты
 	patientGroup := protected.Group("/patients")
-	patientGroup.GET("", h.GetPatientList) // Отдаёт список всех пациентов c пагинацией (1С)
+	patientGroup.GET("", h.GetPatientList)
 
-	// Медкарты (Больше не формируется а получаются от 1С)
+	// Медкарты
 	medCardGroup := protected.Group("/medcard")
 	medCardGroup.GET("/:pat_id", h.GetMedCardByPatientID)
 	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
