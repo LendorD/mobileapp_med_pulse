@@ -79,7 +79,7 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	wsGroup.GET("/unregister/:user_id", ws.Unregister)
 
 	//Запросы от 1С
-	webhook := protected.Group("webhook")
+	webhook := baseRouter.Group("/webhook")
 	webhook.POST("/onec/receptions", h.OneCWebhook)          // Получение заявок
 	webhook.POST("/onec/patients", h.OneCPatientListWebhook) // получение списка пациентов
 	webhook.POST("/onec/auth", h.OneCAuthWebhook)            // Получение списка авторизации
@@ -95,6 +95,15 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 
 	// Выезд
 	emergencyGroup := protected.Group("/emergency")
+
+	//file
+	//TODO: flg, Amalysi (get, post)
+	fileGroup := protected.Group("/file")
+	fileGroup.GET("/flg")
+	fileGroup.POST("/create/flg")
+
+	fileGroup.GET("/analycis")
+	fileGroup.POST("/create/analycis")
 
 	//Подписи пациентов
 	emergencyGroup.GET("/signature/:recep_id", h.GetSignature)

@@ -16,13 +16,17 @@ type Usecases interface {
 	OneCPatientUsecase
 }
 
+type FileUsecase interface {
+	GetFileByID(ctx context.Context, fileID uint) ([]byte, string, string, *errors.AppError)
+}
+
 type OneCPatientUsecase interface {
 	HandlePatientListUpdate(ctx context.Context, update entities.PatientListUpdate) error
 	GetPatientListPage(ctx context.Context, offset, limit int) ([]entities.OneCPatientListItem, error)
 }
 
 type OneCWebhookUsecase interface {
-	HandleReceptionsUpdate(DoctorID int, ctx context.Context, call models.Call) error
+	HandleReceptionsUpdate(DoctorID uint, ctx context.Context, call models.Call) error
 	GetInterestedUserIDs(callID int) []uint
 }
 

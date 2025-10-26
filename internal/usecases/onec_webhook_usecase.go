@@ -25,7 +25,7 @@ func NewOneCWebhookUsecase(
 }
 
 // HandleReceptionsUpdate — обрабатывает обновление от 1С
-func (u *OneCWebhookUsecase) HandleReceptionsUpdate(DoctorID int, ctx context.Context, call models.Call) error {
+func (u *OneCWebhookUsecase) HandleReceptionsUpdate(DoctorID uint, ctx context.Context, call models.Call) error {
 	// err := u.repo.SaveReceptions(ctx, call.CallID, call.Patients)
 	// if err != nil {
 	// 	return err
@@ -36,7 +36,7 @@ func (u *OneCWebhookUsecase) HandleReceptionsUpdate(DoctorID int, ctx context.Co
 		Text:   fmt.Sprintf("Поступил вызов %s", call.CallID),
 	}
 
-	u.hub.SendToUser(1, message)
+	u.hub.SendToUser(DoctorID, message)
 	u.hub.AddBroadcastMessage(message)
 
 	return nil

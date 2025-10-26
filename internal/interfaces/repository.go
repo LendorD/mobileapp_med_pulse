@@ -23,6 +23,12 @@ type TxManager interface {
 	GetTransaction(ctx context.Context) *gorm.DB
 }
 
+type FileRepository interface {
+	CreateFile(ctx context.Context, file *entities.File) error
+	GetFileByID(ctx context.Context, id uint) (*entities.File, error)
+	DeleteFile(ctx context.Context, id uint) error
+}
+
 type MedicalCardRepository interface {
 	SaveMedicalCard(ctx context.Context, card *entities.OneCMedicalCard) error
 	GetMedicalCard(ctx context.Context, patientID string) (*entities.OneCMedicalCard, error)
