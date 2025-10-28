@@ -5,13 +5,13 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
 
-func CallToReception(call models.Call) (*entities.OneCReception, error) {
+func CallToReception(call models.Call) (entities.OneCReception, error) {
 	// patientsData, err := json.Marshal(call.Patients)
 	// if err != nil {
 	// 	return nil, fmt.Errorf("marshal patients: %w", err)
 	// }
 
-	return &entities.OneCReception{
+	return entities.OneCReception{
 		// CallID:           call.CallID,
 		// Address:          call.Address,
 		// Phone:            call.Phone,
@@ -23,13 +23,13 @@ func CallToReception(call models.Call) (*entities.OneCReception, error) {
 	}, nil
 }
 
-func ReceptionToCall(reception *entities.OneCReception) (*models.Call, error) {
+func ReceptionToCall(reception *entities.OneCReception) (models.Call, error) {
 	// var patients []models.Patient
 	// if err := json.Unmarshal(reception.Patients, &patients); err != nil {
 	// 	return nil, fmt.Errorf("unmarshal patients: %w", err)
 	// }
 
-	return &models.Call{
+	return models.Call{
 		// CallID:       reception.CallID,
 		// Address:      reception.Address,
 		// Phone:        reception.Phone,

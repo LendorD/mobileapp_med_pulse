@@ -26,17 +26,7 @@ func (r *ReceptionSmpRepositoryImpl) UpdateStatus(ctx context.Context, callID, s
 		Update("status", status).Error
 }
 
-func (r *ReceptionSmpRepositoryImpl) SaveReceptions(ctx context.Context, callID string, call models.Call) error {
-	_, err := json.Marshal(call)
-	if err != nil {
-		return err
-	}
-
-	reception := entities.OneCReception{
-		CallID: callID,
-		Status: "received",
-		// Receptions: data,
-	}
+func (r *ReceptionSmpRepositoryImpl) SaveReceptions(ctx context.Context, callID string, reception entities.OneCReception) error {
 	db := r.db.GetDB(ctx)
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// Удаляем старую запись, если есть

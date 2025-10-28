@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/converter"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services/websocket"
@@ -26,13 +27,16 @@ func NewOneCWebhookUsecase(
 
 // HandleReceptionsUpdate — обрабатывает обновление от 1С
 func (u *OneCWebhookUsecase) HandleReceptionsUpdate(doctorID uint, ctx context.Context, call models.Call) error {
-	// 1. Сохраняем заявку со статусом "received"
-	err := u.repo.SaveReceptions(ctx, call.CallID, call)
+	oneCReceptions, err := converter.CallToReception(call)
+	if err != nil {
+		return err
+	}
+	err = u.repo.SaveReceptions(ctx, call.CallID, oneCReceptions)
 	if err != nil {
 		return err
 	}
 
-	// 2. Пытаемся отправить сразу
+	// Пытаемся отправить сразу
 	if u.hub.IsUserConnected(doctorID) {
 		message := models.Message{
 			// Type:   "reception_new",

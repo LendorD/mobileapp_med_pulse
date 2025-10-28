@@ -70,7 +70,7 @@ type ReceptionSmpRepository interface {
 	// Вызовы (скорая)
 	GetUndeliveredReceptions(ctx context.Context) ([]entities.OneCReception, error)
 	UpdateStatus(ctx context.Context, callID, status string) error
-	SaveReceptions(ctx context.Context, callID string, call models.Call) error
+	SaveReceptions(ctx context.Context, callID string, reception entities.OneCReception) error
 	GetReceptions(ctx context.Context, callID string) ([]models.Patient, error)
 }
 

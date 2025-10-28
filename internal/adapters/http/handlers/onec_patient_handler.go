@@ -44,7 +44,6 @@ func (h *Handler) OneCPatientListWebhook(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Router /patients [get]
 func (h *Handler) GetPatientList(c *gin.Context) {
-	// Получаем параметры пагинации
 	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 	if err != nil || page < 1 {
 		page = 1
