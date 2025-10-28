@@ -4,22 +4,17 @@ import "github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 
 // Call — основная структура вызова из 1С
 type Call struct {
-	CallID       string     `json:"call_id"`
-	Address      string     `json:"address"`       // Адрес (адрес вызова)
-	Phone        string     `json:"phone"`         // Телефон пациента
-	PatientCount int        `json:"patient_count"` // Кол-во пациентов
-	Status       CallStatus `json:"status"`        // Статус вызова
-	Patients     []Patient  `json:"patients"`      // Данные пациентов
-	DoctorID     uint
+	CallID      string              `json:"call_id"`
+	Address     string              `json:"address"` // Адрес (адрес вызова)
+	Phone       string              `json:"phone"`
+	Status      entities.CallStatus // "received", "edited", "pending_sync", "synced", "sync_failed"
+	Patient     []entities.PatientData
+	Doctor      entities.DoctorData
+	Receptions  []entities.Receptions // Заключения врача
+	Flg         entities.Flg
+	Analysis    entities.Analysis
+	MedServices []byte `gorm:"type:jsonb"`
 }
-
-// CallStatus — статус вызова
-type CallStatus string
-
-const (
-	CallStatusCompleted CallStatus = "compleated"
-	CallStatusWork      CallStatus = "proccess"
-)
 
 // Patient — данные пациента
 type Patient struct {

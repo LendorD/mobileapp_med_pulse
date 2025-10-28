@@ -15,11 +15,35 @@ type Repository interface {
 	ReceptionSmpRepository
 	MedicalCardRepository
 	TxManager
+	FileRepository
+	FlgRepository
+	AnalysisRepository
+}
+
+type AnalysisRepository interface {
+	GetAnalysisByID(ctx context.Context, id uint) (*entities.Analysis, error)
+	GetAllAnalysisIDs(ctx context.Context) ([]uint, error)
+
+	UpdateAnalysisOrder(ctx context.Context, order *entities.AnalysisOrder) error
+	CreateAnalysisOrder(ctx context.Context, order *entities.AnalysisOrder) error
+	CreateAnalysisItems(ctx context.Context, items []entities.AnalysisOrderItem) error
+
+	GetAnalysisOrderByID(ctx context.Context, id uint) (*entities.AnalysisOrder, error)
+	GetOrderItemsByOrderID(ctx context.Context, orderID uint) ([]entities.AnalysisOrderItem, error)
+	UpsertOrderItems(ctx context.Context, items []entities.AnalysisOrderItem) error
+}
+
+type FlgRepository interface {
+	CreateFlg(ctx context.Context, flg *entities.Flg) error
+	GetFlgByPatientID(ctx context.Context, patientID uint) ([]entities.Flg, error)
+	GetFlgByID(ctx context.Context, id uint) (*entities.Flg, error)
+	Delete(ctx context.Context, id uint) error
 }
 
 type TxManager interface {
-	Rollback(ctx context.Context) error
+	Begin(ctx context.Context) (context.Context, error)
 	Commit(ctx context.Context) error
+	Rollback(ctx context.Context) error
 	GetTransaction(ctx context.Context) *gorm.DB
 }
 
@@ -44,7 +68,9 @@ type DoctorRepository interface {
 // updated to match the new structure
 type ReceptionSmpRepository interface {
 	// Вызовы (скорая)
-	SaveReceptions(ctx context.Context, callID string, receptions []models.Patient) error
+	GetUndeliveredReceptions(ctx context.Context) ([]entities.OneCReception, error)
+	UpdateStatus(ctx context.Context, callID, status string) error
+	SaveReceptions(ctx context.Context, callID string, call models.Call) error
 	GetReceptions(ctx context.Context, callID string) ([]models.Patient, error)
 }
 

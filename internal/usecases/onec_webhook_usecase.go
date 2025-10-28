@@ -25,19 +25,28 @@ func NewOneCWebhookUsecase(
 }
 
 // HandleReceptionsUpdate — обрабатывает обновление от 1С
-func (u *OneCWebhookUsecase) HandleReceptionsUpdate(DoctorID uint, ctx context.Context, call models.Call) error {
-	// err := u.repo.SaveReceptions(ctx, call.CallID, call.Patients)
-	// if err != nil {
-	// 	return err
-	// }
-
-	message := models.Message{
-		Header: "Новый вызов",
-		Text:   fmt.Sprintf("Поступил вызов %s", call.CallID),
+func (u *OneCWebhookUsecase) HandleReceptionsUpdate(doctorID uint, ctx context.Context, call models.Call) error {
+	// 1. Сохраняем заявку со статусом "received"
+	err := u.repo.SaveReceptions(ctx, call.CallID, call)
+	if err != nil {
+		return err
 	}
 
-	u.hub.SendToUser(DoctorID, message)
-	u.hub.AddBroadcastMessage(message)
+	// 2. Пытаемся отправить сразу
+	if u.hub.IsUserConnected(doctorID) {
+		message := models.Message{
+			// Type:   "reception_new",
+			Header: "Новый вызов",
+			Text:   fmt.Sprintf("Поступил вызов %s", call.CallID),
+			// Data:   call,
+		}
+
+		// Отправляем и меняем статус на "delivered"
+		if u.hub.SendToUserSafe(doctorID, message) {
+			// Успешно отправлено → обновляем статус
+			return u.repo.UpdateStatus(ctx, call.CallID, "delivered")
+		}
+	}
 
 	return nil
 }

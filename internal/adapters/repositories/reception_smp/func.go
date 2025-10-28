@@ -11,8 +11,23 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
 
-func (r *ReceptionSmpRepositoryImpl) SaveReceptions(ctx context.Context, callID string, patients []models.Patient) error {
-	_, err := json.Marshal(patients)
+func (r *ReceptionSmpRepositoryImpl) GetUndeliveredReceptions(ctx context.Context) ([]entities.OneCReception, error) {
+	var receptions []entities.OneCReception
+	db := r.db.GetDB(ctx)
+	err := db.Where("status IN (?)", []string{"received", "failed"}).Find(&receptions).Error
+	return receptions, err
+}
+
+// UpdateStatus обновляет статус заявки
+func (r *ReceptionSmpRepositoryImpl) UpdateStatus(ctx context.Context, callID, status string) error {
+	db := r.db.GetDB(ctx)
+	return db.Model(&entities.OneCReception{}).
+		Where("call_id = ?", callID).
+		Update("status", status).Error
+}
+
+func (r *ReceptionSmpRepositoryImpl) SaveReceptions(ctx context.Context, callID string, call models.Call) error {
+	_, err := json.Marshal(call)
 	if err != nil {
 		return err
 	}

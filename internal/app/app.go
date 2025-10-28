@@ -134,6 +134,7 @@ var OneCModule = fx.Module("onec_module",
 		ProvideOneCClient,
 		usecases.NewOneCWebhookUsecase,
 		ProvidePatientSyncWorker,
+		ProvideReceptionRetryWorker,
 	),
 )
 
@@ -143,6 +144,31 @@ var WebsocketModule = fx.Module("websocket_module",
 	),
 	fx.Invoke(websocket.InvokeHub),
 )
+
+func ProvideReceptionRetryWorker(
+	lc fx.Lifecycle,
+	repo interfaces.Repository,
+	hub *websocket.Hub,
+	logger *log.Logger, // используем std logger, как в WebsocketModule
+	cfg *config.Config,
+) *workers.ReceptionRetryWorker {
+	interval := time.Second * 10 // или из конфига: time.Duration(cfg.ReceptionRetryInterval) * time.Second
+
+	worker := workers.NewReceptionRetryWorker(repo, hub, interval, logger)
+
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			go worker.Start(ctx)
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			worker.Stop()
+			return nil
+		},
+	})
+
+	return worker
+}
 
 func ProvidePatientSyncWorker(lc fx.Lifecycle, uc *usecases.OneCPatientUsecase, cfg *config.Config) *workers.PatientSyncWorker {
 	interval := time.Minute * 5

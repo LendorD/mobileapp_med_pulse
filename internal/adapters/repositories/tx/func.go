@@ -10,6 +10,15 @@ type contextKey string
 
 const txContextKey contextKey = "db_transaction"
 
+// Begin начинает транзакцию и кладёт её в контекст
+func (tm *TxManager) Begin(ctx context.Context) (context.Context, error) {
+	tx := tm.db.Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return context.WithValue(ctx, txContextKey, tx), nil
+}
+
 func (tm *TxManager) Commit(ctx context.Context) error {
 	tx := tm.GetTransaction(ctx)
 	if tx == nil {

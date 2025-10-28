@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,8 +31,6 @@ import (
 // @Router /flgs/ [post]
 func (h *Handler) CreateFlgWithPhoto(c *gin.Context) {
 	// 1. Парсинг скалярных полей
-	organization := c.PostForm("organization")
-	number := c.PostForm("number")
 	result := c.PostForm("result")
 	date := c.PostForm("date")
 
@@ -66,13 +65,11 @@ func (h *Handler) CreateFlgWithPhoto(c *gin.Context) {
 
 	// 4. Формируем запрос для юзкейса
 	req := &models.CreateFlgRequest{
-		PatientID:    uint(patientID),
-		Organization: organization,
-		Number:       number,
-		Result:       result,
-		Date:         date,
-		FileName:     file.Filename,
-		FileData:     data,
+		PatientID: uint(patientID),
+		Result:    result,
+		Date:      date,
+		FileName:  file.Filename,
+		FileData:  data,
 		// ContentType можно не передавать — выведем из Filename в юзкейсе или репозитории
 	}
 

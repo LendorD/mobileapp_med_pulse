@@ -14,6 +14,17 @@ type Usecases interface {
 	AuthUsecase
 	OneCWebhookUsecase
 	OneCPatientUsecase
+	FlgUsecase
+	FileUsecase
+	AnalysisUsecase
+}
+
+type FlgUsecase interface {
+	CreateFlgWithPhoto(ctx context.Context, req *models.CreateFlgRequest) (*uint, *errors.AppError)
+}
+
+type AnalysisUsecase interface {
+	UpdateAnalysisOrder(ctx context.Context, req *models.UpdateAnalysisOrderRequest) *errors.AppError
 }
 
 type FileUsecase interface {

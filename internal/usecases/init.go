@@ -17,6 +17,9 @@ type UseCases struct {
 	interfaces.AuthUsecase
 	interfaces.OneCWebhookUsecase
 	interfaces.OneCPatientUsecase
+	interfaces.FlgUsecase
+	interfaces.FileUsecase
+	interfaces.AnalysisUsecase
 }
 
 func NewUsecases(
@@ -32,6 +35,9 @@ func NewUsecases(
 		NewAuthUsecase(r, conf.JWTSecret),
 		NewOneCWebhookUsecase(r, hub),
 		NewOneCPatientListUsecase(r, onecClient),
+		NewFlgUseсase(r, r, r, s),
+		NewFileUsecase(r, s),
+		NewAnalysisUsecase(r, r, r),
 	}
 
 }

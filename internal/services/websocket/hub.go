@@ -74,6 +74,30 @@ func (h *Hub) run() {
 	}
 }
 
+func (h *Hub) IsUserConnected(userID uint) bool {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+	_, ok := h.clients[userID]
+	return ok
+}
+
+// SendToUserSafe — возвращает true, если сообщение поставлено в очередь
+func (h *Hub) SendToUserSafe(userID uint, message models.Message) bool {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+
+	if client, ok := h.clients[userID]; ok {
+		select {
+		case client.send <- message:
+			return true
+		default:
+			// буфер переполнен
+			return false
+		}
+	}
+	return false
+}
+
 // cleanupDeadClients периодически удаляет клиентов, которые не отвечают на ping
 func (h *Hub) cleanupDeadClients() {
 	ticker := time.NewTicker(cleanupEvery)
