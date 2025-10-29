@@ -25,10 +25,7 @@ func NewAnalysisUsecase(analysisRepo interfaces.AnalysisRepository, analysisOrde
 	}
 }
 
-func (u *AnalysisUsecase) UpdateAnalysisOrder(
-	ctx context.Context,
-	req *models.UpdateAnalysisOrderRequest,
-) *errors.AppError {
+func (u *AnalysisUsecase) UpdateAnalysisOrder(ctx context.Context, req *models.UpdateAnalysisOrderRequest) *errors.AppError {
 	op := "usecase.AnalysisOrder.UpdateAnalysisOrder"
 
 	// Начало транзакции
@@ -98,4 +95,30 @@ func (u *AnalysisUsecase) UpdateAnalysisOrder(
 	}
 
 	return nil
+}
+
+// GetAllAnalyses возвращает все доступные анализы
+func (u *AnalysisUsecase) GetAllAnalyses(ctx context.Context) ([]models.AnalysisResponse, *errors.AppError) {
+
+	analyses, err := u.analysisRepo.GetAllAnalyses(ctx)
+	if err != nil {
+		return nil, errors.NewAppError(
+			errors.InternalServerErrorCode,
+			"failed to fetch analyses",
+			err,
+			false,
+		)
+	}
+
+	result := make([]models.AnalysisResponse, len(analyses))
+	for i, a := range analyses {
+		result[i] = models.AnalysisResponse{
+			ID:    a.ID,
+			Code:  a.Code,
+			Title: a.Title,
+			Price: a.Price,
+		}
+	}
+
+	return result, nil
 }

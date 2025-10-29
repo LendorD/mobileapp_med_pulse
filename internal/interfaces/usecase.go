@@ -25,6 +25,7 @@ type FlgUsecase interface {
 
 type AnalysisUsecase interface {
 	UpdateAnalysisOrder(ctx context.Context, req *models.UpdateAnalysisOrderRequest) *errors.AppError
+	GetAllAnalyses(ctx context.Context) ([]models.AnalysisResponse, *errors.AppError)
 }
 
 type FileUsecase interface {

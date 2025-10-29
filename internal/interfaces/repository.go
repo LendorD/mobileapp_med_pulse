@@ -23,6 +23,7 @@ type Repository interface {
 type AnalysisRepository interface {
 	GetAnalysisByID(ctx context.Context, id uint) (*entities.Analysis, error)
 	GetAllAnalysisIDs(ctx context.Context) ([]uint, error)
+	GetAllAnalyses(ctx context.Context) ([]entities.Analysis, error)
 
 	UpdateAnalysisOrder(ctx context.Context, order *entities.AnalysisOrder) error
 	CreateAnalysisOrder(ctx context.Context, order *entities.AnalysisOrder) error

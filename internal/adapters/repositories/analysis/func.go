@@ -98,3 +98,13 @@ func (r *AnalysisRepository) GetAllAnalysisIDs(ctx context.Context) ([]uint, err
 	}
 	return ids, nil
 }
+
+func (r *AnalysisRepository) GetAllAnalyses(ctx context.Context) ([]entities.Analysis, error) {
+	op := "repo.Analysis.GetAllAnalyses"
+
+	var analyses []entities.Analysis
+	if err := r.GetDB(ctx).WithContext(ctx).Find(&analyses).Error; err != nil {
+		return nil, errors.NewDBError(op, err)
+	}
+	return analyses, nil
+}
