@@ -8,6 +8,7 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
 	_ "github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services/websocket"
 	_ "github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 )
@@ -28,12 +29,13 @@ func NewUsecases(
 	conf *config.Config,
 	hub *websocket.Hub,
 	onecClient interfaces.OneCClient,
+	logger *logging.Logger,
 ) interfaces.Usecases {
 
 	return &UseCases{
 		NewMedCardUsecase(r, onecClient, r),
 		NewAuthUsecase(r, conf.JWTSecret),
-		NewOneCWebhookUsecase(r, hub),
+		NewOneCWebhookUsecase(r, hub, logger),
 		NewOneCPatientListUsecase(r, onecClient),
 		NewFlgUseсase(r, r, r, s),
 		NewFileUsecase(r, s),

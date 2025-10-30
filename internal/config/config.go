@@ -38,9 +38,9 @@ func DefaultServerConfig() ServerConfig {
 	return ServerConfig{
 		Port: getEnv("SERVER_PORT", "8080"),
 		AllowedOrigins: []string{
-			"http://localhost:3000",
-			"http://localhost:5173",
-			"http://localhost:4200",
+			"http://localhost:*",
+			"http://127.0.0.1:*",
+			"http://192.168.30.139:*",
 			"http://localhost:8081",
 			"http://127.0.0.1:3000",
 			"http://127.0.0.1:5173",

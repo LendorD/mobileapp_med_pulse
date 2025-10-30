@@ -74,6 +74,10 @@ func (u *FlgUsecase) CreateFlgWithPhoto(ctx context.Context, req *models.CreateF
 		return nil, errors.NewDBError(op, err)
 	}
 
+	var fileID *uint
+	if file != nil {
+		fileID = &file.ID
+	}
 	// === 3. Создаём FLG (в транзакции) ===
 	flg := &entities.Flg{
 		PatientID:    req.PatientID,
@@ -81,7 +85,7 @@ func (u *FlgUsecase) CreateFlgWithPhoto(ctx context.Context, req *models.CreateF
 		Number:       req.Number,
 		Result:       req.Result,
 		Date:         parsedDate,
-		FileID:       file.ID,
+		FileID:       fileID,
 	}
 	if err := u.repo.CreateFlg(ctx, flg); err != nil {
 		return nil, errors.NewDBError(op, err)

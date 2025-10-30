@@ -82,7 +82,7 @@ func (w *ReceptionRetryWorker) processUndeliveredReceptions(ctx context.Context)
 		// }
 
 		// Проверяем, онлайн ли доктор
-		if w.Hub.IsUserConnected(call.Doctor.Id) {
+		if w.Hub.IsUserConnected(call.Doctor.ID) {
 			message := models.Message{
 				// Type:   "reception_new",
 				Header: "Новый вызов",
@@ -90,7 +90,7 @@ func (w *ReceptionRetryWorker) processUndeliveredReceptions(ctx context.Context)
 				// Data:   call,
 			}
 
-			if w.Hub.SendToUserSafe(call.Doctor.Id, message) {
+			if w.Hub.SendToUserSafe(call.Doctor.ID, message) {
 				// Успешно отправлено → обновляем статус
 				if err := w.ReceptionRepo.UpdateStatus(ctx, r.CallID, "delivered"); err != nil {
 					w.Logger.Printf("[ReceptionRetry] failed to update status to 'delivered' for %s: %v", r.CallID, err)
