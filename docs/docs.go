@@ -18,6 +18,103 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/analysis": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    },
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Возвращает полный список доступных анализов",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Получить все анализы",
+                "responses": {
+                    "200": {
+                        "description": "Список анализов",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.AnalysisResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    }
+                }
+            }
+        },
+        "/analysis/update": {
+            "post": {
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Обновляет список анализов в направлении",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Обновить направление на анализы",
+                "parameters": [
+                    {
+                        "description": "Данные направления",
+                        "name": "info",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateAnalysisOrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Направление успешно обновлено"
+                    },
+                    "400": {
+                        "description": "Неверный формат запроса",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "404": {
+                        "description": "Направление не найдено",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка валидации данных",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    }
+                }
+            }
+        },
         "/auth": {
             "post": {
                 "description": "Аутентифицирует врача по номеру телефона и паролю",
@@ -70,11 +167,234 @@ const docTemplate = `{
                 }
             }
         },
+        "/emk/{pat_id}": {
+            "get": {
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EMK"
+                ],
+                "summary": "Get all EMK records by patient ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Patient ID",
+                        "name": "pat_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entities.Emk"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/files/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Возвращает бинарные данные файла по его идентификатору. Устанавливает правильные заголовки Content-Type, Content-Length и Content-Disposition.",
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Получить файл по ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID файла",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Файл в виде бинарных данных",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный ID файла (не число)",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизован (отсутствует или невалиден токен)",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "404": {
+                        "description": "Файл не найден",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    }
+                }
+            }
+        },
+        "/flgs/": {
+            "post": {
+                "security": [
+                    {
+                        "JWTAuth": []
+                    }
+                ],
+                "description": "Загружает фото и создаёт запись",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Files"
+                ],
+                "summary": "Создать флюорографию с фото",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID пациента",
+                        "name": "patient_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Организация",
+                        "name": "organization",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Номер",
+                        "name": "number",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Результат",
+                        "name": "result",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Дата (YYYY-MM-DD)",
+                        "name": "date",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Фото (JPEG/PNG, до 10 МБ)",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Созданная флюрография",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос (например, неверный формат даты)",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизован (отсутствует или невалиден токен)",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "404": {
+                        "description": "Пациент или организация не найдены",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "422": {
+                        "description": "Семантическая ошибка (например, patient_id=0)",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ResultError"
+                        }
+                    }
+                }
+            }
+        },
         "/medcard/{pat_id}": {
             "get": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "JWTAuth": []
                     }
                 ],
                 "produces": [
@@ -132,7 +452,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "JWTAuth": []
                     }
                 ],
                 "consumes": [
@@ -196,6 +516,11 @@ const docTemplate = `{
         },
         "/onec/auth": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Syncs a batch of users (login + password) received from 1C into the internal auth system.",
                 "consumes": [
                     "application/json"
@@ -204,7 +529,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Webhooks"
+                    "1C"
                 ],
                 "summary": "Sync users from 1C",
                 "parameters": [
@@ -247,7 +572,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "JWTAuth": []
                     }
                 ],
                 "produces": [
@@ -281,135 +606,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/signature/{recep_id}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Returns the base64-encoded signature image for a given reception ID.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Emergency"
-                ],
-                "summary": "Get patient signature",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Reception ID",
-                        "name": "recep_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Accepts a multipart form with a 'signature' file (e.g., PNG, JPG) and saves it.",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Emergency"
-                ],
-                "summary": "Upload patient signature",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Reception ID",
-                        "name": "recep_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "file",
-                        "description": "Signature image file",
-                        "name": "signature",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/webhook/onec/patients": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -440,6 +643,11 @@ const docTemplate = `{
         },
         "/webhook/onec/receptions": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -477,7 +685,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Notification"
+                    "Websocket"
                 ],
                 "summary": "Подписаться на уведомления",
                 "parameters": [
@@ -505,7 +713,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Notification"
+                    "Websocket"
                 ],
                 "summary": "Отписаться от уведомлений",
                 "parameters": [
@@ -532,6 +740,65 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "entities.Analysis": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.AttendingDoctor": {
+            "type": "object",
+            "properties": {
+                "attachmentEnd": {
+                    "type": "string"
+                },
+                "attachmentStart": {
+                    "type": "string"
+                },
+                "clinic": {
+                    "type": "string"
+                },
+                "fullName": {
+                    "type": "string"
+                },
+                "policyOrCertNumber": {
+                    "type": "string"
+                },
+                "specialization": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.CallStatus": {
+            "type": "string",
+            "enum": [
+                "completed",
+                "process"
+            ],
+            "x-enum-comments": {
+                "CallStatusCompleted": "исправлено: было \"compleated\"",
+                "CallStatusWork": "исправлено: было \"proccess\""
+            },
+            "x-enum-descriptions": [
+                "исправлено: было \"compleated\"",
+                "исправлено: было \"proccess\""
+            ],
+            "x-enum-varnames": [
+                "CallStatusCompleted",
+                "CallStatusWork"
+            ]
+        },
         "entities.Certificate": {
             "type": "object",
             "properties": {
@@ -554,22 +821,105 @@ const docTemplate = `{
                 }
             }
         },
-        "entities.Doctor": {
+        "entities.DoctorData": {
             "type": "object",
             "properties": {
-                "attachment_end": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 },
-                "attachment_start": {
+                "specialization": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.Emk": {
+            "type": "object",
+            "properties": {
+                "analysis": {
+                    "$ref": "#/definitions/entities.Analysis"
+                },
+                "call_id": {
                     "type": "string"
                 },
-                "clinic": {
+                "created_at": {
                     "type": "string"
                 },
-                "full_name": {
+                "doctor": {
+                    "$ref": "#/definitions/entities.DoctorData"
+                },
+                "flg": {
+                    "$ref": "#/definitions/entities.Flg"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "med_services": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "patient_id": {
+                    "description": "связь с пациентом",
                     "type": "string"
                 },
-                "policy_or_cert_number": {
+                "status": {
+                    "$ref": "#/definitions/entities.CallStatus"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.File": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "minioKey": {
+                    "description": "\"minio_id\"",
+                    "type": "string"
+                }
+            }
+        },
+        "entities.Flg": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "file": {
+                    "$ref": "#/definitions/entities.File"
+                },
+                "file_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "number": {
+                    "type": "string"
+                },
+                "organization": {
+                    "type": "string"
+                },
+                "patient_id": {
+                    "type": "integer"
+                },
+                "result": {
                     "type": "string"
                 }
             }
@@ -586,9 +936,6 @@ const docTemplate = `{
                 "age": {
                     "type": "string"
                 },
-                "attending_doctor": {
-                    "$ref": "#/definitions/entities.Doctor"
-                },
                 "birth_date": {
                     "type": "string"
                 },
@@ -598,6 +945,9 @@ const docTemplate = `{
                 "display_name": {
                     "description": "Основные поля",
                     "type": "string"
+                },
+                "doctor": {
+                    "$ref": "#/definitions/entities.AttendingDoctor"
                 },
                 "email": {
                     "type": "string"
@@ -647,9 +997,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "medical_card": {
-                    "$ref": "#/definitions/entities.OneCMedicalCard"
-                },
                 "patientID": {
                     "type": "string"
                 }
@@ -674,6 +1021,20 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "string"
+                }
+            }
+        },
+        "entities.Receptions": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "id": {
+                    "type": "integer"
                 }
             }
         },
@@ -781,51 +1142,117 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.ResultError": {
+            "type": "object",
+            "properties": {
+                "response": {
+                    "type": "object",
+                    "properties": {
+                        "code": {
+                            "description": "[RULE]: must be one of codes from table (Check DEV.PAGE)",
+                            "type": "integer",
+                            "example": 400
+                        },
+                        "message": {
+                            "type": "string",
+                            "example": "Bad request"
+                        }
+                    }
+                },
+                "status": {
+                    "description": "error",
+                    "type": "string",
+                    "example": "error"
+                }
+            }
+        },
+        "handlers.ResultResponse": {
+            "type": "object",
+            "properties": {
+                "response": {
+                    "type": "object",
+                    "properties": {
+                        "data": {
+                            "description": "[AVALIABLE]: object, array of objects, empty"
+                        },
+                        "message": {
+                            "type": "string",
+                            "example": "Success operation"
+                        },
+                        "type": {
+                            "description": "[AVALIABLE]: object, array, empty",
+                            "type": "string",
+                            "example": "object"
+                        }
+                    }
+                },
+                "status": {
+                    "description": "ok",
+                    "type": "string",
+                    "example": "ok"
+                }
+            }
+        },
+        "models.AnalysisResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Call": {
             "type": "object",
             "properties": {
                 "address": {
-                    "description": "Адрес (адрес вызова)",
                     "type": "string"
+                },
+                "analysis": {
+                    "$ref": "#/definitions/entities.Analysis"
                 },
                 "call_id": {
                     "type": "string"
                 },
-                "patient_count": {
-                    "description": "Кол-во пациентов",
-                    "type": "integer"
+                "doctor": {
+                    "$ref": "#/definitions/entities.DoctorData"
                 },
-                "patients": {
-                    "description": "Данные пациентов",
+                "flg": {
+                    "$ref": "#/definitions/entities.Flg"
+                },
+                "med_services": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.Patient"
+                        "type": "integer"
+                    }
+                },
+                "patients": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.OneCPatientListItem"
                     }
                 },
                 "phone": {
-                    "description": "Телефон пациента",
                     "type": "string"
                 },
+                "receptions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Receptions"
+                    }
+                },
                 "status": {
-                    "description": "Статус вызова",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/models.CallStatus"
-                        }
-                    ]
+                    "$ref": "#/definitions/entities.CallStatus"
                 }
             }
-        },
-        "models.CallStatus": {
-            "type": "string",
-            "enum": [
-                "Выполнен",
-                "В работе"
-            ],
-            "x-enum-varnames": [
-                "CallStatusCompleted",
-                "CallStatusWork"
-            ]
         },
         "models.DoctorAuthResponse": {
             "description": "Ответ с данными авторизованного врача",
@@ -854,57 +1281,12 @@ const docTemplate = `{
                 "password": {
                     "description": "Пароль",
                     "type": "string",
-                    "example": "123"
+                    "example": "password123"
                 },
                 "phone": {
                     "description": "Логин (телефон)",
                     "type": "string",
                     "example": "+79622840765"
-                }
-            }
-        },
-        "models.Patient": {
-            "type": "object",
-            "properties": {
-                "age": {
-                    "description": "Возраст",
-                    "type": "string"
-                },
-                "birth_date": {
-                    "description": "Дата рождения",
-                    "type": "string"
-                },
-                "certificate": {
-                    "description": "Сертификат",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/entities.Certificate"
-                        }
-                    ]
-                },
-                "full_name": {
-                    "description": "ФИО",
-                    "type": "string"
-                },
-                "gender": {
-                    "description": "Пол: true — мужской, false — женский",
-                    "type": "boolean"
-                },
-                "phone": {
-                    "description": "Телефон",
-                    "type": "string"
-                },
-                "policy": {
-                    "description": "Полис",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/entities.Policy"
-                        }
-                    ]
-                },
-                "snils": {
-                    "description": "СНИЛС",
-                    "type": "string"
                 }
             }
         },
@@ -916,6 +1298,48 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/entities.OneCPatientListItem"
                     }
+                }
+            }
+        },
+        "models.UpdateAnalysisOrderItemDTO": {
+            "type": "object",
+            "required": [
+                "analysis_id"
+            ],
+            "properties": {
+                "analysis_id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "completed_at": {
+                    "type": "string"
+                },
+                "is_completed": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.UpdateAnalysisOrderRequest": {
+            "type": "object",
+            "required": [
+                "id",
+                "order_items",
+                "patient_id"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "order_items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.UpdateAnalysisOrderItemDTO"
+                    }
+                },
+                "patient_id": {
+                    "type": "integer",
+                    "minimum": 1
                 }
             }
         }

@@ -10,11 +10,11 @@ type Call struct {
 	Status      entities.CallStatus `json:"status"`
 	MedServices []byte              `json:"med_services,omitempty"`
 
-	Patients   []entities.PatientData `json:"patients,omitempty"`
-	Doctor     entities.DoctorData    `json:"doctor"`
-	Receptions []entities.Receptions  `json:"receptions,omitempty"`
-	Flg        entities.Flg           `json:"flg"`
-	Analysis   entities.Analysis      `json:"analysis"`
+	Patients   []entities.OneCPatientListItem `json:"patients,omitempty"`
+	Doctor     entities.DoctorData            `json:"doctor"`
+	Receptions []entities.Receptions          `json:"receptions,omitempty"`
+	Flg        entities.Flg                   `json:"flg"`
+	Analysis   entities.Analysis              `json:"analysis"`
 }
 
 // Patient — данные пациента

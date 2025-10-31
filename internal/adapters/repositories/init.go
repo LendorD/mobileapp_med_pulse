@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/analysis"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emk"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/file"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/flg"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/medcard"
@@ -35,6 +36,7 @@ type Repository struct {
 	interfaces.FileRepository
 	interfaces.FlgRepository
 	interfaces.AnalysisRepository
+	interfaces.EmkRepository
 }
 
 func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
@@ -65,14 +67,14 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 	}
 
 	// Выполнение автомиграций
-	if err := autoMigrate(db); err != nil {
-		return nil, fmt.Errorf("ошибка выполнения автомиграций: %w", err)
-	}
+	// if err := autoMigrate(db); err != nil {
+	// 	return nil, fmt.Errorf("ошибка выполнения автомиграций: %w", err)
+	// }
 
-	if err := seedInitialData(db, cfg); err != nil {
-		log.Printf("⚠️ Ошибка сидов: %v", err)
-		// Не падаем — сиды не критичны
-	}
+	// if err := seedInitialData(db, cfg); err != nil {
+	// 	log.Printf("⚠️ Ошибка сидов: %v", err)
+	// 	// Не падаем — сиды не критичны
+	// }
 
 	return &Repository{
 		auth.NewAuthRepository(db),
@@ -84,6 +86,7 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 		file.NewFileRepository(db),
 		flg.NewFlgRepository(db),
 		analysis.NewAnalysisRepository(db),
+		emk.NewEmkRepository(db),
 	}, nil
 
 }
@@ -93,7 +96,7 @@ func autoMigrate(db *gorm.DB) error {
 
 	// Удаляем ВСЁ в обратном порядке (сначала дочерние, потом родительские)
 	tables := []interface{}{
-		&entities.PatientData{},
+		// &entities.PatientData{},
 		&entities.DoctorData{},
 		&entities.Receptions{},
 		&entities.Flg{},
@@ -130,7 +133,7 @@ func autoMigrate(db *gorm.DB) error {
 
 	// 4. Дочерние сущности вызова (ссылаются на OneCReception)
 	if err := db.AutoMigrate(
-		&entities.PatientData{},
+		// &entities.PatientData{},
 		&entities.DoctorData{},
 		&entities.Receptions{},
 		&entities.Flg{},
@@ -259,24 +262,15 @@ func seedInitialData(db *gorm.DB, cfg *config.Config) error {
 	}
 
 	// Дочерние сущности
-	patients := []entities.PatientData{
-		{
-			ReceptionID: reception.ID,
-			PatientID:   "PATIENT_001",
-			FullName:    "Пациент Иванович 1",
-			Age:         45,
-			BirthDate:   "1979-05-12",
-			MobilePhone: "+79001234501",
-			Policy: entities.Policy{
-				Number: "POLICY_OMS_001",
-				Type:   "ОМС",
-			},
-			Certificate: entities.Certificate{
-				Number: "CERT_001",
-				Date:   "2023-01-10",
-			},
-		},
-	}
+	// patients := []entities.PatientData{
+	// 	{
+	// 		PatientID:   "PATIENT_001",
+	// 		FullName:    "Пациент Иванович 1",
+	// 		Age:         45,
+	// 		BirthDate:   "1979-05-12",
+	// 		MobilePhone: "+79001234501",
+	// 	},
+	// }
 
 	doctor := entities.DoctorData{
 		ReceptionID:    reception.ID,
@@ -308,9 +302,9 @@ func seedInitialData(db *gorm.DB, cfg *config.Config) error {
 	// }
 
 	// Сохраняем всё
-	if err := db.CreateInBatches(patients, len(patients)).Error; err != nil {
-		return fmt.Errorf("failed to seed reception patients: %w", err)
-	}
+	// if err := db.CreateInBatches(patients, len(patients)).Error; err != nil {
+	// 	return fmt.Errorf("failed to seed reception patients: %w", err)
+	// }
 	if err := db.Create(&doctor).Error; err != nil {
 		return fmt.Errorf("failed to seed doctor: %w", err)
 	}

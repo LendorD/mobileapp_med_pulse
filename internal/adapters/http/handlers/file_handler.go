@@ -12,7 +12,7 @@ import (
 // @Description Возвращает бинарные данные файла по его идентификатору. Устанавливает правильные заголовки Content-Type, Content-Length и Content-Disposition.
 // @Tags Files
 // @Produce octet-stream
-// @Security BearerAuth
+// @Security JWTAuth
 // @Param id path uint true "ID файла"
 // @Success 200 {string} binary "Файл в виде бинарных данных"
 // @Failure 400 {object} ResultError "Некорректный ID файла (не число)"

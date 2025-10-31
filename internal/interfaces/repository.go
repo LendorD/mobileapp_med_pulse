@@ -18,6 +18,12 @@ type Repository interface {
 	FileRepository
 	FlgRepository
 	AnalysisRepository
+	EmkRepository
+}
+
+type EmkRepository interface {
+	SaveEmkList(ctx context.Context, patientID string, emkList []entities.Emk) error
+	GetEmkByPatientID(ctx context.Context, patientID string) ([]entities.Emk, error)
 }
 
 type AnalysisRepository interface {

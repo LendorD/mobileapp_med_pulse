@@ -45,7 +45,7 @@ type OneCUser struct {
 // OneCAuthWebhook receives a list of users from 1C and syncs them into the system.
 // @Summary Sync users from 1C
 // @Description Syncs a batch of users (login + password) received from 1C into the internal auth system.
-// @Tags Webhooks
+// @Tags 1C
 // @Accept json
 // @Produce json
 // @Param request body AuthCreditionals true "List of users to sync"
@@ -53,6 +53,7 @@ type OneCUser struct {
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /onec/auth [post]
+// @Security ApiKeyAuth
 func (h *Handler) OneCAuthWebhook(c *gin.Context) {
 	var update AuthCreditionals
 

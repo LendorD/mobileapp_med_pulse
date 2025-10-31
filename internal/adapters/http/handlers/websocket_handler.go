@@ -29,7 +29,7 @@ func NewWebsocketHandler(
 
 // Register godoc
 // @Summary Подписаться на уведомления
-// @Tags Notification
+// @Tags Websocket
 // @Accept json
 // @Produce json
 // @Param user_id path int true "User id"
@@ -65,7 +65,7 @@ func (ws *WebsocketHandler) Register(c *gin.Context) {
 
 // Unregister godoc
 // @Summary Отписаться от уведомлений
-// @Tags Notification
+// @Tags Websocket
 // @Accept json
 // @Produce json
 // @Param user_id path int true "User id"

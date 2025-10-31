@@ -16,7 +16,7 @@ import (
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Security ApiKeyAuth
+// @Security JWTAuth
 // @Router /medcard/{pat_id} [get]
 func (h *Handler) GetMedCardByPatientID(c *gin.Context) {
 	patientID := c.Param("pat_id")
@@ -43,7 +43,7 @@ func (h *Handler) GetMedCardByPatientID(c *gin.Context) {
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Security ApiKeyAuth
+// @Security JWTAuth
 // @Router /medcard/{pat_id} [put]
 func (h *Handler) UpdateMedCard(c *gin.Context) {
 	patientID := c.Param("pat_id")

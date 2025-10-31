@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/converter"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
@@ -38,15 +37,15 @@ func (u *OneCWebhookUsecase) HandleReceptionsUpdate(doctorID uint, ctx context.C
 		"doctor_id", doctorID,
 	)
 
-	oneCReceptions, err := converter.CallToReception(call)
-	if err != nil {
-		return err
-	}
+	// oneCReceptions, err := converter.CallToReception(call)
+	// if err != nil {
+	// 	return err
+	// }
 
-	err = u.repo.SaveReceptions(ctx, call.CallID, oneCReceptions)
-	if err != nil {
-		return err
-	}
+	// err = u.repo.SaveReceptions(ctx, call.CallID, oneCReceptions)
+	// if err != nil {
+	// 	return err
+	// }
 
 	callData, err := json.Marshal(call)
 	if err != nil {

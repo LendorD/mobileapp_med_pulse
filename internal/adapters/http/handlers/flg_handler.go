@@ -12,10 +12,10 @@ import (
 // CreateFlgWithPhoto godoc
 // @Summary Создать флюорографию с фото
 // @Description Загружает фото и создаёт запись
-// @Tags Flg
+// @Tags Files
 // @Accept multipart/form-data
 // @Produce json
-// @Security BearerAuth
+// @Security JWTAuth
 // @Param patient_id formData uint true "ID пациента"
 // @Param organization formData string true "Организация"
 // @Param number formData string true "Номер"

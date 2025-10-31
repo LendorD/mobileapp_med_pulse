@@ -6,7 +6,7 @@ import (
 
 type contextKey string
 
-const TxContextKey contextKey = "db_transaction"
+var TxContextKey = contextKey("db_transaction")
 
 // BaseRepository — базовый репозиторий с общей логикой
 type BaseRepository struct {

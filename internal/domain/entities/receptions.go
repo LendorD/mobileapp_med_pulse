@@ -16,11 +16,11 @@ type OneCReception struct {
 	MedServices []byte     `gorm:"type:jsonb" json:"med_services,omitempty"`
 
 	// Отношения (только прямые ссылки — без обратных!)
-	Patients   []PatientData `gorm:"foreignKey:ReceptionID" json:"patients,omitempty"`
-	Doctor     DoctorData    `gorm:"foreignKey:ReceptionID" json:"doctor"`
-	Receptions []Receptions  `gorm:"foreignKey:ReceptionID" json:"receptions,omitempty"`
-	Flg        Flg           `gorm:"foreignKey:ReceptionID" json:"flg"`
-	Analysis   Analysis      `gorm:"foreignKey:ReceptionID" json:"analysis"`
+	Patients   []OneCPatientListItem `gorm:"foreignKey:ReceptionID" json:"patients,omitempty"`
+	Doctor     DoctorData            `gorm:"foreignKey:ReceptionID" json:"doctor"`
+	Receptions []Receptions          `gorm:"foreignKey:ReceptionID" json:"receptions,omitempty"`
+	Flg        Flg                   `gorm:"foreignKey:ReceptionID" json:"flg"`
+	Analysis   Analysis              `gorm:"foreignKey:ReceptionID" json:"analysis"`
 }
 
 // CallStatus — статус вызова

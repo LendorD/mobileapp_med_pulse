@@ -21,6 +21,7 @@ type UseCases struct {
 	interfaces.FlgUsecase
 	interfaces.FileUsecase
 	interfaces.AnalysisUsecase
+	interfaces.EmkUsecase
 }
 
 func NewUsecases(
@@ -40,6 +41,7 @@ func NewUsecases(
 		NewFlgUseсase(r, r, r, s),
 		NewFileUsecase(r, s),
 		NewAnalysisUsecase(r, r, r),
+		NewEmkUsecse(r, onecClient),
 	}
 
 }

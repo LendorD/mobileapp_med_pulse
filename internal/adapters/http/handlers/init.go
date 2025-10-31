@@ -92,20 +92,21 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	medCardGroup.GET("/:pat_id", h.GetMedCardByPatientID)
 	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
 
+	//ЭМК
+	emkGroup := protected.Group("/emk")
+	emkGroup.GET("/:pat_id", h.GetAllEmkByPatientID)
+
 	flgGroup := protected.Group("/flg")
 	// flgGroup.Use(ImageMiddleware())
 	flgGroup.POST("/create/flg", h.CreateFlgWithPhoto)
 
-	analysisGroup := baseRouter.Group("/analysis")
+	analysisGroup := protected.Group("/analysis")
 	analysisGroup.GET("", h.GetAllAnalyses)
 	analysisGroup.POST("/update", h.UpdateAnalysisOrder)
 
-	// Выезд
-	emergencyGroup := protected.Group("/emergency")
-	emergencyGroup.GET("/signature/:recep_id", h.GetSignature)
-	emergencyGroup.POST("/signature/:recep_id", h.SaveSignature)
-
-	// emergencyGroup.POST("/pdf/:rec_id", h.UploadPdf)
+	//file
+	fileGroup := protected.Group("/file")
+	fileGroup.GET("/:file_id", h.GetFileByID)
 
 	return r
 }

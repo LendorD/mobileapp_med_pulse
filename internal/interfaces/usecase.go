@@ -17,6 +17,11 @@ type Usecases interface {
 	FlgUsecase
 	FileUsecase
 	AnalysisUsecase
+	EmkUsecase
+}
+
+type EmkUsecase interface {
+	GetAllEmkByPatientID(ctx context.Context, patientID string) ([]entities.Emk, error)
 }
 
 type FlgUsecase interface {

@@ -50,3 +50,25 @@ func (c *OneCClient) UpdateMedCardByPatientID(patientID string, card *entities.O
 
 	return nil
 }
+
+// GetEmkByPatientID — получает список ЭМК пациента из 1С
+func (c *OneCClient) GetEmkByPatientID(patientID string) ([]entities.Emk, error) {
+	endpoint := fmt.Sprintf("/emk/%s", patientID)
+
+	req, err := c.CreateRequestJSON(http.MethodGet, endpoint, nil, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("1C request creation error: %w", err)
+	}
+
+	bodyBytes, _, err := c.DoRequest(req)
+	if err != nil {
+		return nil, fmt.Errorf("1C request error: %w", err)
+	}
+
+	var emkList []entities.Emk
+	if err := json.Unmarshal(bodyBytes, &emkList); err != nil {
+		return nil, fmt.Errorf("unmarshal EMK error: %w", err)
+	}
+
+	return emkList, nil
+}
