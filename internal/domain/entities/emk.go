@@ -10,6 +10,7 @@ type Emk struct {
 
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+	// Receptions Receptions
 
 	MedServices []byte `gorm:"type:jsonb" json:"med_services,omitempty"`
 
