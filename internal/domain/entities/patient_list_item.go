@@ -6,10 +6,9 @@ type PatientListUpdate struct {
 
 // PatientListItem — краткая информация о пациенте для списка
 type OneCPatientListItem struct {
-	ID        uint   `gorm:"primaryKey"`
-	PatientID string `gorm:"not null;uniqueIndex"`
-	FullName  string `gorm:"not null"`
-	Gender    bool   // true — мужской
-	BirthDate string // в формате "YYYY-MM-DD"
-
+	ID        uint   `gorm:"primaryKey" json:"id"`
+	PatientID string `gorm:"not null;uniqueIndex" json:"patient_id"`
+	FullName  string `gorm:"not null" json:"full_name"`
+	Gender    bool   `json:"gender"`
+	BirthDate string `json:"birth_date"`
 }

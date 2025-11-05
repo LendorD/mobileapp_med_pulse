@@ -4,10 +4,8 @@ import "time"
 
 // Flg — данные ФЛГ, привязанные к вызову (1:1)
 type Flg struct {
-	ID          uint `gorm:"primaryKey" json:"id"`
-	ReceptionID uint `gorm:"uniqueIndex;not null" json:"-"`
-
-	CreatedAt    time.Time `json:"created_at"`
+	ID           uint      `gorm:"primaryKey" json:"id"`
+	ReceptionID  uint      `gorm:"uniqueIndex;not null" json:"-"`
 	PatientID    uint      `json:"patient_id"`
 	Organization string    `json:"organization"`
 	Number       string    `json:"number"`
@@ -15,4 +13,5 @@ type Flg struct {
 	Date         time.Time `json:"date"`
 	FileID       *uint     `json:"file_id"`
 	File         *File     `gorm:"foreignKey:FileID" json:"file,omitempty"`
+	CreatedAt    time.Time `json:"created_at"`
 }

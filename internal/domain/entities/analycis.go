@@ -10,7 +10,11 @@ type Analysis struct {
 	Code  string `json:"code"`
 	Title string `json:"title"`
 	Price uint   `json:"price"`
+
+	FileID *uint `json:"file_id"`
+	File   *File `gorm:"foreignKey:FileID" json:"file,omitempty"`
 }
+
 type AnalysisOrderItem struct {
 	ID uint `gorm:"primarykey" json:"id"`
 
