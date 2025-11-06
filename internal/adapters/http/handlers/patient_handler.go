@@ -18,7 +18,8 @@ import (
 // @Produce json
 // @Param update body entities.PatientListUpdate true "Patient list update from 1C"
 // @Success 200
-// @Router /webhook/onec/patients [post]
+// @Router /webhook/onec/patients [post]]
+// @Security ApiKeyAuth
 func (h *Handler) OneCPatientListWebhook(c *gin.Context) {
 	var update entities.PatientListUpdate
 	if err := c.ShouldBindJSON(&update); err != nil {
@@ -41,10 +42,9 @@ func (h *Handler) OneCPatientListWebhook(c *gin.Context) {
 // @Param page query int false "Page number (default: 1)"
 // @Param limit query int false "Items per page (default: 20, max: 100)"
 // @Success 200 {object} models.PatientListResponse
-// @Security ApiKeyAuth
+// @Security JWTAuth
 // @Router /patients [get]
 func (h *Handler) GetPatientList(c *gin.Context) {
-	// Получаем параметры пагинации
 	page, err := strconv.Atoi(c.DefaultQuery("page", "1"))
 	if err != nil || page < 1 {
 		page = 1

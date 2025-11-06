@@ -11,18 +11,22 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/models"
 )
 
-// SaveReceptions сохраняет список пациентов по callID
-func (r *ReceptionSmpRepositoryImpl) SaveReceptions(ctx context.Context, callID string, patients []models.Patient) error {
-	data, err := json.Marshal(patients)
-	if err != nil {
-		return err
-	}
+func (r *ReceptionSmpRepositoryImpl) GetUndeliveredReceptions(ctx context.Context) ([]entities.OneCReception, error) {
+	var receptions []entities.OneCReception
+	db := r.db.GetDB(ctx)
+	err := db.Where("status IN (?)", []string{"received", "failed"}).Find(&receptions).Error
+	return receptions, err
+}
 
-	reception := entities.OneCReception{
-		CallID: callID,
-		Status: "received",
-		Data:   data,
-	}
+// UpdateStatus обновляет статус заявки
+func (r *ReceptionSmpRepositoryImpl) UpdateStatus(ctx context.Context, callID, status string) error {
+	db := r.db.GetDB(ctx)
+	return db.Model(&entities.OneCReception{}).
+		Where("call_id = ?", callID).
+		Update("status", status).Error
+}
+
+func (r *ReceptionSmpRepositoryImpl) SaveReceptions(ctx context.Context, callID string, reception entities.OneCReception) error {
 	db := r.db.GetDB(ctx)
 	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// Удаляем старую запись, если есть
@@ -34,7 +38,6 @@ func (r *ReceptionSmpRepositoryImpl) SaveReceptions(ctx context.Context, callID 
 	})
 }
 
-// GetReceptions возвращает список пациентов по callID
 func (r *ReceptionSmpRepositoryImpl) GetReceptions(ctx context.Context, callID string) ([]models.Patient, error) {
 	var reception entities.OneCReception
 	db := r.db.GetDB(ctx)
@@ -47,7 +50,7 @@ func (r *ReceptionSmpRepositoryImpl) GetReceptions(ctx context.Context, callID s
 	}
 
 	var patients []models.Patient
-	if err := json.Unmarshal(reception.Data, &patients); err != nil {
+	if err := json.Unmarshal(reception.MedServices, &patients); err != nil {
 		return nil, err
 	}
 	return patients, nil

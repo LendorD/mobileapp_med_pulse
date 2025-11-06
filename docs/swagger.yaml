@@ -1,5 +1,45 @@
 basePath: /api/v1
 definitions:
+  entities.Analysis:
+    properties:
+      code:
+        type: string
+      id:
+        type: integer
+      price:
+        type: integer
+      title:
+        type: string
+    type: object
+  entities.AttendingDoctor:
+    properties:
+      attachmentEnd:
+        type: string
+      attachmentStart:
+        type: string
+      clinic:
+        type: string
+      fullName:
+        type: string
+      policyOrCertNumber:
+        type: string
+      specialization:
+        type: string
+    type: object
+  entities.CallStatus:
+    enum:
+    - completed
+    - process
+    type: string
+    x-enum-comments:
+      CallStatusCompleted: 'исправлено: было "compleated"'
+      CallStatusWork: 'исправлено: было "proccess"'
+    x-enum-descriptions:
+    - 'исправлено: было "compleated"'
+    - 'исправлено: было "proccess"'
+    x-enum-varnames:
+    - CallStatusCompleted
+    - CallStatusWork
   entities.Certificate:
     properties:
       date:
@@ -14,17 +54,72 @@ definitions:
       name:
         type: string
     type: object
-  entities.Doctor:
+  entities.DoctorData:
     properties:
-      attachment_end:
+      id:
+        type: integer
+      name:
         type: string
-      attachment_start:
+      specialization:
         type: string
-      clinic:
+    type: object
+  entities.Emk:
+    properties:
+      analysis:
+        $ref: '#/definitions/entities.Analysis'
+      call_id:
         type: string
-      full_name:
+      created_at:
         type: string
-      policy_or_cert_number:
+      doctor:
+        $ref: '#/definitions/entities.DoctorData'
+      flg:
+        $ref: '#/definitions/entities.Flg'
+      id:
+        type: integer
+      med_services:
+        items:
+          type: integer
+        type: array
+      patient_id:
+        description: связь с пациентом
+        type: string
+      status:
+        $ref: '#/definitions/entities.CallStatus'
+      updated_at:
+        type: string
+    type: object
+  entities.File:
+    properties:
+      createdAt:
+        type: string
+      filename:
+        type: string
+      id:
+        type: integer
+      minioKey:
+        description: '"minio_id"'
+        type: string
+    type: object
+  entities.Flg:
+    properties:
+      created_at:
+        type: string
+      date:
+        type: string
+      file:
+        $ref: '#/definitions/entities.File'
+      file_id:
+        type: integer
+      id:
+        type: integer
+      number:
+        type: string
+      organization:
+        type: string
+      patient_id:
+        type: integer
+      result:
         type: string
     type: object
   entities.OneCMedicalCard:
@@ -35,8 +130,6 @@ definitions:
         type: string
       age:
         type: string
-      attending_doctor:
-        $ref: '#/definitions/entities.Doctor'
       birth_date:
         type: string
       certificate:
@@ -44,6 +137,8 @@ definitions:
       display_name:
         description: Основные поля
         type: string
+      doctor:
+        $ref: '#/definitions/entities.AttendingDoctor'
       email:
         type: string
       legal_representative:
@@ -75,8 +170,6 @@ definitions:
         type: boolean
       id:
         type: integer
-      medical_card:
-        $ref: '#/definitions/entities.OneCMedicalCard'
       patientID:
         type: string
     type: object
@@ -93,6 +186,15 @@ definitions:
         type: string
       type:
         type: string
+    type: object
+  entities.Receptions:
+    properties:
+      data:
+        items:
+          type: integer
+        type: array
+      id:
+        type: integer
     type: object
   entities.Relative:
     properties:
@@ -165,37 +267,82 @@ definitions:
         example: secret123
         type: string
     type: object
+  handlers.ResultError:
+    properties:
+      response:
+        properties:
+          code:
+            description: '[RULE]: must be one of codes from table (Check DEV.PAGE)'
+            example: 400
+            type: integer
+          message:
+            example: Bad request
+            type: string
+        type: object
+      status:
+        description: error
+        example: error
+        type: string
+    type: object
+  handlers.ResultResponse:
+    properties:
+      response:
+        properties:
+          data:
+            description: '[AVALIABLE]: object, array of objects, empty'
+          message:
+            example: Success operation
+            type: string
+          type:
+            description: '[AVALIABLE]: object, array, empty'
+            example: object
+            type: string
+        type: object
+      status:
+        description: ok
+        example: ok
+        type: string
+    type: object
+  models.AnalysisResponse:
+    properties:
+      code:
+        type: string
+      id:
+        type: integer
+      price:
+        type: integer
+      title:
+        type: string
+    type: object
   models.Call:
     properties:
       address:
-        description: Адрес (адрес вызова)
         type: string
+      analysis:
+        $ref: '#/definitions/entities.Analysis'
       call_id:
         type: string
-      patient_count:
-        description: Кол-во пациентов
-        type: integer
-      patients:
-        description: Данные пациентов
+      doctor:
+        $ref: '#/definitions/entities.DoctorData'
+      flg:
+        $ref: '#/definitions/entities.Flg'
+      med_services:
         items:
-          $ref: '#/definitions/models.Patient'
+          type: integer
+        type: array
+      patients:
+        items:
+          $ref: '#/definitions/entities.OneCPatientListItem'
         type: array
       phone:
-        description: Телефон пациента
         type: string
+      receptions:
+        items:
+          $ref: '#/definitions/entities.Receptions'
+        type: array
       status:
-        allOf:
-        - $ref: '#/definitions/models.CallStatus'
-        description: Статус вызова
+        $ref: '#/definitions/entities.CallStatus'
     type: object
-  models.CallStatus:
-    enum:
-    - Выполнен
-    - В работе
-    type: string
-    x-enum-varnames:
-    - CallStatusCompleted
-    - CallStatusWork
   models.DoctorAuthResponse:
     description: Ответ с данными авторизованного врача
     properties:
@@ -213,7 +360,7 @@ definitions:
     properties:
       password:
         description: Пароль
-        example: "123"
+        example: password123
         type: string
       phone:
         description: Логин (телефон)
@@ -223,41 +370,41 @@ definitions:
     - password
     - phone
     type: object
-  models.Patient:
-    properties:
-      age:
-        description: Возраст
-        type: string
-      birth_date:
-        description: Дата рождения
-        type: string
-      certificate:
-        allOf:
-        - $ref: '#/definitions/entities.Certificate'
-        description: Сертификат
-      full_name:
-        description: ФИО
-        type: string
-      gender:
-        description: 'Пол: true — мужской, false — женский'
-        type: boolean
-      phone:
-        description: Телефон
-        type: string
-      policy:
-        allOf:
-        - $ref: '#/definitions/entities.Policy'
-        description: Полис
-      snils:
-        description: СНИЛС
-        type: string
-    type: object
   models.PatientListResponse:
     properties:
       patient:
         items:
           $ref: '#/definitions/entities.OneCPatientListItem'
         type: array
+    type: object
+  models.UpdateAnalysisOrderItemDTO:
+    properties:
+      analysis_id:
+        minimum: 1
+        type: integer
+      completed_at:
+        type: string
+      is_completed:
+        type: boolean
+    required:
+    - analysis_id
+    type: object
+  models.UpdateAnalysisOrderRequest:
+    properties:
+      id:
+        minimum: 1
+        type: integer
+      order_items:
+        items:
+          $ref: '#/definitions/models.UpdateAnalysisOrderItemDTO'
+        type: array
+      patient_id:
+        minimum: 1
+        type: integer
+    required:
+    - id
+    - order_items
+    - patient_id
     type: object
 info:
   contact:
@@ -267,6 +414,66 @@ info:
   title: ClinicHub API
   version: 1.0.0
 paths:
+  /analysis:
+    get:
+      description: Возвращает полный список доступных анализов
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список анализов
+          schema:
+            items:
+              $ref: '#/definitions/models.AnalysisResponse'
+            type: array
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      security:
+      - BearerAuth: []
+      - JWTAuth: []
+      summary: Получить все анализы
+      tags:
+      - Files
+  /analysis/update:
+    post:
+      consumes:
+      - application/json
+      description: Обновляет список анализов в направлении
+      parameters:
+      - description: Данные направления
+        in: body
+        name: info
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateAnalysisOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Направление успешно обновлено
+        "400":
+          description: Неверный формат запроса
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "404":
+          description: Направление не найдено
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "422":
+          description: Ошибка валидации данных
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      security:
+      - JWTAuth: []
+      summary: Обновить направление на анализы
+      tags:
+      - Files
   /auth:
     post:
       consumes:
@@ -301,6 +508,152 @@ paths:
       summary: Вход в систему
       tags:
       - Auth
+  /emk/{pat_id}:
+    get:
+      parameters:
+      - description: Patient ID
+        in: path
+        name: pat_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entities.Emk'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWTAuth: []
+      summary: Get all EMK records by patient ID
+      tags:
+      - EMK
+  /files/{id}:
+    get:
+      description: Возвращает бинарные данные файла по его идентификатору. Устанавливает
+        правильные заголовки Content-Type, Content-Length и Content-Disposition.
+      parameters:
+      - description: ID файла
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: Файл в виде бинарных данных
+          schema:
+            type: string
+        "400":
+          description: Некорректный ID файла (не число)
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "401":
+          description: Неавторизован (отсутствует или невалиден токен)
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "404":
+          description: Файл не найден
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      security:
+      - JWTAuth: []
+      summary: Получить файл по ID
+      tags:
+      - Files
+  /flgs/:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Загружает фото и создаёт запись
+      parameters:
+      - description: ID пациента
+        in: formData
+        name: patient_id
+        required: true
+        type: integer
+      - description: Организация
+        in: formData
+        name: organization
+        required: true
+        type: string
+      - description: Номер
+        in: formData
+        name: number
+        required: true
+        type: string
+      - description: Результат
+        in: formData
+        name: result
+        required: true
+        type: string
+      - description: Дата (YYYY-MM-DD)
+        in: formData
+        name: date
+        required: true
+        type: string
+      - description: Фото (JPEG/PNG, до 10 МБ)
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Созданная флюрография
+          schema:
+            $ref: '#/definitions/handlers.ResultResponse'
+        "400":
+          description: Некорректный запрос (например, неверный формат даты)
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "401":
+          description: Неавторизован (отсутствует или невалиден токен)
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "404":
+          description: Пациент или организация не найдены
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "422":
+          description: Семантическая ошибка (например, patient_id=0)
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ResultError'
+      security:
+      - JWTAuth: []
+      summary: Создать флюорографию с фото
+      tags:
+      - Files
   /medcard/{pat_id}:
     get:
       parameters:
@@ -335,7 +688,7 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - JWTAuth: []
       summary: Get medical card by patient ID
       tags:
       - MedicalCard
@@ -376,7 +729,7 @@ paths:
               type: string
             type: object
       security:
-      - ApiKeyAuth: []
+      - JWTAuth: []
       summary: Update medical card by patient ID
       tags:
       - MedicalCard
@@ -410,9 +763,11 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Sync users from 1C
       tags:
-      - Webhooks
+      - 1C
   /patients:
     get:
       parameters:
@@ -432,94 +787,10 @@ paths:
           schema:
             $ref: '#/definitions/models.PatientListResponse'
       security:
-      - ApiKeyAuth: []
+      - JWTAuth: []
       summary: Get cached patient list from 1C with pagination
       tags:
       - Patients
-  /signature/{recep_id}:
-    get:
-      description: Returns the base64-encoded signature image for a given reception
-        ID.
-      parameters:
-      - description: Reception ID
-        in: path
-        name: recep_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Get patient signature
-      tags:
-      - Emergency
-    post:
-      consumes:
-      - multipart/form-data
-      description: Accepts a multipart form with a 'signature' file (e.g., PNG, JPG)
-        and saves it.
-      parameters:
-      - description: Reception ID
-        in: path
-        name: recep_id
-        required: true
-        type: string
-      - description: Signature image file
-        in: formData
-        name: signature
-        required: true
-        type: file
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Upload patient signature
-      tags:
-      - Emergency
   /webhook/onec/patients:
     post:
       consumes:
@@ -536,6 +807,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - ApiKeyAuth: []
       summary: 'Webhook from 1C: patient list update'
       tags:
       - 1C
@@ -555,6 +828,8 @@ paths:
       responses:
         "200":
           description: OK
+      security:
+      - ApiKeyAuth: []
       summary: 'Webhook from 1C: new receptions'
       tags:
       - 1C
@@ -575,7 +850,7 @@ paths:
           description: OK
       summary: Подписаться на уведомления
       tags:
-      - Notification
+      - Websocket
   /ws/notification/unregister/{user_id}:
     get:
       consumes:
@@ -597,7 +872,7 @@ paths:
             type: object
       summary: Отписаться от уведомлений
       tags:
-      - Notification
+      - Websocket
 securityDefinitions:
   ApiKeyAuth:
     description: Type "Bearer <JWT>" to authenticate

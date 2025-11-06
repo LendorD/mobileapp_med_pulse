@@ -18,11 +18,11 @@ type OneCMedicalCard struct {
 	Snils           string `gorm:"type:varchar(20);index" json:"snils"`
 
 	// Вложенные структуры
-	LegalRepresentative ClientRef   `gorm:"embedded;embeddedPrefix:legal_rep_" json:"legal_representative,omitempty"`
-	Relative            Relative    `gorm:"embedded;embeddedPrefix:relative_" json:"relative,omitempty"`
-	AttendingDoctor     Doctor      `gorm:"embedded;embeddedPrefix:doctor_" json:"attending_doctor"`
-	Policy              Policy      `gorm:"embedded;embeddedPrefix:policy_" json:"policy"`
-	Certificate         Certificate `gorm:"embedded;embeddedPrefix:cert_" json:"certificate"`
+	LegalRepresentative ClientRef       `gorm:"embedded;embeddedPrefix:legal_rep_" json:"legal_representative,omitempty"`
+	Relative            Relative        `gorm:"embedded;embeddedPrefix:relative_" json:"relative,omitempty"`
+	Doctor              AttendingDoctor `gorm:"embedded;embeddedPrefix:doctor_" json:"doctor"`
+	Policy              Policy          `gorm:"embedded;embeddedPrefix:policy_" json:"policy"`
+	Certificate         Certificate     `gorm:"embedded;embeddedPrefix:cert_" json:"certificate"`
 }
 
 type ClientRef struct {
@@ -35,20 +35,23 @@ type Relative struct {
 	Name   string `gorm:"type:text" json:"name"`
 }
 
-type Doctor struct {
-	FullName           string `gorm:"type:text" json:"full_name"`
-	PolicyOrCertNumber string `gorm:"type:varchar(100)" json:"policy_or_cert_number"`
-	AttachmentStart    string `gorm:"type:varchar(20)" json:"attachment_start"`
-	AttachmentEnd      string `gorm:"type:varchar(20)" json:"attachment_end"`
-	Clinic             string `gorm:"type:text" json:"clinic"`
+type AttendingDoctor struct {
+	FullName           string
+	Specialization     string
+	PolicyOrCertNumber string
+	AttachmentStart    string
+	AttachmentEnd      string
+	Clinic             string
 }
 
+// Policy — полис пациента
 type Policy struct {
-	Number string `gorm:"type:varchar(50);index" json:"number"`
-	Type   string `gorm:"type:varchar(50)" json:"type"`
+	Number string `json:"number"`
+	Type   string `json:"type"`
 }
 
+// Certificate — сертификат
 type Certificate struct {
-	Number string `gorm:"type:varchar(50)" json:"number"`
-	Date   string `gorm:"type:varchar(20)" json:"date"`
+	Number string `json:"number"`
+	Date   string `json:"date"`
 }

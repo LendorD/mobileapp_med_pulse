@@ -8,6 +8,7 @@ import (
 	"github.com/AlexanderMorozov1919/mobileapp/internal/config"
 	_ "github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/interfaces"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/services/websocket"
 	_ "github.com/AlexanderMorozov1919/mobileapp/pkg/errors"
 )
@@ -17,6 +18,10 @@ type UseCases struct {
 	interfaces.AuthUsecase
 	interfaces.OneCWebhookUsecase
 	interfaces.OneCPatientUsecase
+	interfaces.FlgUsecase
+	interfaces.FileUsecase
+	interfaces.AnalysisUsecase
+	interfaces.EmkUsecase
 }
 
 func NewUsecases(
@@ -25,13 +30,18 @@ func NewUsecases(
 	conf *config.Config,
 	hub *websocket.Hub,
 	onecClient interfaces.OneCClient,
+	logger *logging.Logger,
 ) interfaces.Usecases {
 
 	return &UseCases{
 		NewMedCardUsecase(r, onecClient, r),
 		NewAuthUsecase(r, conf.JWTSecret),
-		NewOneCWebhookUsecase(r, hub),
+		NewOneCWebhookUsecase(r, hub, logger),
 		NewOneCPatientListUsecase(r, onecClient),
+		NewFlgUseсase(r, r, r, s),
+		NewFileUsecase(r, s),
+		NewAnalysisUsecase(r, r, r),
+		NewEmkUsecse(r, onecClient),
 	}
 
 }

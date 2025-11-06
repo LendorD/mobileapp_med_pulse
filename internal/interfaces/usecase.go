@@ -14,6 +14,27 @@ type Usecases interface {
 	AuthUsecase
 	OneCWebhookUsecase
 	OneCPatientUsecase
+	FlgUsecase
+	FileUsecase
+	AnalysisUsecase
+	EmkUsecase
+}
+
+type EmkUsecase interface {
+	GetAllEmkByPatientID(ctx context.Context, patientID string) ([]entities.Emk, error)
+}
+
+type FlgUsecase interface {
+	CreateFlgWithPhoto(ctx context.Context, req *models.CreateFlgRequest) (*uint, *errors.AppError)
+}
+
+type AnalysisUsecase interface {
+	UpdateAnalysisOrder(ctx context.Context, req *models.UpdateAnalysisOrderRequest) *errors.AppError
+	GetAllAnalyses(ctx context.Context) ([]models.AnalysisResponse, *errors.AppError)
+}
+
+type FileUsecase interface {
+	GetFileByID(ctx context.Context, fileID uint) ([]byte, string, string, *errors.AppError)
 }
 
 type OneCPatientUsecase interface {
@@ -22,7 +43,7 @@ type OneCPatientUsecase interface {
 }
 
 type OneCWebhookUsecase interface {
-	HandleReceptionsUpdate(ctx context.Context, update models.Call) error
+	HandleReceptionsUpdate(DoctorID uint, ctx context.Context, call models.Call) error
 	GetInterestedUserIDs(callID int) []uint
 }
 

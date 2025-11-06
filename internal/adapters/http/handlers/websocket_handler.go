@@ -29,13 +29,18 @@ func NewWebsocketHandler(
 
 // Register godoc
 // @Summary Подписаться на уведомления
-// @Tags Notification
+// @Tags Websocket
 // @Accept json
 // @Produce json
 // @Param user_id path int true "User id"
 // @Success 200
 // @Router /ws/notification/register/{user_id} [get]
 func (ws *WebsocketHandler) Register(c *gin.Context) {
+	ws.logger.Debug("📡 [WS] Register called! UserID: %s, RemoteIP: %s, Origin: %s",
+		c.Param("user_id"),
+		c.ClientIP(),
+		c.GetHeader("Origin"),
+	)
 	strUserId := c.Param("user_id")
 	if strUserId == "" {
 		ws.Handler.ErrorResponse(c, nil, http.StatusBadRequest, "parameter 'user_id' must be exist", false)
@@ -60,7 +65,7 @@ func (ws *WebsocketHandler) Register(c *gin.Context) {
 
 // Unregister godoc
 // @Summary Отписаться от уведомлений
-// @Tags Notification
+// @Tags Websocket
 // @Accept json
 // @Produce json
 // @Param user_id path int true "User id"

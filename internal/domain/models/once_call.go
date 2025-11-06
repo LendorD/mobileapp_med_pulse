@@ -2,23 +2,20 @@ package models
 
 import "github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
 
-// Call — основная структура вызова из 1С
+// Call — зеркало entities.OneCReception для внешнего API (без полей БД)
 type Call struct {
-	CallID       string     `json:"call_id"`
-	Address      string     `json:"address"`       // Адрес (адрес вызова)
-	Phone        string     `json:"phone"`         // Телефон пациента
-	PatientCount int        `json:"patient_count"` // Кол-во пациентов
-	Status       CallStatus `json:"status"`        // Статус вызова
-	Patients     []Patient  `json:"patients"`      // Данные пациентов
+	CallID      string              `json:"call_id"`
+	Address     string              `json:"address"`
+	Phone       string              `json:"phone"`
+	Status      entities.CallStatus `json:"status"`
+	MedServices []byte              `json:"med_services,omitempty"`
+
+	Patients   []entities.OneCPatientListItem `json:"patients,omitempty"`
+	Doctor     entities.DoctorData            `json:"doctor"`
+	Receptions []entities.Receptions          `json:"receptions,omitempty"`
+	Flg        entities.Flg                   `json:"flg"`
+	Analysis   entities.Analysis              `json:"analysis"`
 }
-
-// CallStatus — статус вызова
-type CallStatus string
-
-const (
-	CallStatusCompleted CallStatus = "compleated"
-	CallStatusWork      CallStatus = "proccess"
-)
 
 // Patient — данные пациента
 type Patient struct {

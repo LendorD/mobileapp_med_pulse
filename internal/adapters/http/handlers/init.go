@@ -8,7 +8,6 @@ import (
 	middleware "github.com/AlexanderMorozov1919/mobileapp/internal/middleware/jwt"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/logging"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/middleware/swagger"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	_ "github.com/swaggo/files"
@@ -44,13 +43,13 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	r := gin.Default()
 
 	// CORS
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     cfg.Server.AllowedOrigins,
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-	}))
+	// r.Use(cors.New(cors.Config{
+	// 	AllowOrigins:     cfg.Server.AllowedOrigins,
+	// 	AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+	// 	AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+	// 	ExposeHeaders:    []string{"Content-Length"},
+	// 	AllowCredentials: true,
+	// }))
 
 	// Swagger-роутер
 	swagger.Setup(r, swagCfg)
@@ -79,28 +78,35 @@ func ProvideRouter(h *Handler, ws *WebsocketHandler, cfg *config.Config, swagCfg
 	wsGroup.GET("/unregister/:user_id", ws.Unregister)
 
 	//Запросы от 1С
-	webhook := protected.Group("webhook")
+	webhook := protected.Group("/webhook")
 	webhook.POST("/onec/receptions", h.OneCWebhook)          // Получение заявок
 	webhook.POST("/onec/patients", h.OneCPatientListWebhook) // получение списка пациентов
 	webhook.POST("/onec/auth", h.OneCAuthWebhook)            // Получение списка авторизации
 
 	// Пациенты
 	patientGroup := protected.Group("/patients")
-	patientGroup.GET("", h.GetPatientList) // Отдаёт список всех пациентов c пагинацией (1С)
+	patientGroup.GET("", h.GetPatientList)
 
-	// Медкарты (Больше не формируется а получаются от 1С)
+	// Медкарты
 	medCardGroup := protected.Group("/medcard")
 	medCardGroup.GET("/:pat_id", h.GetMedCardByPatientID)
 	medCardGroup.PUT("/:pat_id", h.UpdateMedCard)
 
-	// Выезд
-	emergencyGroup := protected.Group("/emergency")
+	//ЭМК
+	emkGroup := protected.Group("/emk")
+	emkGroup.GET("/:pat_id", h.GetAllEmkByPatientID)
 
-	//Подписи пациентов
-	emergencyGroup.GET("/signature/:recep_id", h.GetSignature)
-	emergencyGroup.POST("/signature/:recep_id", h.SaveSignature)
+	flgGroup := protected.Group("/flg")
+	// flgGroup.Use(ImageMiddleware())
+	flgGroup.POST("/create/flg", h.CreateFlgWithPhoto)
 
-	// emergencyGroup.POST("/pdf/:rec_id", h.UploadPdf)
+	analysisGroup := protected.Group("/analysis")
+	analysisGroup.GET("", h.GetAllAnalyses)
+	analysisGroup.POST("/update", h.UpdateAnalysisOrder)
+
+	//file
+	fileGroup := protected.Group("/file")
+	fileGroup.GET("/:file_id", h.GetFileByID)
 
 	return r
 }

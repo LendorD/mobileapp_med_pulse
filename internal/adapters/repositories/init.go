@@ -6,11 +6,14 @@ import (
 	"os"
 	"time"
 
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/analysis"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/emk"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/file"
+	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/flg"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/medcard"
 	receptionSmp "github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/reception_smp"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/tx"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/domain/entities"
-	"golang.org/x/crypto/bcrypt"
 
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/auth"
 	"github.com/AlexanderMorozov1919/mobileapp/internal/adapters/repositories/doctor"
@@ -29,6 +32,10 @@ type Repository struct {
 	interfaces.ReceptionSmpRepository
 	interfaces.MedicalCardRepository
 	interfaces.TxManager
+	interfaces.FileRepository
+	interfaces.FlgRepository
+	interfaces.AnalysisRepository
+	interfaces.EmkRepository
 }
 
 func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
@@ -59,13 +66,8 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 	}
 
 	// Выполнение автомиграций
-	if err := autoMigrate(db); err != nil {
+	if err := Migrate(db); err != nil {
 		return nil, fmt.Errorf("ошибка выполнения автомиграций: %w", err)
-	}
-
-	if err := seedInitialData(db, cfg); err != nil {
-		log.Printf("⚠️ Ошибка сидов: %v", err)
-		// Не падаем — сиды не критичны
 	}
 
 	return &Repository{
@@ -75,145 +77,146 @@ func NewRepository(cfg *config.Config) (interfaces.Repository, error) {
 		receptionSmp.NewReceptionSmpRepository(db),
 		medcard.NewMedicalCardRepository(db),
 		tx.NewTxManager(db),
+		file.NewFileRepository(db),
+		flg.NewFlgRepository(db),
+		analysis.NewAnalysisRepository(db),
+		emk.NewEmkRepository(db),
 	}, nil
 
 }
 
-func autoMigrate(db *gorm.DB) error {
-	//  Только для dev! Удаляем ВСЁ
-	log.Println("🗑️ Dropping all tables...")
-
-	// Сначала дочерние таблицы (с FK), потом родительские
-	_ = db.Migrator().DropTable(&entities.OneCMedicalCard{})
-	_ = db.Migrator().DropTable(&entities.OneCPatientListItem{})
-	_ = db.Migrator().DropTable(&entities.OneCReception{})
-	_ = db.Migrator().DropTable(&entities.AuthUser{})
-
-	log.Println("🆕 Creating tables in correct order...")
-
-	// Теперь создаём в правильном порядке
-	if err := db.Migrator().CreateTable(&entities.AuthUser{}); err != nil {
-		return fmt.Errorf("auth_users: %w", err)
-	}
-	if err := db.Migrator().CreateTable(&entities.OneCReception{}); err != nil {
-		return fmt.Errorf("receptions: %w", err)
-	}
-	if err := db.Migrator().CreateTable(&entities.OneCPatientListItem{}); err != nil {
-		return fmt.Errorf("patient_list: %w", err)
-	}
-	if err := db.Migrator().CreateTable(&entities.OneCMedicalCard{}); err != nil {
-		return fmt.Errorf("med_cards: %w", err)
+// Migrate выполняет миграции и заполняет тестовыми данными.
+func Migrate(db *gorm.DB) error {
+	// Автоматическая миграция
+	err := db.AutoMigrate(
+		&entities.AuthUser{},
+		&entities.Emk{},
+		&entities.Flg{},
+		&entities.File{},
+		&entities.OneCMedicalCard{},
+		&entities.OneCPatientListItem{},
+	)
+	if err != nil {
+		return err
 	}
 
-	log.Println("✅ Migrations completed")
-	return nil
-}
+	log.Println("✅ Таблицы успешно смигрированы")
 
-func seedInitialData(db *gorm.DB, cfg *config.Config) error {
-	// Проверяем, есть ли уже демо-данные (например, по первому пользователю)
+	// Проверим, есть ли уже данные
 	var count int64
-	db.Model(&entities.AuthUser{}).Where("login = ?", "user1").Count(&count)
+	db.Model(&entities.OneCPatientListItem{}).Count(&count)
 	if count > 0 {
-		log.Println("ℹ️ Demo data already exists, skipping seeding")
+		log.Println("ℹ️  Тестовые данные уже существуют, пропуск заполнения")
 		return nil
 	}
 
-	log.Println("🌱 Seeding initial demo data...")
+	log.Println("🚀 Добавляем тестовые данные...")
 
-	// Хешируем пароль один раз (для всех пользователей — одинаковый)
-	password := "password123"
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return fmt.Errorf("failed to hash password: %w", err)
+	// --- Очистка данных перед перезапуском ---
+	log.Println("🧹 Очищаем таблицы перед заполнением...")
+	if err := truncateAll(db); err != nil {
+		return err
 	}
 
-	// Собираем данные для пакетной вставки
-	var authUsers []entities.AuthUser
-	var medicalCards []entities.OneCMedicalCard
-	var patientListItems []entities.OneCPatientListItem
+	// --- 1. Создаём 2 врача
+	doctors := []entities.DoctorData{
+		{ReceptionID: 1, Name: "Иванов Сергей Петрович", Specialization: "Терапевт"},
+		{ReceptionID: 2, Name: "Петров Алексей Николаевич", Specialization: "Хирург"},
+	}
 
+	// --- 2. 10 пациентов с медкартами
 	for i := 1; i <= 10; i++ {
-		login := fmt.Sprintf("+7962284076%d", i)
-		patientID := fmt.Sprintf("user%d_id", i)
-		fullName := fmt.Sprintf("Пациент %d", i)
+		patient := entities.OneCPatientListItem{
+			PatientID: generatePatientID(i),
+			FullName:  generateName(i),
+			Gender:    i%2 == 0,
+			BirthDate: "1990-01-01",
+		}
+		db.Create(&patient)
 
-		// 1. Пользователь аутентификации
-		authUsers = append(authUsers, entities.AuthUser{
-			Login:    login,
-			Password: string(hash),
-		})
-
-		// 2. Медицинская карта
-		medicalCards = append(medicalCards, entities.OneCMedicalCard{
-			PatientID:   patientID,
-			DisplayName: fullName,
-			Age:         fmt.Sprintf("%d", 20+i%50),
-			BirthDate:   fmt.Sprintf("198%d-0%d-1%d", i%9+1, i%12+1, i%28+1),
-			MobilePhone: fmt.Sprintf("+790012345%02d", i),
-			Address:     fmt.Sprintf("г. Москва, ул. Тестовая, д. %d", i),
-			Email:       fmt.Sprintf("user%d@example.com", i),
-			Workplace:   fmt.Sprintf("ООО \"Компания %d\"", i),
-			Snils:       fmt.Sprintf("123-456-789 %d", i),
-
-			LegalRepresentative: entities.ClientRef{
-				ID:   fmt.Sprintf("rep_%d", i),
-				Name: fmt.Sprintf("Представитель %d", i),
-			},
-			Relative: entities.Relative{
-				Status: "Родственник",
-				Name:   fmt.Sprintf("Родственник %d", i),
-			},
-			AttendingDoctor: entities.Doctor{
-				FullName:           fmt.Sprintf("Доктор %d", i),
-				PolicyOrCertNumber: fmt.Sprintf("POL%d", i),
+		// Создаём медкарту
+		card := entities.OneCMedicalCard{
+			PatientID:       patient.PatientID,
+			DisplayName:     patient.FullName,
+			Age:             "35",
+			BirthDate:       patient.BirthDate,
+			MobilePhone:     "+79991234567",
+			AdditionalPhone: "+79990001122",
+			Address:         "г. Москва, ул. Пушкина, д. Колотушкина",
+			Email:           "patient" + patient.PatientID + "@mail.ru",
+			Workplace:       "ООО «Пример»",
+			Snils:           "123-456-789 00",
+			Doctor: entities.AttendingDoctor{
+				FullName:           doctors[i%2].Name,
+				Specialization:     doctors[i%2].Specialization,
+				PolicyOrCertNumber: "ABC-" + patient.PatientID,
 				AttachmentStart:    "2020-01-01",
 				AttachmentEnd:      "2030-01-01",
-				Clinic:             fmt.Sprintf("Поликлиника %d", i),
+				Clinic:             "Клиника №" + generateClinic(i),
 			},
 			Policy: entities.Policy{
-				Number: fmt.Sprintf("POLICY%d", i),
+				Number: "P-" + patient.PatientID,
 				Type:   "ОМС",
 			},
 			Certificate: entities.Certificate{
-				Number: fmt.Sprintf("CERT%d", i),
-				Date:   "2023-01-01",
+				Number: "C-" + patient.PatientID,
+				Date:   "2022-01-01",
 			},
-		})
+		}
+		db.Create(&card)
 
-		// 3. Элемент списка пациентов
-		patientListItems = append(patientListItems, entities.OneCPatientListItem{
-			PatientID: patientID,
-			FullName:  fullName,
-			Gender:    i%2 == 0, // чередуем пол
-			BirthDate: fmt.Sprintf("198%d-0%d-1%d", i%9+1, i%12+1, i%28+1),
-		})
+		// Создаём вызов Emk
+		emk := entities.Emk{
+			PatientID:   patient.PatientID,
+			CallID:      "CALL-" + patient.PatientID,
+			Status:      entities.CallStatusWork,
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+			MedServices: []byte(`["Терапия", "Диагностика"]`),
+		}
+		db.Create(&emk)
 	}
 
-	// 1. Пользователи аутентификации
-	if err := db.CreateInBatches(authUsers, 10).Error; err != nil {
-		return fmt.Errorf("failed to seed auth users: %w", err)
-	}
-
-	// 2. Список пациентов (родительская таблица для медкарт!)
-	if err := db.CreateInBatches(patientListItems, 10).Error; err != nil {
-		return fmt.Errorf("failed to seed patient list items: %w", err)
-	}
-
-	// 3. Медицинские карты (дочерняя таблица)
-	if err := db.CreateInBatches(medicalCards, 10).Error; err != nil {
-		return fmt.Errorf("failed to seed medical cards: %w", err)
-	}
-
-	// Добавим одну заявку на скорую (опционально)
-	emergencyCall := entities.OneCReception{
-		CallID: "demo_call_001",
-		Status: "received",
-		Data:   []byte(`{"patient": "demo", "reason": "test"}`),
-	}
-	if err := db.Create(&emergencyCall).Error; err != nil {
-		log.Printf("⚠️ Warning: failed to seed emergency call: %v", err)
-	}
-
-	log.Println("Demo data seeded successfully (10 users, 10 medical cards, 10 patient list items)")
+	log.Println("✅ Тестовые данные успешно добавлены!")
 	return nil
+}
+
+// ---- Утилиты для тестов ----
+
+// truncateAll удаляет все записи из таблиц.
+func truncateAll(db *gorm.DB) error {
+	tables := []string{
+		"auth_users",
+		"files",
+		"flgs",
+		"emks",
+		"one_c_medical_cards",
+		"one_c_patient_list_items",
+	}
+	for _, t := range tables {
+		if err := db.Exec(fmt.Sprintf("TRUNCATE TABLE %s RESTART IDENTITY CASCADE;", t)).Error; err != nil {
+			return fmt.Errorf("ошибка очистки таблицы %s: %v", t, err)
+		}
+	}
+	return nil
+}
+
+func generatePatientID(i int) string {
+	return "P-" + fmt.Sprint(1000+i)
+}
+
+func generateName(i int) string {
+	names := []string{
+		"Иванов Иван", "Петров Петр", "Сидоров Алексей", "Кузнецов Дмитрий",
+		"Смирнов Николай", "Федоров Сергей", "Егоров Михаил", "Ковалев Андрей",
+		"Новиков Артем", "Лебедев Павел",
+	}
+	if i <= len(names) {
+		return names[i-1]
+	}
+	return fmt.Sprintf("Пациент %d", i)
+}
+
+func generateClinic(i int) string {
+	return fmt.Sprint(i%3 + 1)
 }

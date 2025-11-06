@@ -2,12 +2,17 @@ package entities
 
 import "time"
 
+// Analysis — данные анализа, привязанные к вызову (1:1)
 type Analysis struct {
-	ID uint `gorm:"primarykey" json:"id" example:"1"`
+	ID          uint `gorm:"primaryKey" json:"id"`
+	ReceptionID uint `gorm:"uniqueIndex;not null" json:"-"`
 
-	Code  string `gorm:"not null" json:"code" example:"12-0739"`
-	Title string `gorm:"not null" json:"title" example:"EKG"`
-	Price uint   `gorm:"not null" json:"price" example:"100"`
+	Code  string `json:"code"`
+	Title string `json:"title"`
+	Price uint   `json:"price"`
+
+	FileID *uint `json:"file_id"`
+	File   *File `gorm:"foreignKey:FileID" json:"file,omitempty"`
 }
 
 type AnalysisOrderItem struct {
